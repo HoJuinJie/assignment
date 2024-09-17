@@ -32,6 +32,9 @@
 	// placeholder={user.email}
 	// bind:value={updateEmails[index]}
 
+	let editModeEmails = [];
+	let editModePasswords = [];
+
 	const getAllUsers = async () => {
 		try {
 			const userList = await axios.get(ApiUrl + '/allusers', { withCredentials: true });
@@ -119,20 +122,25 @@
 		// 	return;
 		// }
 
+		users[index].email = editModeEmails[index];
+		users[index].password = editModePasswords[index];
+
 		try {
 			const response = await axios.patch(ApiUrl + '/adminResetCredentials', users[index], {
 				withCredentials: true
 			});
-
 			await getAllUsers();
 			users[index].editMode = false;
 			// updateEmails[index] = null;
+			
 			customAlert('Saved, profile updated successfully');
 		} catch (error) {
 			console.log(error.response.data.message);
 			toast.error(error.response.data.message);
 			if (error.response.status === 401) goto('/login');
 		}
+		editModeEmails = [];
+		editModePasswords = [];
 	}
 
 	async function cancelEdit(index) {
@@ -257,7 +265,10 @@
 						<td
 							><input
 								type="text"
-								bind:value={user.email}
+	
+								placeholder={user.email}
+								bind:value={editModeEmails[index]}
+
 								disabled={!user.editMode}
 								class:editable={user.editMode}
 							/></td
@@ -292,7 +303,10 @@
 						<td
 							><input
 								type="password"
-								bind:value={user.password}
+
+								placeholder={user.password}
+								bind:value={editModePasswords[index]}
+
 								disabled={!user.editMode}
 								class:editable={user.editMode}
 							/></td
