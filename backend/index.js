@@ -2,7 +2,7 @@ const express = require('express');
 const cookieParser = require('cookie-parser');
 const { createConnection, createRootAdmin } = require('./database');
 const auth = require('./routes/auth');
-const cors = require('cors'); // Cross-Origin Resouce Sharing (CORS)
+const cors = require('cors'); // Cross-Origin Resource Sharing (CORS)
 const app = express();
 const port = 3000;
 

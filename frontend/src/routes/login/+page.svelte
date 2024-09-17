@@ -1,35 +1,32 @@
 <script>
     import {goto} from '$app/navigation'
     import axios from 'axios'
-    // import { userStore } from '../../lib/stores';
-    import { handleError, handleNetworkError, handleUnauthorizedError, handleValidationError } from '../../lib/errorHandler';
+	  import { toast } from 'svelte-sonner';
+
  
     let username ='';
     let password ='';
-    let showError = false;
     const ApiUrl = import.meta.env.VITE_API_URL+':'+import.meta.env.VITE_PORT+'/api/v1/auth';
 
     const login = async() =>{  
         try {
-          const response = await axios.post(ApiUrl+'/login', {
+          await axios.post(ApiUrl+'/login', {
             username,
             password,
           }, {withCredentials: true});
-          const user = response.data;
           goto('/homePage/application');
         } catch (error) {
-          console.error('Login failed:', error.response.data.message);
-          handleError(error.response.data);
+          console.log(error.response.data.message);
+          toast.error(error.response.data.message);
         }
     };
-
 </script>
 
 
 <div class="loginFormContainer">
     <div>
     <h1>LOGIN</h1>
-    <form class="loginForm" on:submit|preventDefault={login}> <!--refer to notes below-->
+    <form class="loginForm" on:submit|preventDefault={login}>
         <input type="text" placeholder="Username" bind:value={username}/> <br> 
         <input type="password" placeholder="Password" bind:value={password}/> <br>
         <button class="loginSubmitBtn" type="submit"> LOGIN </button>
@@ -119,6 +116,9 @@
 
 .loginSubmitBtn:focus {
   box-shadow: rgba(50, 50, 93, .1) 0 0 0 1px inset, rgba(50, 50, 93, .2) 0 6px 15px 0, rgba(0, 0, 0, .1) 0 2px 2px 0, rgba(50, 151, 211, .3) 0 0 0 4px;
+}
+.loginSubmitBtn:hover {
+  color: lightgray;
 }
 </style>
 

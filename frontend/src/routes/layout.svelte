@@ -3,7 +3,8 @@
 	import { goto } from "$app/navigation";
 	import axios from "axios";
 	import { onMount } from "svelte";
-	import { handleError, customAlert } from '../lib/errorHandler';
+	import { customAlert } from '../lib/errorHandler';
+	import { toast } from 'svelte-sonner';
 	const ApiUrl = import.meta.env.VITE_API_URL + ':' + import.meta.env.VITE_PORT + '/api/v1/auth';
 
     export let showModal = false;
@@ -11,19 +12,21 @@
     let password;
     let updatedEmail;
     let usergroups;
-    // let user;
-
+    let newUserEmail;
+    let newUserPassword;
+    let exisitngEmail;
+    
     const getUserDetails = async(userid) => {
         try{
             const userDetails = await axios.get(ApiUrl + '/getUserByUsername?username='+userid, {withCredentials: true});
-            // username = userDetails.data.username;
             password = userDetails.data.password;
             updatedEmail = userDetails.data.email;
             usergroups = userDetails.data.user_groups;
+            exisitngEmail = updatedEmail;
 
         } catch (error) {
-            console.error('Access denied:', error.response.data.message);
-            handleError(error.response.data);
+            console.log(error.response.data.message);
+            toast.error(error.response.data.message);
         }
     };
 
@@ -34,7 +37,8 @@
             username = response.data.username;
             await getUserDetails(username);
         } catch (error) {
-            handleError(error.response.data);
+            console.log(error.response.data.message);
+            toast.error(error.response.data.message);
             goto('/login');
         }
     });
@@ -44,9 +48,10 @@
             const response = await axios.put(ApiUrl + '/updateProfile', updatedProfile, {withCredentials: true});
             getUserDetails(username);
             showModal = false;
-            customAlert('Profile Updated, please refresh the page.');
+            customAlert('Profile Updated successfully .');
         } catch (error) {
-            handleError(error.response.data);
+            console.log(error.response.data.message);
+            toast.error(error.response.data.message);
         }
     };
 
@@ -60,9 +65,18 @@
             await axios.post(ApiUrl + '/logout');
             goto('/login');
         } catch (error) {
-            handleError(error.response.data);
+            console.log(error.response.data.message);
+            toast.error(error.response.data.message);
         }
     };
+
+    function updateEmailandPassword() {
+        updatedEmail = newUserEmail;
+        password = newUserPassword;
+        submitEditProfile({password, "email": updatedEmail});
+        newUserEmail = "";
+        password = "";
+    }
     
 </script>
 
@@ -88,17 +102,21 @@
     <label for="Username" style="margin-bottom: 10px;">Username:</label>
     <input type="text" id="Username" bind:value={username} disabled class="editable1" />
 </div>
+ <div class="input-container">
+    <label for="current email" style="margin-bottom: 10px;">Current Email:</label>
+    <input type="text" id="exisitngEmail" bind:value={exisitngEmail} disabled class="editable1" />
+</div>
 
  <div class="input-container">
-    <label for="Email" style="margin-bottom: 10px; margin-right:31px">Email:</label>
-    <input type="text" id="Email" bind:value={updatedEmail} class="editable" />
+    <label for="Email" style="margin-bottom: 10px; margin-right:31px">New Email:</label>
+    <input type="text" id="Email" bind:value={newUserEmail} class="editable" placeholder="email" />
 </div>
  <div class="input-container">
-    <label for="Password" style="margin-bottom: 10px;margin-right:8px">Password:</label>
-    <input type="password" id="Password" bind:value={password} class="editable" />
+    <label for="Password" style="margin-bottom: 10px;margin-right:8px">New Password:</label>
+    <input type="password" id="Password" bind:value={newUserPassword} class="editable" placeholder="password"/>
 </div>
  <div slot="button">
-    <button class="modelCloseBtn" on:click={() => submitEditProfile({"username":username, "email": updatedEmail, "password":password , "accountStatus":"Active", "usergroups":usergroups})}>SAVE CHANGES</button>
+    <button class="modelCloseBtn" on:click={() => updateEmailandPassword()}>SAVE CHANGES</button>
   </div>
 </Modal>
 

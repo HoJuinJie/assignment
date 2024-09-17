@@ -16,30 +16,31 @@ const {
     logout
 } = require('../controllers/authController');
 
-const { 
+const {
     isAuthenticatedUser,
     isActive,
     isAdminUser
 } = require('../middleware/auth');
 
 // Routes
-router.get('/getUserByUsername', [isAuthenticatedUser, isActive, getUserByUsername]);
-router.get('/allUsers', [ isAuthenticatedUser, isActive, allUsers ]);
-router.get('/allGroups', [ isAuthenticatedUser, isActive, allGroups ]);
 
 router.post('/login', login);
 router.post('/logout', logout);
+
 // Protected routes
-router.put('/updateProfile', [ isAuthenticatedUser, isActive, updateProfile ]);
-// ADMIN ONLY routes
-router.post('/register',  [ isAuthenticatedUser, isActive, isAdminUser, register ]);
-router.post('/addGroup', [ isAuthenticatedUser, isActive, isAdminUser, addGroup ]);
-router.patch('/disableUser', [ isAuthenticatedUser, isActive, isAdminUser, disableUser ]);
-router.patch('/adminResetCredentials', [ isAuthenticatedUser, isActive, isAdminUser, adminResetCredentials ]);
+router.get('/getUserByUsername', [isAuthenticatedUser, isActive, getUserByUsername]);
+router.get('/allUsers', [isAuthenticatedUser, isActive, allUsers]);
+router.get('/allGroups', [isAuthenticatedUser, isActive, allGroups]);
+router.put('/updateProfile', [isAuthenticatedUser, isActive, updateProfile]);
+// admin ONLY routes
+router.post('/register', [isAuthenticatedUser, isActive, isAdminUser, register]);
+router.post('/addGroup', [isAuthenticatedUser, isActive, isAdminUser, addGroup]);
+router.patch('/disableUser', [isAuthenticatedUser, isActive, isAdminUser, disableUser]);
+router.patch('/adminResetCredentials', [isAuthenticatedUser, isActive, isAdminUser, adminResetCredentials]);
 
 // FRONT-END Protected routes
-router.get('/application', [ isAuthenticatedUser, isActive, BelongsTo]);
-router.get('/userManagement', [ isAuthenticatedUser, isActive, isAdminUser, BelongsTo ]);
+router.get('/application', [isAuthenticatedUser, isActive, BelongsTo]);
+router.get('/userManagement', [isAuthenticatedUser, isActive, isAdminUser, BelongsTo]);
 
 module.exports = router;
 

@@ -4,7 +4,7 @@
 	import axios from "axios";
   import Layout from "../../layout.svelte";
   import { page } from "$app/stores";
-	import { handleError } from "$lib/errorHandler";
+	import { toast } from 'svelte-sonner';
 	const ApiUrl = import.meta.env.VITE_API_URL + ':' + import.meta.env.VITE_PORT + '/api/v1/auth';
 
     let globalUsername;
@@ -14,12 +14,12 @@
     onMount(async () => {
         try {
             const response = await axios.get(ApiUrl + '/application', {withCredentials: true});
-			if (response.status === 401) goto('/login');
+			      if (response.status === 401) goto('/login');
             globalUsername = response.data.username;
             isAdmin = response.data.isAdmin;
-            console.log(response);
         } catch (error) {
-            handleError(error.response.data);
+            console.log(error.response.data.message);
+            toast.error(error.response.data.message);
             goto('/login');
         }
     })
@@ -30,8 +30,8 @@
 <Layout bind:globalUsername>
 <span slot="NavContentLeft" class='greet'>Hello, {globalUsername}</span>
   <div slot="NavContentCenter">
+    <a href="/homePage/application" class:active={$page.url.pathname === '/homePage/application'} class="links">Application</a>
     {#if isAdmin}
-      <a href="/homePage/application" class:active={$page.url.pathname === '/homePage/application'} class="links">Application</a>
       <a href="/homePage/userManagement" class:active={$page.url.pathname === '/homePage/userManagement'} class="links">User Management</a>
     {/if}
   </div>

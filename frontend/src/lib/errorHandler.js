@@ -1,5 +1,4 @@
 // src/utils/errorHandler.js
-//@ts-nocheck
 import { toast } from "svelte-sonner";
 import { goto } from "$app/navigation";
 

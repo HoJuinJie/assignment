@@ -1,9 +1,8 @@
 <script>
-	//@ts-nocheck
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import axios from 'axios';
-	import { handleError, customAlert, customError } from '../../../lib/errorHandler';
+	import { customAlert } from '../../../lib/errorHandler';
 	import Layout from '../../layout.svelte';
 	import Modal from '../../../lib/AddGroupModel.svelte';
 	import { page } from '$app/stores';
@@ -16,6 +15,19 @@
 	let newGroupName = '';
 	let showModal = false;
 
+	// let groups = ['admin', 'USER'];
+	let activeStatus = ['ACTIVE', 'DISABLED'];
+	let newUser = {
+		username: null,
+		email: null,
+		group: [],
+		password: null,
+		active: 'ACTIVE',
+		editMode: false
+	};
+
+	let NewUserSelectedGroup = '';
+
 	// Temp user
 	// let updateEmails = [];
 	// placeholder={user.email}
@@ -26,7 +38,9 @@
 			const userList = await axios.get(ApiUrl + '/allusers', { withCredentials: true });
 			users = userList.data;
 		} catch (error) {
-			console.error('Unauthorised access:', error);
+			console.log(error.response.data.message);
+			toast.error(error.response.data.message);
+			// console.error('Unauthorised access:', error);
 		}
 	};
 
@@ -35,8 +49,10 @@
 			const groupList = await axios.get(ApiUrl + '/allGroups', { withCredentials: true });
 			distinctGroups = groupList.data;
 		} catch (error) {
-			console.error('Unauthorised access:', error.response.data.message);
-			handleError(error.response.data);
+			console.log(error.response.data.message);
+			toast.error(error.response.data.message);
+			// console.error('Unauthorised access:', error.response.data.message);
+			// handleError(error.response.data);
 		}
 	};
 
@@ -44,14 +60,14 @@
 		try {
 			const response = await axios.get(ApiUrl + '/userManagement', { withCredentials: true });
 			if (response.status === 401) goto('/login');
-			// console.log(`response.data ${JSON.stringify(response.data.username)}`);
 			globalUsername = response.data.username;
-			await getAllUsers();
-			await getAllGroups();
+			getAllUsers(); //await
+			getAllGroups(); //await
 		} catch (error) {
-			console.error('Unauthorised access:', error);
-			toast.error('ops something went wrong');
+			console.log(error.response.data.message);
+			toast.error(error.response.data.message);
 			goto('/login');
+			// console.error('Unauthorised access:', error);
 		}
 
 		// await axios
@@ -75,18 +91,6 @@
 		// getAllGroups().catch((e) => console.log(`error in [getAllGroups]: ${e}`));
 	});
 
-	let groups = ['ADMIN', 'USER'];
-	let activeStatus = ['ACTIVE', 'DISABLED'];
-	let newUser = {
-		username: null,
-		email: null,
-		group: [],
-		password: null,
-		active: 'ACTIVE',
-		editMode: false
-	};
-	let NewUserSelectedGroup = '';
-	
 	function resetNewUser() {
 		newUser = {
 			username: null,
@@ -96,13 +100,12 @@
 			active: 'ACTIVE',
 			editMode: false
 		};
-	};
-	
+	}
+
 	function addNewUserGroup() {
 		if (!newUser.group.includes(NewUserSelectedGroup)) {
 			newUser.group = [...newUser.group, NewUserSelectedGroup];
 		}
-		// NewUserShowDropdown = false;
 	}
 
 	function NewUserRemoveGroup(groupIndex) {
@@ -119,10 +122,6 @@
 			...users[userIndex].user_groups.slice(groupIndex + 1)
 		];
 	}
-
-	// function showAddGroupDropdown(index) {
-	// 	users[index].showDropdown = true;
-	// }
 
 	function addGroup(index) {
 		if (users[index].selectedGroup === '') {
@@ -144,7 +143,6 @@
 		// }
 
 		try {
-			console.log(users[index]);
 			const response = await axios.patch(ApiUrl + '/adminResetCredentials', users[index], {
 				withCredentials: true
 			});
@@ -154,8 +152,10 @@
 			// updateEmails[index] = null;
 			customAlert('Profile updated successfully');
 		} catch (error) {
-			console.error('Error: ', error.response.data.message);
-			handleError(error.response.data);
+			console.log(error.response.data.message);
+			toast.error(error.response.data.message);
+			// console.error('Error: ', error.response.data.message);
+			// handleError(error.response.data);
 		}
 	}
 
@@ -171,8 +171,10 @@
 			customAlert('New user added successfully');
 			resetNewUser();
 		} catch (error) {
-			console.error('Error: ', error.response.data.message);
-			handleError(error.response.data);
+			console.log(error.response.data.message);
+			toast.error(error.response.data.message);
+			// console.error('Error: ', error.response.data.message);
+			// handleError(error.response.data);
 		}
 	}
 
@@ -189,8 +191,10 @@
 			newGroupName = '';
 			await getAllGroups();
 		} catch (error) {
-			console.error('Error: ', error.response.data.message);
-			handleError(error.response.data);
+			console.log(error.response.data.message);
+			toast.error(error.response.data.message);
+			// console.error('Error: ', error.response.data.message);
+			// handleError(error.response.data);
 		}
 	}
 </script>
@@ -239,7 +243,6 @@
 					<td><input type="text" bind:value={newUser.username} placeholder="enter username" /></td>
 					<td><input type="text" bind:value={newUser.email} placeholder="enter email" /></td>
 					<td>
-						<!-- <button class="add-btn" on:click={() => showAddGroupDropdownNewUser()}>Add</button> -->
 						{#each newUser.group as group, groupIndex}
 							<span class="tag">
 								{group}
@@ -254,7 +257,13 @@
 							{/each}
 						</select>
 					</td>
-					<td><input type="password" bind:value={newUser.password} placeholder="enter password" /></td>
+					<td
+						><input
+							type="password"
+							bind:value={newUser.password}
+							placeholder="enter password"
+						/></td
+					>
 					<td>
 						<select bind:value={newUser.active}>
 							{#each activeStatus as status}
@@ -289,7 +298,6 @@
 											>
 										</span>
 									{/each}
-									<!-- <button class="add-btn" on:click={() => showAddGroupDropdown(index)}>+</button> -->
 									<select bind:value={user.selectedGroup} on:change={() => addGroup(index)}>
 										<option value="">Select Group</option>
 										{#each distinctGroups as distinctGroup}
