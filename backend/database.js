@@ -23,7 +23,7 @@ function getConnection() {
 
 async function createRootAdmin() {
     const hashedPassword = await bcrpyt.hash('P@ssw0rd1', 10);
-    getConnection().query('INSERT IGNORE INTO accounts (username, password, email, accountStatus) VALUES (?, ?, ?, ?)', ['admin', hashedPassword, 'admin@admin.COM', 'ACTIVE']);
+    getConnection().query('INSERT IGNORE INTO accounts (username, password, email, accountStatus) VALUES (?, ?, ?, ?)', ['admin', hashedPassword, 'admin@admin.com', 'ACTIVE']);
     getConnection().query('INSERT IGNORE INTO usergroup (username, user_group) VALUES (?, ?)', ['admin', 'admin']);
 };
 
