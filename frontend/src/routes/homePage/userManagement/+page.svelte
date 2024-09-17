@@ -26,12 +26,6 @@
 	};
 
 	let NewUserSelectedGroup = '';
-
-	// Temp user
-	// let updateEmails = [];
-	// placeholder={user.email}
-	// bind:value={updateEmails[index]}
-
 	let editModeEmails = [];
 	let editModePasswords = [];
 
@@ -116,11 +110,6 @@
 	}
 
 	async function saveChanges(index) {
-		// console.log(`changes for :${index} | ${updateEmails[index]}`);
-		// // check should update
-		// if (updateEmails[index] == null) {
-		// 	return;
-		// }
 
 		users[index].email = editModeEmails[index];
 		users[index].password = editModePasswords[index];
@@ -131,7 +120,6 @@
 			});
 			await getAllUsers();
 			users[index].editMode = false;
-			// updateEmails[index] = null;
 			
 			customAlert('Saved. Profile update successfully');
 		} catch (error) {
