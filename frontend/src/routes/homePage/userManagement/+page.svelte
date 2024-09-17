@@ -133,7 +133,7 @@
 			users[index].editMode = false;
 			// updateEmails[index] = null;
 			
-			customAlert('Saved, profile updated successfully');
+			customAlert('Saved. Profile update successfully');
 		} catch (error) {
 			console.log(error.response.data.message);
 			toast.error(error.response.data.message);
@@ -153,7 +153,7 @@
 		try {
 			const response = await axios.post(ApiUrl + '/register', newUser, { withCredentials: true });
 			await getAllUsers();
-			customAlert(`user ${newUser} created`);
+			customAlert(`New user: ${newUser.username} created`);
 			resetNewUser();
 		} catch (error) {
 			console.log(error.response.data.message);
@@ -171,7 +171,7 @@
 				}
 			);
 
-			customAlert(`${newGroupName} group added`);
+			customAlert(`New group: ${newGroupName} created`);
 			newGroupName = '';
 			await getAllGroups();
 		} catch (error) {
