@@ -125,7 +125,7 @@ exports.login = async (req, res) => {
 };
 
 exports.register = async (req, res) => {
-    const { username, password, email, accountStatus, user_group } = req.body;
+    const { username, password, email, accountStatus, group } = req.body;
     if (!username || !password) return res.status(400).json({ message: 'Both Username and Password required' });
     if (username.length < 1 || username.length > 50) return res.status(400).json({ message: 'Invalid username format. Username must be 1-50 characters' });
     if (!validateUsername(username)) return res.status(400).json({ message: 'Invalid username format. Username must only have alphanumeric characters' });
@@ -140,7 +140,12 @@ exports.register = async (req, res) => {
             'INSERT INTO accounts (username, password, email, accountStatus) VALUES (?, ?, ?, ?)',
             [username, hashedPassword, email || '-', accountStatus || 'ACTIVE']
         );
-        if (user_group) await getConnection().query('INSERT INTO usergroup (username, user_group) VALUES (?, ?)', [username, user_group]);
+        if (group && group.length !==0) {
+            console.log("this is group:",group)
+            const toAddValue = group.map(user_group => [username, user_group])
+            console.log('this is toaddvalue:',toAddValue)
+            await getConnection().query('INSERT INTO usergroup (username, user_group) VALUES ?', [toAddValue]);
+        }
         res.status(201).json({ message: 'User created successfully' });
     } catch (err) {
         console.log(JSON.stringify(err));

@@ -15,7 +15,6 @@
 	let newGroupName = '';
 	let showModal = false;
 
-	// let groups = ['admin', 'USER'];
 	let activeStatus = ['ACTIVE', 'DISABLED'];
 	let newUser = {
 		username: null,
@@ -40,7 +39,7 @@
 		} catch (error) {
 			console.log(error.response.data.message);
 			toast.error(error.response.data.message);
-			// console.error('Unauthorised access:', error);
+			if (error.response.status === 401) goto('/login');
 		}
 	};
 
@@ -51,8 +50,7 @@
 		} catch (error) {
 			console.log(error.response.data.message);
 			toast.error(error.response.data.message);
-			// console.error('Unauthorised access:', error.response.data.message);
-			// handleError(error.response.data);
+			if (error.response.status === 401) goto('/login');
 		}
 	};
 
@@ -61,34 +59,13 @@
 			const response = await axios.get(ApiUrl + '/userManagement', { withCredentials: true });
 			if (response.status === 401) goto('/login');
 			globalUsername = response.data.username;
-			getAllUsers(); //await
-			getAllGroups(); //await
+			getAllUsers(); 
+			getAllGroups();
 		} catch (error) {
 			console.log(error.response.data.message);
 			toast.error(error.response.data.message);
-			goto('/login');
-			// console.error('Unauthorised access:', error);
+			if (error.response.status === 401) goto('/login');
 		}
-
-		// await axios
-		// 	.get(ApiUrl + '/userManagement', { withCredentials: true })
-		// 	.then((response) => {
-		// 		if (response.data == null) return;
-		// 		globalUsername = response.data.username;
-		// 	})
-		// 	.catch((e) => {
-		// 		if (e instanceof axios.AxiosError) {
-		// 			toast.error(`From usermanagement: ${e.response.data.message}`);
-		// 			if (e.status == 401) {
-		// 				goto('/login');
-		// 				return;
-		// 			}
-		// 		}
-		// 		toast.error('ops something went wrong');
-		// 	});
-
-		// getAllUsers().catch((e) => console.log(`error in [getAllUsers]: ${e}`));
-		// getAllGroups().catch((e) => console.log(`error in [getAllGroups]: ${e}`));
 	});
 
 	function resetNewUser() {
@@ -150,12 +127,11 @@
 			await getAllUsers();
 			users[index].editMode = false;
 			// updateEmails[index] = null;
-			customAlert('Profile updated successfully');
+			customAlert('Saved, profile updated successfully');
 		} catch (error) {
 			console.log(error.response.data.message);
 			toast.error(error.response.data.message);
-			// console.error('Error: ', error.response.data.message);
-			// handleError(error.response.data);
+			if (error.response.status === 401) goto('/login');
 		}
 	}
 
@@ -165,16 +141,15 @@
 	}
 
 	async function submitNewUser() {
+		console.log(newUser);
 		try {
 			const response = await axios.post(ApiUrl + '/register', newUser, { withCredentials: true });
 			await getAllUsers();
-			customAlert('New user added successfully');
+			customAlert(`user ${newUser} created`);
 			resetNewUser();
 		} catch (error) {
 			console.log(error.response.data.message);
 			toast.error(error.response.data.message);
-			// console.error('Error: ', error.response.data.message);
-			// handleError(error.response.data);
 		}
 	}
 
@@ -187,14 +162,14 @@
 					withCredentials: true
 				}
 			);
-			customAlert(`${newGroupName} group added successfully`);
+
+			customAlert(`${newGroupName} group added`);
 			newGroupName = '';
 			await getAllGroups();
 		} catch (error) {
 			console.log(error.response.data.message);
 			toast.error(error.response.data.message);
-			// console.error('Error: ', error.response.data.message);
-			// handleError(error.response.data);
+			if (error.response.status === 401) goto('/login');
 		}
 	}
 </script>
@@ -591,3 +566,27 @@
 		color: lightgray;
 	}
 </style>
+
+
+<!-- NOTES
+// PETER's help with onMount
+		// await axios
+		// 	.get(ApiUrl + '/userManagement', { withCredentials: true })
+		// 	.then((response) => {
+		// 		if (response.data == null) return;
+		// 		globalUsername = response.data.username;
+		// 	})
+		// 	.catch((e) => {
+		// 		if (e instanceof axios.AxiosError) {
+		// 			toast.error(`From usermanagement: ${e.response.data.message}`);
+		// 			if (e.status == 401) {
+		// 				goto('/login');
+		// 				return;
+		// 			}
+		// 		}
+		// 		toast.error('ops something went wrong');
+		// 	});
+
+		// getAllUsers().catch((e) => console.log(`error in [getAllUsers]: ${e}`));
+		// getAllGroups().catch((e) => console.log(`error in [getAllGroups]: ${e}`)); 
+-->
