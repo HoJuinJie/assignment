@@ -292,7 +292,7 @@
 							><input
 								type="password"
 
-								placeholder={user.password}
+								placeholder="********"
 								bind:value={editModePasswords[index]}
 
 								disabled={!user.editMode}

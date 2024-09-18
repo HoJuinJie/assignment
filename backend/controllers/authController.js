@@ -138,7 +138,7 @@ exports.register = async (req, res) => {
         const hashedPassword = await bcrpyt.hash(password, 10);
         await getConnection().query(
             'INSERT INTO accounts (username, password, email, accountStatus) VALUES (?, ?, ?, ?)',
-            [username, hashedPassword, email || '-', accountStatus || 'ACTIVE']
+            [username, hashedPassword, email || '', accountStatus || 'ACTIVE']
         );
         if (group && group.length !==0) {
             console.log("this is group:",group)
