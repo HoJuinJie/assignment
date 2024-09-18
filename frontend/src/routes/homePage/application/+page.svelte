@@ -2,7 +2,7 @@
 	import { onMount } from "svelte";
   import { goto } from "$app/navigation";
 	import axios from "axios";
-  import Layout from "../../layout.svelte";
+  import Layout from "../../navBar.svelte";
   import { page } from "$app/stores";
 	import { toast } from 'svelte-sonner';
 	const ApiUrl = import.meta.env.VITE_API_URL + ':' + import.meta.env.VITE_PORT + '/api/v1/auth';

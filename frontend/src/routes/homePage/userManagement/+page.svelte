@@ -3,7 +3,7 @@
 	import { goto } from '$app/navigation';
 	import axios from 'axios';
 	import { customAlert } from '../../../lib/errorHandler';
-	import Layout from '../../layout.svelte';
+	import Layout from '../../navBar.svelte';
 	import Modal from '../../../lib/AddGroupModel.svelte';
 	import { page } from '$app/stores';
 	import { toast } from 'svelte-sonner';
@@ -56,7 +56,7 @@
 			const response = await axios.get(ApiUrl + '/userManagement', { withCredentials: true });
 			if (response.status === 401) goto('/login');
 			globalUsername = response.data.username;
-			getAllUsers(); 
+			getAllUsers();
 			getAllGroups();
 		} catch (error) {
 			console.log(error.response.data.message);
@@ -110,7 +110,6 @@
 	}
 
 	async function saveChanges(index) {
-
 		users[index].email = editModeEmails[index];
 		users[index].password = editModePasswords[index];
 
@@ -120,7 +119,7 @@
 			});
 			await getAllUsers();
 			users[index].editMode = false;
-			
+
 			customAlert('Saved. Profile update successfully');
 		} catch (error) {
 			console.log(error.response.data.message);
@@ -253,10 +252,8 @@
 						<td
 							><input
 								type="text"
-	
 								placeholder={user.email}
 								bind:value={editModeEmails[index]}
-
 								disabled={!user.editMode}
 								class:editable={user.editMode}
 							/></td
@@ -291,10 +288,8 @@
 						<td
 							><input
 								type="password"
-
 								placeholder="********"
 								bind:value={editModePasswords[index]}
-
 								disabled={!user.editMode}
 								class:editable={user.editMode}
 							/></td
@@ -342,6 +337,29 @@
 		<button class="modelAddBtn" on:click={() => addNewGroup()}>ADD</button>
 	</div>
 </Modal>
+
+<!-- NOTES
+// PETER's help with onMount
+		// await axios
+		// 	.get(ApiUrl + '/userManagement', { withCredentials: true })
+		// 	.then((response) => {
+		// 		if (response.data == null) return;
+		// 		globalUsername = response.data.username;
+		// 	})
+		// 	.catch((e) => {
+		// 		if (e instanceof axios.AxiosError) {
+		// 			toast.error(`From usermanagement: ${e.response.data.message}`);
+		// 			if (e.status == 401) {
+		// 				goto('/login');
+		// 				return;
+		// 			}
+		// 		}
+		// 		toast.error('ops something went wrong');
+		// 	});
+
+		// getAllUsers().catch((e) => console.log(`error in [getAllUsers]: ${e}`));
+		// getAllGroups().catch((e) => console.log(`error in [getAllGroups]: ${e}`)); 
+-->
 
 <style>
 	.container {
@@ -558,6 +576,7 @@
 
 	.links {
 		font-weight: bold;
+		color: white;
 	}
 
 	.links:visited {
@@ -568,27 +587,3 @@
 		color: lightgray;
 	}
 </style>
-
-
-<!-- NOTES
-// PETER's help with onMount
-		// await axios
-		// 	.get(ApiUrl + '/userManagement', { withCredentials: true })
-		// 	.then((response) => {
-		// 		if (response.data == null) return;
-		// 		globalUsername = response.data.username;
-		// 	})
-		// 	.catch((e) => {
-		// 		if (e instanceof axios.AxiosError) {
-		// 			toast.error(`From usermanagement: ${e.response.data.message}`);
-		// 			if (e.status == 401) {
-		// 				goto('/login');
-		// 				return;
-		// 			}
-		// 		}
-		// 		toast.error('ops something went wrong');
-		// 	});
-
-		// getAllUsers().catch((e) => console.log(`error in [getAllUsers]: ${e}`));
-		// getAllGroups().catch((e) => console.log(`error in [getAllGroups]: ${e}`)); 
--->
