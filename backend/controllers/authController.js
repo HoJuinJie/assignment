@@ -176,26 +176,6 @@ exports.addGroup = async (req, res) => {
     }
 };
 
-
-exports.disableUser = async (req, res) => {
-    const { username, accountStatus } = req.body;
-    if (username === 'admin') return res.status(400).json({ message: 'Hardcoded admin account cannot be disabled' });
-    if (!username || !accountStatus) return res.status(400).json({ message: 'Username and Account Status required' });
-    try {
-        const [resultsFromAccounts] = await getConnection().query('SELECT * FROM accounts WHERE username = ?', [username]);
-        if (resultsFromAccounts.length === 0) return res.status(400).json({ message: 'User not found' });
-
-        const [result] = await getConnection().query('SELECT * FROM accounts WHERE username = ? AND accountStatus = ?', [username, accountStatus]);
-        if (result.length !== 0) return res.status(400).json({ message: `User already ${accountStatus}` });
-
-        await getConnection().query('UPDATE accounts SET accountStatus = ? WHERE username = ?', [accountStatus, username]);
-        res.status(200).json({ message: `Account status set to ${accountStatus}` });
-    } catch (err) {
-        console.log(JSON.stringify(err));
-        return res.status(400).json({ message: 'An error occurred when disabling user' });
-    }
-};
-
 exports.updateProfile = async (req, res) => {
     const { password, email } = req.body;
     if (!password && !email) return res.status(400).json({ message: 'At least one field must be updated' });
@@ -299,6 +279,25 @@ exports.logout = (req, res) => {
         return res.status(400).json({ message: err });
     }
 };
+
+// exports.disableUser = async (req, res) => {
+//     const { username, accountStatus } = req.body;
+//     if (username === 'admin') return res.status(400).json({ message: 'Hardcoded admin account cannot be disabled' });
+//     if (!username || !accountStatus) return res.status(400).json({ message: 'Username and Account Status required' });
+//     try {
+//         const [resultsFromAccounts] = await getConnection().query('SELECT * FROM accounts WHERE username = ?', [username]);
+//         if (resultsFromAccounts.length === 0) return res.status(400).json({ message: 'User not found' });
+
+//         const [result] = await getConnection().query('SELECT * FROM accounts WHERE username = ? AND accountStatus = ?', [username, accountStatus]);
+//         if (result.length !== 0) return res.status(400).json({ message: `User already ${accountStatus}` });
+
+//         await getConnection().query('UPDATE accounts SET accountStatus = ? WHERE username = ?', [accountStatus, username]);
+//         res.status(200).json({ message: `Account status set to ${accountStatus}` });
+//     } catch (err) {
+//         console.log(JSON.stringify(err));
+//         return res.status(400).json({ message: 'An error occurred when disabling user' });
+//     }
+// };
 // BACKEND (END)
 
 /*

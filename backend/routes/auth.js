@@ -10,10 +10,10 @@ const {
     login,
     register,
     addGroup,
-    disableUser,
     updateProfile,
     adminResetCredentials,
     logout
+    // disableUser,
 } = require('../controllers/authController');
 
 const {
@@ -36,12 +36,13 @@ router.put('/updateProfile', [isAuthenticatedUser, updateProfile]);
 // admin ONLY routes
 router.post('/register', [isAuthenticatedUser, userBelongsTo(['admin']), register]);
 router.post('/addGroup', [isAuthenticatedUser, userBelongsTo(['admin']), addGroup]);
-router.patch('/disableUser', [isAuthenticatedUser, userBelongsTo(['admin']), disableUser]);
 router.patch('/adminResetCredentials', [isAuthenticatedUser, userBelongsTo(['admin']), adminResetCredentials]);
 
 // FRONT-END Protected routes
 router.get('/application', [isAuthenticatedUser, BelongsTo]);
 router.get('/userManagement', [isAuthenticatedUser, userBelongsTo(['admin']), BelongsTo]);
+
+// router.patch('/disableUser', [isAuthenticatedUser, userBelongsTo(['admin']), disableUser]);
 
 module.exports = router;
 

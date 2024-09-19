@@ -48,19 +48,18 @@
 
 <style>
     a {
-  text-decoration: none; /* Remove the default underline */
   color: white;
   padding: 0 10px;
 }
 
 a:hover {
-  text-decoration: underline; /* Underline on hover */
+  text-decoration: none; /* Underline on hover */
 }
 
 a.active {
-  text-decoration: underline; /* Underline if this is the active page */
-  font-weight: bold; /* Optional: Make it bold */
-  /* color: yellow; */
+  /* text-decoration: underline; 
+  font-weight: bold; 
+  color: yellow; */
 }
 
 .greet {
@@ -70,11 +69,11 @@ a.active {
 
 .edit:hover,
 .logout:hover {
+  text-decoration: underline;
   color: lightgray;
 }
 
 .links {
-  text-decoration: underline; /* Underline if this is the active page */
   font-weight: bold; /* Optional: Make it bold */
 }
 

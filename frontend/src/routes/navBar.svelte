@@ -3,7 +3,6 @@
 	import { goto } from "$app/navigation";
 	import axios from "axios";
 	import { onMount } from "svelte";
-	import { customAlert } from '../lib/errorHandler';
 	import { toast } from 'svelte-sonner';
 	const ApiUrl = import.meta.env.VITE_API_URL + ':' + import.meta.env.VITE_PORT + '/api/v1/auth';
 
@@ -48,7 +47,7 @@
             const response = await axios.put(ApiUrl + '/updateProfile', updatedProfile, {withCredentials: true});
             getUserDetails(username);
             showModal = false;
-            customAlert('Profile Updated successfully .');
+            toast.success('Profile updated successfully');
         } catch (error) {
             console.log(error.response.data.message);
             toast.error(error.response.data.message);
@@ -64,6 +63,7 @@
     async function logout() {
         try {
             await axios.post(ApiUrl + '/logout');
+            toast.success('logged out');
             goto('/login');
         } catch (error) {
             console.log(error.response.data.message);

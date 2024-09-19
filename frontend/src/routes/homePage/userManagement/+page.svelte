@@ -3,7 +3,7 @@
 	import { goto } from '$app/navigation';
 	import axios from 'axios';
 	import { customAlert } from '../../../lib/errorHandler';
-	import Layout from '../../navBar.svelte';
+	import NavBar from '../../navBar.svelte';
 	import Modal from '../../../lib/AddGroupModel.svelte';
 	import { page } from '$app/stores';
 	import { toast } from 'svelte-sonner';
@@ -167,7 +167,7 @@
 	}
 </script>
 
-<Layout>
+<NavBar>
 	<span slot="NavContentLeft">Hello, {globalUsername}</span>
 	<div slot="NavContentCenter">
 		<a
@@ -183,7 +183,7 @@
 	</div>
 	<div slot="NavContentRight" class="edit">Edit Profile</div>
 	<div slot="NavContentRightRight" class="logout">Logout</div>
-</Layout>
+</NavBar>
 
 <div class="container">
 	<div class="header">
@@ -427,7 +427,7 @@
 	}
 
 	table {
-		width: 80%; /* Make table span full width */
+		width: 100%; /* Make table span full width */
 		border-collapse: collapse;
 		margin-left: auto;
 		margin-right: auto;
