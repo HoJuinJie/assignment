@@ -208,8 +208,8 @@
 			</thead>
 			<tbody class="TableBodyContainer">
 				<tr class="input-new">
-					<td><input type="text" bind:value={newUser.username} placeholder="enter username" /></td>
-					<td><input type="text" bind:value={newUser.email} placeholder="enter email" /></td>
+					<td><input type="text" class="inputfields" bind:value={newUser.username} placeholder="username" /></td>
+					<td><input type="text" class="inputfields" bind:value={newUser.email} placeholder="email" /></td>
 					<td>
 						{#each newUser.group as group, groupIndex}
 							<span class="tag">
@@ -228,8 +228,9 @@
 					<td
 						><input
 							type="password"
+							class="inputfields"
 							bind:value={newUser.password}
-							placeholder="enter password"
+							placeholder="password"
 						/></td
 					>
 					<td>
@@ -584,4 +585,9 @@
 	.links:hover {
 		color: lightgray;
 	}
+
+	.inputfields {
+		background-color: lightgray;
+	}
+
 </style>
