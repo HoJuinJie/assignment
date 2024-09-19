@@ -18,8 +18,9 @@ const {
 
 const {
     isAuthenticatedUser,
-    isActive,
-    isAdminUser
+    userBelongsTo
+    // isActive,
+    // isAdminUser,
 } = require('../middleware/auth');
 
 // Routes
@@ -28,19 +29,19 @@ router.post('/login', login);
 router.post('/logout', logout);
 
 // Protected routes
-router.get('/getUserByUsername', [isAuthenticatedUser, isActive, getUserByUsername]);
-router.get('/allUsers', [isAuthenticatedUser, isActive, allUsers]);
-router.get('/allGroups', [isAuthenticatedUser, isActive, allGroups]);
-router.put('/updateProfile', [isAuthenticatedUser, isActive, updateProfile]);
+router.get('/getUserByUsername', [isAuthenticatedUser, getUserByUsername]);
+router.get('/allUsers', [isAuthenticatedUser, allUsers]);
+router.get('/allGroups', [isAuthenticatedUser, allGroups]);
+router.put('/updateProfile', [isAuthenticatedUser, updateProfile]);
 // admin ONLY routes
-router.post('/register', [isAuthenticatedUser, isActive, isAdminUser, register]);
-router.post('/addGroup', [isAuthenticatedUser, isActive, isAdminUser, addGroup]);
-router.patch('/disableUser', [isAuthenticatedUser, isActive, isAdminUser, disableUser]);
-router.patch('/adminResetCredentials', [isAuthenticatedUser, isActive, isAdminUser, adminResetCredentials]);
+router.post('/register', [isAuthenticatedUser, userBelongsTo(['admin']), register]);
+router.post('/addGroup', [isAuthenticatedUser, userBelongsTo(['admin']), addGroup]);
+router.patch('/disableUser', [isAuthenticatedUser, userBelongsTo(['admin']), disableUser]);
+router.patch('/adminResetCredentials', [isAuthenticatedUser, userBelongsTo(['admin']), adminResetCredentials]);
 
 // FRONT-END Protected routes
-router.get('/application', [isAuthenticatedUser, isActive, BelongsTo]);
-router.get('/userManagement', [isAuthenticatedUser, isActive, isAdminUser, BelongsTo]);
+router.get('/application', [isAuthenticatedUser, BelongsTo]);
+router.get('/userManagement', [isAuthenticatedUser, userBelongsTo(['admin']), BelongsTo]);
 
 module.exports = router;
 

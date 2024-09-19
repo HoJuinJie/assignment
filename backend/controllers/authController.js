@@ -88,6 +88,13 @@ exports.allGroups = async (req, res) => {
 }
 
 exports.BelongsTo = async (req, res) => {
+    // added 3 lines below from middleware
+    const token = req.cookies.token;
+    if (!token) return res.status(401).json({ message: 'Login required' });
+    const decoded = jwt.verify(token, JWT_SECRET);
+
+    req.user = decoded;
+
     try {
         const [rows] = await getConnection().query(`
             SELECT ug.user_group

@@ -119,10 +119,8 @@
 			});
 			await getAllUsers();
 			users[index].editMode = false;
-
 			customAlert('Saved. Profile update successfully');
 		} catch (error) {
-			console.log(error.response.data.message);
 			toast.error(error.response.data.message);
 			if (error.response.status === 401) goto('/login');
 		}
@@ -136,7 +134,6 @@
 	}
 
 	async function submitNewUser() {
-		console.log(newUser);
 		try {
 			const response = await axios.post(ApiUrl + '/register', newUser, { withCredentials: true });
 			await getAllUsers();
@@ -145,6 +142,7 @@
 		} catch (error) {
 			console.log(error.response.data.message);
 			toast.error(error.response.data.message);
+			if (error.response.status === 401) goto('/login');
 		}
 	}
 
