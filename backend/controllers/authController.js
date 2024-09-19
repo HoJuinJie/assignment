@@ -119,7 +119,7 @@ exports.login = async (req, res) => {
     if (!username || !password) return res.status(400).json({ message: 'Username and Password are required' });
     try {
         const [result] = await getConnection().query('SELECT * FROM accounts WHERE username = ?', [username]);
-        if (result.length === 0) return res.status(400).json({ message: 'User does not exist' });
+        if (result.length === 0) return res.status(400).json({ message: 'Invalid Username or Password' });
         if (result[0].accountStatus !== 'ACTIVE') return res.status(400).json({ message: `Login failed. Account is ${result[0].accountStatus}` });
 
         const isPasswordValid = await bcrpyt.compare(password, result[0].password);

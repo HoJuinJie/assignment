@@ -26,7 +26,7 @@
 		<slot name="button" />
 		<button class="modelCloseBtn" on:click={() => dialog.close()}>CANCEL</button>
 		</div>
-	</div><Toaster />
+	</div><Toaster expand={true} richColors = {true} />
 </dialog>
 
 <style>
