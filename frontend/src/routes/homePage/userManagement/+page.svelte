@@ -219,7 +219,7 @@
 							</span>
 						{/each}
 						<select class="inputfields" bind:value={NewUserSelectedGroup} on:change={() => addNewUserGroup()}>
-							<option value="" disabled>Select Group</option>
+							<option value="" disabled>- select group -</option>
 							{#each distinctGroups as distinctGroup}
 								<option class="options" value={distinctGroup}>{distinctGroup}</option>
 							{/each}
@@ -330,7 +330,7 @@
 
 	<div class="input-container">
 		<label for="groupName" style="margin-bottom: 10px;">Group Name:</label>
-		<input type="text" id="groupName" bind:value={newGroupName} class="editable" />
+		<input type="text" id="groupName" bind:value={newGroupName} class="editable" placeholder="e.g group_name1"/>
 	</div>
 	<div slot="button">
 		<button class="modelAddBtn" on:click={() => addNewGroup()}>ADD</button>
@@ -499,7 +499,9 @@
 	}
 
 	.editable {
-		background-color: #c9c9c9; /* Background color when editable */
+		border: 1px solid #ccc;
+ 	 	border-radius: 4px;
+  		box-sizing: border-box;
 	}
 
 	.view-only-box {
@@ -514,10 +516,13 @@
 	}
 
 	.view-only-box .tag {
-		background-color: #d3d3d3;
+		background-color: white;
 		margin-right: 5px;
 		padding: 3px 6px;
 		border-radius: 4px;
+		border: 1px solid #ccc;
+  		border-radius: 4px;
+  		box-sizing: border-box;
 	}
 
 	.tags-container {
@@ -526,13 +531,15 @@
 	}
 
 	.tag {
-		background-color: #bbb7b7;
+		background-color: white;
 		padding: 5px 10px;
 		border-radius: 5px;
 		margin: 5px;
 		display: inline-flex;
 		align-items: left;
 		color: black;
+		border: 1px solid #ccc;
+		box-sizing: border-box;
 	}
 
 	.delete-btn {
@@ -587,7 +594,9 @@
 	}
 
 	.inputfields {
-		background-color: lightgray;
+		border: 1px solid #ccc;
+  		border-radius: 4px;
+  		box-sizing: border-box;
 	}
 
 	.options {

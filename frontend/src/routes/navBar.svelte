@@ -100,16 +100,16 @@
 	</h2>
 
  <div class="input-container">
-    <label for="Username" style="margin-bottom: 10px;">Username:</label>
+    <label for="Username" style="margin-bottom: 20px;">Username:</label>
     <input type="text" id="Username" bind:value={username} disabled class="editable1" />
 </div>
  <div class="input-container">
-    <label for="current email" style="margin-bottom: 10px;">Current Email:</label>
+    <label for="existingEmail" style="margin-bottom: 20px;">Current Email:</label>
     <input type="text" id="exisitngEmail" bind:value={exisitngEmail} disabled class="editable1" />
 </div>
 
  <div class="input-container">
-    <label for="Email" style="margin-bottom: 10px; margin-right:31px">New Email:</label>
+    <label for="Email" style="margin-bottom: 10px;">New Email:</label>
     <input type="text" id="Email" bind:value={newUserEmail} class="editable" placeholder="email" />
 </div>
  <div class="input-container">
@@ -169,7 +169,6 @@ input {
   border: none;
   outline: none;
   padding: 8px;
-  background-color: #C9C9C9; /* Default background color for non-editable inputs */
 }
 
 .input-container {
@@ -206,4 +205,29 @@ input {
     width: 100%; /* Optional: Make it responsive to container width */
 }
 
+.input-container {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.input-container label {
+  width: 150px; /* Fixed width for labels to align them */
+  text-align: left;
+  margin-right: 10px;
+}
+
+.input-container input {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+  width: 100%; /* Ensures inputs and selects take full width */
+}
+
+#Username,
+#exisitngEmail {
+    border: none;
+}
 </style>
