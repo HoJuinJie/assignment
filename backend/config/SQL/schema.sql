@@ -14,3 +14,43 @@ CREATE TABLE IF NOT EXISTS `UserGroup` (
 `user_group` VARCHAR(50) NOT NULL,
 CONSTRAINT user_group_pk PRIMARY KEY (`user_group`, `username`)
 ) ENGINE = INNODB DEFAULT CHARSET = UTF8;
+
+CREATE TABLE IF NOT EXISTS `application` {
+    `App_Acronym` VARCHAR(50) NOT NULL,
+    `App_Description` TEXT NOT NULL,
+    `App_Rnumber`INT NOT NULL,
+    `App_startDate` INT NOT NULL,
+    `App_endDate` INT NOT NULL,
+    `App_permit_Open` JSON NOT NULL,
+    `App_permit_toDoList` JSON NOT NULL,
+    `App_permit_Doing` JSON NOT NULL,
+    `App_permit_Done` JSON NOT NULL,
+    `App_permit_Create` JSON NOT NULL,
+    CONSTRAINT App_Acronym_pk PRIMARY KEY (`App_Acronym`)
+} ENGINE = INNODB DEFAULT CHARSET = UTF8;
+
+CREATE TABLE IF NOT EXISTS `plan` {
+    `Plan_MVP_name` VARCHAR(100) NOT NULL,
+    `Plan_app_Acronym`VARCHAR(50) NOT NULL,
+    `Plan_startDate`INT NOT NULL,
+    `Plan_endDate`INT NOT NULL,
+    `Plan_colour` VARCHAR(6)
+    CONSTRAINT Plan_MVP_name_pk PRIMARY KEY (`Plan_MVP_name`),
+    CONSTRAINT Plan_app_Acronym_fk FOREIGN KEY (`Plan_app_Acronym`) REFERENCE application (`App_Acronym`)
+} ENGINE = INNODB DEFAULT CHARSET = UTF8;
+
+CREATE TABLE IF NOT EXISTS `task` {
+    `Task_id` VARCHAR(55) NOT NULL,
+    `Task_plan` VARCHAR(100) DEFAULT '',
+    `Task_app_Acronym` VARCHAR(50) NOT NULL,
+    `Task_name` VARCHAR(50) NOT NULL,
+    `Task_description` TEXT NOT NULL,
+    `Task_notes` MEDIUMTEXT NOT NULL,
+    `Task_state` VARCHAR(10) NOT NULL,
+    `Task_creator`VARCHAR(50) NOT NULL,
+    `Task_owner` VARCHAR(50) NOT NULL,
+    `Task_createDate` INT NOT NULL,
+    CONSTRAINT Task_id_pk PRIMARY KEY (`Task_id`),
+    CONSTRAINT Task_plan_fk FOREIGN KEY (`Task_plan`) REFERENCE plan (`Plan_MVP_name`),
+    CONSTRAINT Task_app_Acronym_fk FOREIGN KEY (`Task_app_Acronym`) REFERENCE accounts ('App_Acronym')
+} ENGINE = INNODB DEFAULT CHARSET = UTF8;

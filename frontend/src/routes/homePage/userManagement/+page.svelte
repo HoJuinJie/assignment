@@ -202,7 +202,7 @@
 					<th>Email</th>
 					<th>Group</th>
 					<th>Password</th>
-					<th>Active</th>
+					<th>Status</th>
 					<th>Action</th>
 				</tr>
 			</thead>
@@ -218,10 +218,10 @@
 								>
 							</span>
 						{/each}
-						<select bind:value={NewUserSelectedGroup} on:change={() => addNewUserGroup()}>
+						<select class="inputfields" bind:value={NewUserSelectedGroup} on:change={() => addNewUserGroup()}>
 							<option value="" disabled>Select Group</option>
 							{#each distinctGroups as distinctGroup}
-								<option value={distinctGroup}>{distinctGroup}</option>
+								<option class="options" value={distinctGroup}>{distinctGroup}</option>
 							{/each}
 						</select>
 					</td>
@@ -234,9 +234,9 @@
 						/></td
 					>
 					<td>
-						<select bind:value={newUser.active}>
+						<select class="inputfields" bind:value={newUser.active}>
 							{#each activeStatus as status}
-								<option value={status}>{status}</option>
+								<option class="options" value={status}>{status}</option>
 							{/each}
 						</select>
 					</td>
@@ -588,6 +588,10 @@
 
 	.inputfields {
 		background-color: lightgray;
+	}
+
+	.options {
+		background-color: white;
 	}
 
 </style>
