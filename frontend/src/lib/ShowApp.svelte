@@ -1,12 +1,25 @@
 <script>
-	import { onMount } from 'svelte';
+	import { onMount } from "svelte";
+
 	export let appDetails;
 	export let editApp;
 	export let gotoApp;
 
-	onMount(() => {
-		console.log(JSON.stringify(appDetails));
-	});
+    function getDateFromEpoch(epochTime) {
+        console.log('logging epoch time', epochTime);
+        const date = new Date(epochTime*1000);
+        // Extract day, month, and year
+        const day = date.getDate().toString().padStart(2, '0'); // pad with 0 if needed
+        const month = (date.getMonth() + 1).toString().padStart(2, '0'); // months are 0-indexed, so add 1
+        const year = date.getFullYear();
+        // Format as DD/MM/YYYY
+        const formattedDate = `${day}/${month}/${year}`;
+        return formattedDate
+    }
+
+    onMount(()=>{
+        console.log(appDetails)
+    })
 </script>
 
 <div
@@ -35,20 +48,20 @@
 		<div class="input-container">
 			<div class="titleText">App_startDate</div>
 			<div class="bodyText">
-				{appDetails.App_startDate}
+				{getDateFromEpoch(appDetails.App_startDate)}
 			</div>
 		</div>
 
 		<div class="input-container">
 			<div class="titleText">App_endDate</div>
 			<div class="bodyText">
-				{appDetails.App_endDate}
+				{getDateFromEpoch(appDetails.App_endDate)}
 			</div>
 		</div>
 	</div>
-    {#if editApp}
-	    <button class="edit-button" on:click|stopPropagation={editApp}>Edit</button>
-    {/if}
+	{#if editApp}
+		<button class="edit-button" on:click|stopPropagation={editApp}>Edit</button>
+	{/if}
 </div>
 
 <style>
@@ -62,14 +75,14 @@
 		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 		width: 800px;
 		margin: 10px 50px;
-        height: auto;
+		height: auto;
 	}
 
 	.app-content {
 		display: flex;
 		flex-direction: column;
 		flex: 1;
-        gap: 10px;
+		gap: 10px;
 	}
 
 	.input-container {
@@ -81,9 +94,8 @@
 		font-size: 15px;
 		margin-bottom: 5px;
 		color: #333;
-        margin-right: 30px;
-        width: 100px;
-
+		margin-right: 30px;
+		width: 100px;
 	}
 
 	.bodyText {
@@ -91,11 +103,11 @@
 		color: #555;
 	}
 
-    .app-description {
-        flex-grow: 2;
-    }
+	.app-description {
+		flex-grow: 2;
+	}
 
-    /* Set flex-grow for other sections for spacing */
+	/* Set flex-grow for other sections for spacing */
 	.input-container:not(.app-description) {
 		flex-grow: 1;
 	}
@@ -103,8 +115,6 @@
 	.app-card:hover {
 		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 	}
-
-
 
 	/* Responsiveness */
 	@media (max-width: 768px) {
@@ -117,7 +127,7 @@
 		}
 	}
 
-    .edit-button {
+	.edit-button {
 		width: auto;
 		appearance: button;
 		background-color: black;

@@ -89,7 +89,7 @@
 
 	async function createNewApp() {
 		try {
-			const response = await axios.post(ApiUrl + '/createApp', newApp, { withCredentials: true });
+			const response = await axios.post(ApiUrl_TMS + '/createApp', newApp, { withCredentials: true });
 			await getAllApps();
 			customAlert(`New app: ${newApp.appAcronym} created`);
 			resetNewApp();
