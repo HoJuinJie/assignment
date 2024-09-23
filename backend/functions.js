@@ -30,10 +30,16 @@ const validateGroupName = (groupName) => {
     return groupNameRegex.test(groupName);
 }
 
+const validateAppAcronym = (acronym) => {
+    const acronymRegex = /^[a-zA-Z0-9_]{1,50}$/;
+    return acronymRegex.test(acronym);
+}
+
 module.exports = {
     checkGroup,
     validatePassword,
     validateEmail,
     validateUsername,
-    validateGroupName
+    validateGroupName,
+    validateAppAcronym
 }

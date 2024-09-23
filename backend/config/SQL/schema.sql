@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS `application` (
 ) ENGINE = INNODB DEFAULT CHARSET = UTF8;
 
 CREATE TABLE IF NOT EXISTS `plan` (
-    `Plan_MVP_name` VARCHAR(100) NOT NULL,
+    `Plan_MVP_name` VARCHAR(255) NOT NULL,
     `Plan_app_Acronym`VARCHAR(50) NOT NULL,
     `Plan_startDate`INT NOT NULL,
     `Plan_endDate`INT NOT NULL,
@@ -40,10 +40,10 @@ CREATE TABLE IF NOT EXISTS `plan` (
 ) ENGINE = INNODB DEFAULT CHARSET = UTF8;
 
 CREATE TABLE IF NOT EXISTS `task` (
-    `Task_id` VARCHAR(55) NOT NULL,
-    `Task_plan` VARCHAR(100) DEFAULT '',
+    `Task_id` VARCHAR(100) NOT NULL,
+    `Task_plan` VARCHAR(255) DEFAULT '',
     `Task_app_Acronym` VARCHAR(50) NOT NULL,
-    `Task_name` VARCHAR(50) NOT NULL,
+    `Task_name` VARCHAR(255) NOT NULL,
     `Task_description` TEXT NOT NULL,
     `Task_notes` MEDIUMTEXT NOT NULL,
     `Task_state` VARCHAR(10) NOT NULL,

@@ -148,9 +148,7 @@ exports.register = async (req, res) => {
             [username, hashedPassword, email || '', accountStatus || 'ACTIVE']
         );
         if (group && group.length !==0) {
-            console.log("this is group:",group)
             const toAddValue = group.map(user_group => [username, user_group])
-            console.log('this is toaddvalue:',toAddValue)
             await getConnection().query('INSERT INTO usergroup (username, user_group) VALUES ?', [toAddValue]);
         }
         res.status(201).json({ message: 'User created successfully' });
