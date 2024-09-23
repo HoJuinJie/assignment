@@ -2,6 +2,7 @@ const express = require('express');
 const cookieParser = require('cookie-parser');
 const { createConnection, createRootAdmin } = require('./database');
 const auth = require('./routes/auth');
+const tms = require('./routes/tms');
 const cors = require('cors'); // Cross-Origin Resource Sharing (CORS)
 const app = express();
 const port = 3000;
@@ -22,6 +23,7 @@ app.use(cookieParser());
 
 // Routing
 app.use('/api/v1/auth', auth);
+app.use('/api/v1/tms', tms);
 
 // Connecting to database
 createConnection()

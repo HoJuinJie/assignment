@@ -241,7 +241,7 @@
 						</select>
 					</td>
 					<td>
-						<button class="btn-submit" on:click={submitNewUser}>Submit</button>
+						<button class="btn-submit" on:click={submitNewUser}>Create</button>
 					</td>
 				</tr>
 
