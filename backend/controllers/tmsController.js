@@ -53,3 +53,54 @@ exports.createApp = async (req,res) => {
         return res.status(400).json({ message: 'An error occurred while creating application' });
     }
 }
+
+exports.editApp = async (req,res) => {
+    const { 
+        appAcronym,
+        rNumber,
+        appDescription,
+        startDate,
+        endDate,
+        appPermitCreate,
+        appPermitOpen,
+        appPermitToDo,
+        appPermitDoing,
+        appPermitDone
+    } = req.body;
+
+    // convert date to epoch
+    const userStartDate = new Date(startDate);
+    const epochStartDate = Math.floor(userStartDate.getTime()/1000);    
+    const userEndDate = new Date(endDate);
+    const epochEndDate = Math.floor(userEndDate.getTime()/1000);
+
+    try {
+        let updateFields = [];
+        let values = [];
+
+        updateFields.push('App_Description = ?');
+        values.push(appDescription);
+        updateFields.push('App_startDate = ?');
+        values.push(epochStartDate);
+        updateFields.push('App_endDate = ?');
+        values.push(epochEndDate);
+        updateFields.push('App_permit_Open = ?');
+        values.push(appPermitOpen);
+        updateFields.push('App_permit_toDoList = ?');
+        values.push(appPermitToDo);
+        updateFields.push('App_permit_Doing = ?');
+        values.push(appPermitDoing);
+        updateFields.push('App_permit_Done = ?');
+        values.push(appPermitDone);
+        updateFields.push('App_permit_Create = ?');
+        values.push(appPermitCreate);
+
+        values.push(appAcronym);
+        await getConnection().query(`UPDATE application SET ${updateFields.join(', ')} WHERE App_Acronym = ?`, values);
+
+        res.status(201).json({ message: 'Plan edited successfully' });    
+    } catch (err) {
+        console.log(JSON.stringify(err));
+        return res.status(400).json({ message: 'An error occurred while editing application' });
+    }
+}

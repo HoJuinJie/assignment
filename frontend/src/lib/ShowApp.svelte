@@ -1,25 +1,24 @@
 <script>
-	import { onMount } from "svelte";
+	import { onMount } from 'svelte';
 
 	export let appDetails;
 	export let editApp;
 	export let gotoApp;
 
-    function getDateFromEpoch(epochTime) {
-        console.log('logging epoch time', epochTime);
-        const date = new Date(epochTime*1000);
-        // Extract day, month, and year
-        const day = date.getDate().toString().padStart(2, '0'); // pad with 0 if needed
-        const month = (date.getMonth() + 1).toString().padStart(2, '0'); // months are 0-indexed, so add 1
-        const year = date.getFullYear();
-        // Format as DD/MM/YYYY
-        const formattedDate = `${day}/${month}/${year}`;
-        return formattedDate
-    }
+	function getDateFromEpoch(epochTime) {
+		const date = new Date(epochTime * 1000);
+		// Extract day, month, and year
+		const day = date.getDate().toString().padStart(2, '0'); // pad with 0 if needed
+		const month = (date.getMonth() + 1).toString().padStart(2, '0'); // months are 0-indexed, so add 1
+		const year = date.getFullYear();
+		// Format as DD/MM/YYYY
+		const formattedDate = `${day}/${month}/${year}`;
+		return formattedDate;
+	}
 
-    onMount(()=>{
-        console.log(appDetails)
-    })
+	// onMount(()=>{
+	//     console.log('logging appdetails:', appDetails);
+	// })
 </script>
 
 <div
@@ -46,21 +45,21 @@
 		</div>
 
 		<div class="input-container">
-			<div class="titleText">App_startDate</div>
+			<div class="titleText">App_startDate (dd/mm/yyyy)</div>
 			<div class="bodyText">
 				{getDateFromEpoch(appDetails.App_startDate)}
 			</div>
 		</div>
 
 		<div class="input-container">
-			<div class="titleText">App_endDate</div>
+			<div class="titleText">App_endDate (dd/mm/yyyy)</div>
 			<div class="bodyText">
 				{getDateFromEpoch(appDetails.App_endDate)}
 			</div>
 		</div>
 	</div>
 	{#if editApp}
-		<button class="edit-button" on:click|stopPropagation={editApp}>Edit</button>
+		<button class="edit-button" on:click|stopPropagation={editApp()}>Edit</button>
 	{/if}
 </div>
 
@@ -73,7 +72,7 @@
 		border-radius: 8px;
 		padding: 20px;
 		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-		width: 800px;
+		width: 40%;
 		margin: 10px 50px;
 		height: auto;
 	}

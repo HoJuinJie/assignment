@@ -8,6 +8,7 @@
 	import Modal from '../../../lib/CreateAppModel.svelte';
 	import { customAlert } from '../../../lib/errorHandler';
 	import ShowApp from '$lib/ShowApp.svelte';
+	import EditApp from '$lib/EditApp.svelte';
 
 	const ApiUrl = import.meta.env.VITE_API_URL + ':' + import.meta.env.VITE_PORT + '/api/v1/auth';
 	const ApiUrl_TMS = import.meta.env.VITE_API_URL + ':' + import.meta.env.VITE_PORT + '/api/v1/tms';
@@ -21,7 +22,7 @@
 	let newApp = {
 		appAcronym: null,
 		rNumber: null,
-		appDescription: null,
+		appDescription: '',
 		startDate: null,
 		endDate: null,
 		appPermitCreate: '',
@@ -33,6 +34,8 @@
 	};
 
 	let showModal = false;
+	let showEditApp = false;
+	let editIndex = null;
 
 	const getAllApps = async () => {
 		try {
@@ -75,7 +78,7 @@
 		newApp = {
 			appAcronym: null,
 			rNumber: null,
-			appDescription: null,
+			appDescription: '',
 			startDate: null,
 			endDate: null,
 			appPermitCreate: '',
@@ -89,7 +92,9 @@
 
 	async function createNewApp() {
 		try {
-			const response = await axios.post(ApiUrl_TMS + '/createApp', newApp, { withCredentials: true });
+			const response = await axios.post(ApiUrl_TMS + '/createApp', newApp, {
+				withCredentials: true
+			});
 			await getAllApps();
 			customAlert(`New app: ${newApp.appAcronym} created`);
 			resetNewApp();
@@ -98,6 +103,31 @@
 			toast.error(error.response.data.message);
 			if (error.response.status === 401) goto('/login');
 		}
+	}
+
+	async function editApp() {
+		try {
+			const response = await axios.post(ApiUrl_TMS + '/editApp', newApp, {
+				withCredentials: true
+			});
+			await getAllApps();
+			customAlert(`${newApp.appAcronym} edited successfully`);
+		} catch (error) {
+			console.log(error.response.data.message);
+			toast.error(error.response.data.message);
+			if (error.response.status === 401) goto('/login');
+		}
+	}
+
+	function getDateFromEpochEdit(epochTime) {
+		const date = new Date(epochTime * 1000);
+		// Extract day, month, and year
+		const day = date.getDate().toString().padStart(2, '0'); // pad with 0 if needed
+		const month = (date.getMonth() + 1).toString().padStart(2, '0'); // months are 0-indexed, so add 1
+		const year = date.getFullYear();
+		// Format as DD/MM/YYYY
+		const formattedDate = `${year}-${month}-${day}`;
+		return formattedDate;
 	}
 </script>
 
@@ -127,15 +157,39 @@
 			<h1 class="head">Applications</h1>
 			<div class="middle"></div>
 			<div class="createApp">
-				<button class="createAppBtn" on:click={() => (showModal = true)}>CREATE APP</button>
+				<button
+					class="createAppBtn"
+					on:click={() => {
+						resetNewApp();
+						showModal = true;
+					}}>CREATE APP</button
+				>
 			</div>
 		</div>
 
 		<div class="app-container">
-			{#each apps as app}
+			{#each apps as app, index}
 				<ShowApp
 					appDetails={app}
-					editApp={isPL ? ()=>{console.log('pressing edit')} : null}
+					editApp={isPL
+						? () => {
+								showEditApp = true;
+								editIndex = index;
+								newApp.appAcronym = apps[editIndex].App_Acronym;
+								newApp.rNumber = apps[editIndex].App_Rnumber;
+								newApp.appDescription = apps[editIndex].App_Description;
+								newApp.startDate = getDateFromEpochEdit(apps[editIndex].App_startDate);
+								newApp.endDate = getDateFromEpochEdit(apps[editIndex].App_endDate);
+								newApp.appPermitCreate = apps[editIndex].App_permit_Create;
+								newApp.appPermitOpen = apps[editIndex].App_permit_Open;
+								newApp.appPermitToDo = apps[editIndex].App_permit_toDoList;
+								newApp.appPermitDoing = apps[editIndex].App_permit_Doing;
+								newApp.appPermitDone = apps[editIndex].App_permit_Done;
+
+								console.log('showing app:', app);
+								console.log('showing application array:', apps);
+							}
+						: null}
 					gotoApp={() => {
 						console.log('pressing app');
 					}}
@@ -148,7 +202,9 @@
 <Modal bind:showModal>
 	<h2 slot="header">Create Application</h2>
 	<div class="input-container">
-		<label for="appAcronym" style="margin-bottom: 10px;">App Acronym*</label>
+		<label for="appAcronym" style="margin-bottom: 10px;"
+			>App Acronym<span style="color: red;">*</span></label
+		>
 		<input
 			type="text"
 			id="appAcronym"
@@ -159,7 +215,9 @@
 		/>
 	</div>
 	<div class="input-container">
-		<label for="appRNum" style="margin-bottom: 10px;">App R-Number*</label>
+		<label for="appRNum" style="margin-bottom: 10px;"
+			>App R-Number<span style="color: red;">*</span></label
+		>
 		<input
 			type="text"
 			id="appRNum"
@@ -179,7 +237,9 @@
 		/>
 	</div>
 	<div class="input-container">
-		<label for="startDate" style="margin-bottom: 10px;">Start Date*</label>
+		<label for="startDate" style="margin-bottom: 10px;"
+			>Start Date<span style="color: red;">*</span></label
+		>
 		<input
 			type="date"
 			id="startDate"
@@ -190,7 +250,9 @@
 		/>
 	</div>
 	<div class="input-container">
-		<label for="endDate" style="margin-bottom: 10px;">End Date*</label>
+		<label for="endDate" style="margin-bottom: 10px;"
+			>End Date<span style="color: red;">*</span></label
+		>
 		<input
 			type="date"
 			id="endDate"
@@ -246,13 +308,103 @@
 		</select>
 	</div>
 	<div class="input-container">
-		<div>*required field</div>
+		<div style="color: red;">*required field</div>
 	</div>
 
 	<div slot="button">
 		<button class="modelCreateBtn" on:click={() => createNewApp()}>CONFIRM</button>
 	</div>
 </Modal>
+
+<EditApp bind:showEditApp>
+	<h2 slot="header">Edit Application</h2>
+	{#if apps[editIndex]}
+		<!--wait for data to be fetched-->
+		<div class="input-container">
+			<label for="appAcronymEdit" style="margin-bottom: 10px;">App Acronym</label>
+			<span id="appAcronymEdit">
+				{apps[editIndex].App_Acronym}
+			</span>
+		</div>
+		<div class="input-container">
+			<label for="appRNumEdit" style="margin-bottom: 10px;">App R-Number</label>
+			<span id="appAcronymEdit">
+				{apps[editIndex].App_Rnumber}
+			</span>
+		</div>
+		<div class="input-container">
+			<label for="AppDesEdit" style="margin-bottom: 10px;">App Description</label>
+			<textarea
+				id="AppDesEdit"
+				bind:value={newApp.appDescription}
+				class="editable"
+				placeholder={apps[editIndex].App_Description}
+			/>
+		</div>
+		<div class="input-container">
+			<label for="startDateEdit" style="margin-bottom: 10px;">Start Date</label>
+			<input
+				type="date"
+				id="startDateEdit"
+				bind:value={newApp.startDate}
+				class="editable"
+				required
+			/>
+		</div>
+		<div class="input-container">
+			<label for="endDateEdit" style="margin-bottom: 10px;">End Date</label>
+			<input type="date" id="endDateEdit" bind:value={newApp.endDate} class="editable" required />
+		</div>
+		<div class="input-container">
+			<label for="appPermitCreateEdit" style="margin-bottom: 10px;">App Permit Create</label>
+			<select class="inputfields" id="appPermitCreateEdit" bind:value={newApp.appPermitCreate}>
+				<option value="" disabled>- select group -</option>
+				{#each distinctGroups as distinctGroup}
+					<option class="options" value={distinctGroup}>{distinctGroup}</option>
+				{/each}
+			</select>
+		</div>
+		<div class="input-container">
+			<label for="appPermitOpenEdit" style="margin-bottom: 10px;">App Permit Open</label>
+			<select class="inputfields" id="appPermitOpenEdit" bind:value={newApp.appPermitOpen}>
+				<option value="" disabled>- select group -</option>
+				{#each distinctGroups as distinctGroup}
+					<option class="options" value={distinctGroup}>{distinctGroup}</option>
+				{/each}
+			</select>
+		</div>
+		<div class="input-container">
+			<label for="appPermitToDoEdit" style="margin-bottom: 10px;">App Permit ToDo</label>
+			<select class="inputfields" id="appPermitToDoEdit" bind:value={newApp.appPermitToDo}>
+				<option value="" disabled>- select group -</option>
+				{#each distinctGroups as distinctGroup}
+					<option class="options" value={distinctGroup}>{distinctGroup}</option>
+				{/each}
+			</select>
+		</div>
+		<div class="input-container">
+			<label for="appPermitDoingEdit" style="margin-bottom: 10px;">App Permit Doing</label>
+			<select class="inputfields" id="appPermitDoingEdit" bind:value={newApp.appPermitDoing}>
+				<option value="" disabled>- select group -</option>
+				{#each distinctGroups as distinctGroup}
+					<option class="options" value={distinctGroup}>{distinctGroup}</option>
+				{/each}
+			</select>
+		</div>
+		<div class="input-container">
+			<label for="appPermitDoneEdit" style="margin-bottom: 10px;">App Permit Done</label>
+			<select class="inputfields" id="appPermitDoneEdit" bind:value={newApp.appPermitDone}>
+				<option value="" disabled>- select group -</option>
+				{#each distinctGroups as distinctGroup}
+					<option class="options" value={distinctGroup}>{distinctGroup}</option>
+				{/each}
+			</select>
+		</div>
+	{/if}
+	<div slot="button">
+		<button class="modelCreateBtn" on:click={() => editApp()}>CONFIRM</button>
+	</div>
+</EditApp>
 
 <style>
 	.container {
@@ -391,9 +543,7 @@
 
 	.app-container {
 		display: flex;
+		justify-content: space-between;
 		flex-wrap: wrap;
 	}
-
-
-
 </style>

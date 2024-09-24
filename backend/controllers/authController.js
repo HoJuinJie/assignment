@@ -226,7 +226,7 @@ exports.adminResetCredentials = async (req, res) => {
         values.push(email);
     }
 
-    updateFields.push('accountStatus = ?')
+    updateFields.push('accountStatus = ?');
     values.push(accountStatus || 'ACTIVE');
 
     try {

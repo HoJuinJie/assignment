@@ -1,20 +1,20 @@
 <script>
-	export let showModal; // boolean
+	export let showEditApp; // boolean
 	import { Toaster } from 'svelte-sonner';
 
 	let dialog; // HTMLDialogElement
 
-	$: if (dialog && showModal) dialog.showModal();
+	$: if (dialog && showEditApp) dialog.showModal();
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events a11y-no-noninteractive-element-interactions -->
 <dialog
 	bind:this={dialog}
-	on:close={() => (showModal = false)}
+	on:close={() => (showEditApp = false)}
 	on:click|self={() => dialog.close()}
 >
 	<!-- svelte-ignore a11y-no-static-element-interactions -->
-	<div class="ModalContainer" on:click|stopPropagation>
+	<div class="editContainer" on:click|stopPropagation>
 		<slot name="header" />
 
 		<slot />
@@ -29,7 +29,7 @@
 </dialog>
 
 <style>
-	.ModalContainer {
+	.editContainer {
 		text-align: center;
 		width: 550px;
 		/* height: 180px; */
