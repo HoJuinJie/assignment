@@ -15,10 +15,7 @@
 
 	const ApiUrl = import.meta.env.VITE_API_URL + ':' + import.meta.env.VITE_PORT + '/api/v1/auth';
 	const ApiUrl_TMS = import.meta.env.VITE_API_URL + ':' + import.meta.env.VITE_PORT + '/api/v1/tms';
-
 	const appWritable = writable();
-
-
 
 	let globalUsername;
 	let isAdmin;
@@ -43,6 +40,7 @@
 	let showModal = false;
 	let showEditApp = false;
 	let editIndex = null;
+
 
 	const getAllApps = async () => {
 		try {
@@ -76,6 +74,7 @@
 			isPL = response.data.isPL;
 			getAllApps();
 			getAllGroups();
+			setContext('appStore', appWritable);
 		} catch (error) {
 			console.log(error.response.data.message);
 			toast.error(error.response.data.message);
@@ -202,7 +201,6 @@
 					gotoApp={() => {
 						console.log('pressing app');
 						appWritable.set(app);
-						setContext('appStore', appWritable);
 						goto('/homePage/application/kanban');
 					}}
 				/>
