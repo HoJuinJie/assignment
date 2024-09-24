@@ -39,7 +39,7 @@
 
 		<div class="input-container app-description">
 			<div class="titleText">App_Description</div>
-			<div class="bodyText">
+			<div class="bodyText description">
 				{appDetails.App_Description}
 			</div>
 		</div>
@@ -72,8 +72,8 @@
 		border-radius: 8px;
 		padding: 20px;
 		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-		width: 40%;
-		margin: 10px 50px;
+		width: 42%;
+		margin: 10px 30px;
 		height: auto;
 	}
 
@@ -146,4 +146,17 @@
 		float: right;
 		line-height: 40px;
 	}
+
+	.description {
+		max-height: 7.3em;
+		overflow-y: auto;
+		scrollbar-width: none; /* For Firefox */
+		-ms-overflow-style: none; /* For Internet Explorer and Edge */
+	}
+
+	/* For Chrome, Safari, and other WebKit browsers */
+	.description::-webkit-scrollbar {
+		display: none;
+	}
+
 </style>

@@ -63,8 +63,10 @@
 		try {
 			const response = await axios.get(ApiUrl + '/application', { withCredentials: true });
 			if (response.status === 401) goto('/login');
+			console.log('logging response.data', response.data);
 			globalUsername = response.data.username;
 			isAdmin = response.data.isAdmin;
+			isPL = response.data.isPL;
 			getAllApps();
 			getAllGroups();
 		} catch (error) {
