@@ -10,8 +10,15 @@
 	import ShowApp from '$lib/ShowApp.svelte';
 	import EditApp from '$lib/EditApp.svelte';
 
+	import { setContext } from 'svelte';
+	import { writable } from 'svelte/store';
+
 	const ApiUrl = import.meta.env.VITE_API_URL + ':' + import.meta.env.VITE_PORT + '/api/v1/auth';
 	const ApiUrl_TMS = import.meta.env.VITE_API_URL + ':' + import.meta.env.VITE_PORT + '/api/v1/tms';
+
+	const appWritable = writable();
+
+
 
 	let globalUsername;
 	let isAdmin;
@@ -194,6 +201,9 @@
 						: null}
 					gotoApp={() => {
 						console.log('pressing app');
+						appWritable.set(app);
+						setContext('appStore', appWritable);
+						goto('/homePage/application/kanban');
 					}}
 				/>
 			{/each}
