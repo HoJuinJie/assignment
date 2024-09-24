@@ -37,7 +37,7 @@
 			</div>
 		</div>
 
-		<div class="input-container app-description">
+		<div class="input-container">
 			<div class="titleText">App_Description</div>
 			<div class="bodyText description">
 				{appDetails.App_Description}
@@ -72,7 +72,7 @@
 		border-radius: 8px;
 		padding: 20px;
 		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-		width: 42%;
+		width: 40%;
 		margin: 10px 30px;
 		height: auto;
 	}
@@ -90,40 +90,20 @@
 
 	.titleText {
 		font-weight: 1000;
-		font-size: 15px;
+		font-size: 13px;
 		margin-bottom: 5px;
 		color: #333;
-		margin-right: 30px;
-		width: 100px;
+		margin-right: 60px;
+		width: 50px;
 	}
 
 	.bodyText {
-		font-size: 16px;
+		font-size: 13px;
 		color: #555;
-	}
-
-	.app-description {
-		flex-grow: 2;
-	}
-
-	/* Set flex-grow for other sections for spacing */
-	.input-container:not(.app-description) {
-		flex-grow: 1;
 	}
 
 	.app-card:hover {
 		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-	}
-
-	/* Responsiveness */
-	@media (max-width: 768px) {
-		.app-card {
-			flex-direction: column;
-		}
-
-		.edit-button {
-			align-self: flex-end;
-		}
 	}
 
 	.edit-button {
