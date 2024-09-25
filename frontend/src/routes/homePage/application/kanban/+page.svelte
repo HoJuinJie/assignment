@@ -122,6 +122,10 @@
 			toast.error(error.response.data.message);
 			if (error.response.status === 401) goto('/login');
 		}
+	};
+
+	function createNewTask() {
+		console.log('pressing on create new task')
 	}
 
 	// async function createNewTask() {
@@ -288,9 +292,9 @@
 			</div>
 		</div>
 		<div class="right-container">
-			<div class="input-container2">
+			<div class="input-container2 notes-box">
 				<label for="taskNotes" style="margin-bottom: 10px;">Notes</label>
-				<input type="text" id="taskNotes" bind:value={newTask.taskNotes} placeholder={newTask.taskNotes} disabled>
+				<textarea id="taskNotes" bind:value={newTask.taskNotes} placeholder={newTask.taskNotes} disabled/>
 			</div>
 			<div class="input-container2 comments">
 				<textarea
@@ -299,6 +303,9 @@
 			/>
 			</div>
 		</div>
+	</div>
+	<div slot="button">
+		<button class="modelCreateBtn" on:click={() => createNewTask()}>CONFIRM</button>
 	</div>
 </CreateTaskModel>
 
@@ -451,17 +458,29 @@
 	}
 
 	.left-container {
-		flex: 2;
+		width: 38%;
 		border-right: 1px solid black;
 		padding-right: 10px;
 	}
 
 	.right-container {
-		flex: 3;
+		width: 62%;
 		padding-left: 10px;
 		display: flex;
 		flex-direction: column;
 		justify-content: space-between;
+	}
+
+	.notes-box {
+		display: flex;
+		flex-direction: column;
+		flex: 1;
+		overflow-y: auto;
+	}
+
+	#taskNotes {
+		border: none;
+		background-color: #D8D8D8;
 	}
 
 	.editable {

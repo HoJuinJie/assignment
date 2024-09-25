@@ -128,7 +128,7 @@
 	}
 
 	.description {
-		max-height: 7.3em;
+		max-height: 6.5em;
 		overflow-y: auto;
 		scrollbar-width: none; /* For Firefox */
 		-ms-overflow-style: none; /* For Internet Explorer and Edge */
