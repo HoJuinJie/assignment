@@ -12,7 +12,7 @@ exports.apps = async (req, res) => {
     }
 };
 
-exports.plans = async (req, res) => {
+exports.plans = async (req, res) => { // rmb to only fetch plans that exist in that APP
     try {
         const [rows] = await getConnection().query(`SELECT * from plan`);
         res.status(200).json(rows);

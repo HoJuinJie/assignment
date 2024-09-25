@@ -178,7 +178,7 @@
 		<a
 			href="/homePage/userManagement"
 			class:active={$page.url.pathname === '/homePage/userManagement'}
-			class="links">User Management</a
+			class="links user-management">User Management</a
 		>
 	</div>
 	<div slot="NavContentRight" class="edit">Edit Profile</div>
@@ -576,21 +576,25 @@
 		height: 35px;
 	}
 
-	.edit:hover {
+	.links:hover,
+	.edit:hover,
+	.logout:hover {
+		text-decoration: underline;
 		color: lightgray;
 	}
 
 	.links {
 		font-weight: bold;
 		color: white;
+		text-decoration: none;
 	}
 
 	.links:visited {
 		color: white;
 	}
 
-	.links:hover {
-		color: lightgray;
+	.user-management {
+		text-decoration: underline;
 	}
 
 	.inputfields {
@@ -603,4 +607,8 @@
 		background-color: white;
 	}
 
+	a {
+		color: white;
+		padding: 0 70px;
+	}
 </style>

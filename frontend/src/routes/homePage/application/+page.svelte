@@ -140,7 +140,7 @@
 		<a
 			href="/homePage/application"
 			class:active={$page.url.pathname === '/homePage/application'}
-			class="links">Application</a
+			class="links application">Application</a
 		>
 		{#if isAdmin}
 			<a
@@ -467,23 +467,14 @@
 
 	a {
 		color: white;
-		padding: 0 10px;
-	}
-
-	a:hover {
-		text-decoration: none; /* Underline on hover */
-	}
-
-	a.active {
-		/* text-decoration: underline; 
-  font-weight: bold; 
-  color: yellow; */
+		padding: 0 70px;
 	}
 
 	.greet {
 		font-weight: bold; /* Optional: Make it bold */
 	}
 
+	.links:hover,
 	.edit:hover,
 	.logout:hover {
 		text-decoration: underline;
@@ -492,6 +483,7 @@
 
 	.links {
 		font-weight: bold; /* Optional: Make it bold */
+		text-decoration: none;
 	}
 
 	.links:visited {
@@ -500,6 +492,10 @@
 
 	.links:hover {
 		color: lightgray;
+	}
+
+	.application {
+		text-decoration: underline;
 	}
 
 	.input-container {
