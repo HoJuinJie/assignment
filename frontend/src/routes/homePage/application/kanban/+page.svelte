@@ -1,19 +1,24 @@
 <script>
-	import { onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import axios from 'axios';
 	import { page } from '$app/stores';
 	import { toast } from 'svelte-sonner';
 	import Layout from '../../../navBar.svelte';
-	import { appWritable } from '../store';
 	import Modal from '../../../../lib/CreateAppModel.svelte';
 	import { customAlert } from '../../../../lib/errorHandler';
+	import OpenState from '$lib/OpenState.svelte';
+	import CreateTaskModel from '$lib/createTaskModel.svelte';
+
+	import { appWritable } from '../store';
 
 	let globalUsername;
 	let isAdmin = false;
 	let isPL = false;
 	let showModal = false;
+	let showCreateTask = false;
 	let plans = [];
+	const taskIDName = '<App_Acronym>_<App_Rnumber>';
 
 	const ApiUrl = import.meta.env.VITE_API_URL + ':' + import.meta.env.VITE_PORT + '/api/v1/auth';
 	const ApiUrl_TMS = import.meta.env.VITE_API_URL + ':' + import.meta.env.VITE_PORT + '/api/v1/tms';
@@ -25,6 +30,39 @@
 		endDate: null,
 		colour: '#000000'
 	};
+
+	let newTask = {
+		taskID: '',
+		planName: '',
+		appAcronym: '',
+		taskName: null,
+		taskDescription: null,
+		taskNotes: '',
+		taskState: 'Open',
+		taskCreator: '',
+		taskOwner: '',
+		taskCreateDate: '',
+		taskDisplayDate: ''
+	};
+
+	console.log(`newTask: ${JSON.stringify(newTask)}`);
+
+	appWritable.subscribe((v) => console.log('logging sub', v));
+
+	function setCreateTaskFields() {
+		const today = new Date();
+		const day = today.getDate().toString().padStart(2, '0');
+		const month = (today.getMonth() + 1).toString().padStart(2, '0');
+		const year = today.getFullYear();
+		const formattedDate = `${year}-${month}-${day}`;
+		const displayDate = `${day}/${month}/${year}`;
+
+		newTask.taskID = $appWritable.App_Acronym + '_' + $appWritable.App_Rnumber.toString();
+		newTask.appAcronym = $appWritable.App_Acronym;
+		newTask.taskCreator = globalUsername;
+		newTask.taskCreateDate = formattedDate;
+		newTask.taskDisplayDate = displayDate;
+	}
 
 	const getPlans = async () => {
 		try {
@@ -38,7 +76,7 @@
 	};
 
 	onMount(async () => {
-		console.log('log appwritable:', $appWritable);
+		// console.log('log appwritable:', $appWritable);
 		if (!$appWritable) {
 			goto('/homePage/application');
 			return;
@@ -46,12 +84,14 @@
 		try {
 			const response = await axios.get(ApiUrl + '/application', { withCredentials: true });
 			if (response.status === 401) goto('/login');
-			console.log('logging response.data', response.data);
 			globalUsername = response.data.username;
 			isAdmin = response.data.isAdmin;
 			isPL = response.data.isPL;
 			newPlan.appAcronym = $appWritable.App_Acronym;
 			getPlans();
+			console.log('before passing through functions', newTask);
+			setCreateTaskFields();
+			console.log('after through functions', newTask);
 		} catch (error) {
 			console.log(error.response.data.message);
 			toast.error(error.response.data.message);
@@ -83,6 +123,20 @@
 			if (error.response.status === 401) goto('/login');
 		}
 	}
+
+	// async function createNewTask() {
+	// 	try {
+	// 		const response = await axios.post(ApiUrl_TMS + '/createTask', newPlan, {
+	// 			withCredentials: true
+	// 		});
+	// 		customAlert(`New plan: ${newPlan.planName} created`);
+	// 		resetNewPlan();
+	// 	} catch (error) {
+	// 		console.log(error.response.data.message);
+	// 		toast.error(error.response.data.message);
+	// 		if (error.response.status === 401) goto('/login');
+	// 	}
+	// }
 </script>
 
 <Layout bind:globalUsername>
@@ -108,7 +162,7 @@
 <main>
 	<div class="container">
 		<div class="header">
-			<h1 class="head">{$appWritable.App_Acronym}'s Kanban</h1>
+			<h1 class="head">{newPlan.appAcronym}'s Kanban</h1>
 			<div class="middle"></div>
 			<div class="createPlan">
 				<button
@@ -120,7 +174,14 @@
 			</div>
 		</div>
 		<div class="kanban">
-			<div class="kanban-container">Open</div>
+			<div class="kanban-container">
+				<OpenState
+					createTask={() => {
+						console.log('pressing on create task');
+						showCreateTask = true;
+					}}
+				/>
+			</div>
 			<div class="kanban-container">ToDo</div>
 			<div class="kanban-container">Doing</div>
 			<div class="kanban-container">Done</div>
@@ -133,7 +194,7 @@
 	<h2 slot="header">Create Plan</h2>
 	<div class="input-container">
 		<label for="appAcronym" style="margin-bottom: 10px;">App Acronym</label>
-		<span id="appAcronym">{$appWritable.App_Acronym}</span>
+		<span id="appAcronym">{newPlan.appAcronym}</span>
 	</div>
 	<div class="input-container">
 		<label for="planName" style="margin-bottom: 10px;"
@@ -176,6 +237,70 @@
 		<button class="modelCreateBtn" on:click={() => createNewPlan()}>CONFIRM</button>
 	</div>
 </Modal>
+
+<CreateTaskModel bind:showCreateTask>
+	<h2 slot="header">Create Task</h2>
+	<div class="task-container">
+		<div class="left-container">
+			<div class="input-container2">
+				<label for="taskID" style="margin-bottom: 10px;">Task ID</label>
+				<span id="taskID">{newTask.taskID}</span>
+			</div>
+			<div class="input-container2">
+				<label for="taskName" style="margin-bottom: 10px;"
+					>Task Name<span style="color: red;">*</span></label
+				>
+				<input
+					type="text"
+					id="taskName"
+					bind:value={newTask.taskName}
+					class="editable"
+					placeholder="name"
+					required
+				/>
+			</div>
+			<div class="input-container2">
+				<label for="taskDes" style="margin-bottom: 10px;">Task Description</label>
+				<textarea
+					id="taskDes"
+					bind:value={newTask.taskDescription}
+					class="editable"
+					placeholder="description"
+				/>
+			</div>
+			<div class="input-container2">
+				<label for="plan-name" style="margin-bottom: 10px;">Plan Name</label>
+				<select class="inputfields" id="plan-name" bind:value={newTask.planName}>
+					<option value="" disabled>- select group -</option>
+				</select>
+			</div>
+			<div class="input-container2">
+				<label for="taskState" style="margin-bottom: 10px;">Task State</label>
+				<span id="taskState">{newTask.taskState}</span>
+			</div>
+			<div class="input-container2">
+				<label for="taskState" style="margin-bottom: 10px;">Task Creator</label>
+				<span id="taskState">{newTask.taskCreator}</span>
+			</div>
+			<div class="input-container2">
+				<label for="taskState" style="margin-bottom: 10px;">Task Create Date (dd/mm/yyyy)</label>
+				<span id="taskState">{newTask.taskDisplayDate}</span>
+			</div>
+		</div>
+		<div class="right-container">
+			<div class="input-container2">
+				<label for="taskNotes" style="margin-bottom: 10px;">Notes</label>
+				<input type="text" id="taskNotes" bind:value={newTask.taskNotes} placeholder={newTask.taskNotes} disabled>
+			</div>
+			<div class="input-container2 comments">
+				<textarea
+				bind:value={newTask.taskNotes}
+				placeholder="comments"
+			/>
+			</div>
+		</div>
+	</div>
+</CreateTaskModel>
 
 <style>
 	.container {
@@ -288,6 +413,56 @@
 		box-sizing: border-box;
 		width: 100%; /* Ensures inputs and selects take full width */
 	}
+	.input-container2 {
+		display: flex;
+		align-items: center;
+		margin-bottom: 15px;
+	}
+
+	.input-container2 label {
+		width: 80px; /* Fixed width for labels to align them */
+		text-align: left;
+		margin-right: 10px;
+		font-weight: bold;
+	}
+
+	.input-container2 input,
+	.input-container2 textarea,
+	.input-container2 select {
+		flex: 1;
+		padding: 8px;
+		border: 1px solid #ccc;
+		border-radius: 4px;
+		box-sizing: border-box;
+		width: 100%; /* Ensures inputs and selects take full width */
+	}
+
+	.input-container2 textarea {
+		height: 150px; /* Make the textarea larger */
+		resize: none; /* Allow vertical resizing only */
+	}
+	
+	.comments textarea {
+		height: 80px;
+	}
+
+	.task-container {
+		display: flex;
+	}
+
+	.left-container {
+		flex: 2;
+		border-right: 1px solid black;
+		padding-right: 10px;
+	}
+
+	.right-container {
+		flex: 3;
+		padding-left: 10px;
+		display: flex;
+		flex-direction: column;
+		justify-content: space-between;
+	}
 
 	.editable {
 		width: 100%;
@@ -305,30 +480,28 @@
 	}
 
 	.hidden-input {
-		flex:1;
+		flex: 1;
 		cursor: pointer;
 	}
 
 	.kanban {
 		display: flex;
-		width: 100%; 
-		height: 70vh; 
+		width: 100%;
+		height: 70vh;
 		box-sizing: border-box; /* Ensure padding and borders are included in the width */
 	}
 
 	.kanban-container {
 		flex-grow: 1; /* Make each container take up equal space */
-		border: 1px solid black;
 		padding: 20px; /* Optional: Add some padding inside the containers */
 		text-align: center; /* Center the text horizontally */
 		box-sizing: border-box; /* Include borders and padding in the width calculation */
 		overflow-y: auto; /* In case content overflows */
+		background-color: #d8d8d8;
 	}
 
 	/* Optional: Add a bit of spacing between columns */
 	.kanban-container:not(:last-child) {
 		margin-right: 10px;
 	}
-
-
 </style>
