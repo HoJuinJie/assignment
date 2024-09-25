@@ -7,7 +7,7 @@
 	import Layout from '../../../navBar.svelte';
 	import { appWritable } from '../store';
 	import Modal from '../../../../lib/CreateAppModel.svelte';
-	import { customAlert } from '../../../../lib/errorHandler'
+	import { customAlert } from '../../../../lib/errorHandler';
 
 	let globalUsername;
 	let isAdmin = false;
@@ -24,7 +24,7 @@
 		startDate: null,
 		endDate: null,
 		colour: '#000000'
-	}
+	};
 
 	const getPlans = async () => {
 		try {
@@ -36,7 +36,6 @@
 			if (error.response.status === 401) goto('/login');
 		}
 	};
-
 
 	onMount(async () => {
 		console.log('log appwritable:', $appWritable);
@@ -67,8 +66,8 @@
 			startDate: null,
 			endDate: null,
 			colour: '#000000'
-		}
-	};
+		};
+	}
 
 	async function createNewPlan() {
 		console.log(newPlan);
@@ -120,22 +119,34 @@
 				>
 			</div>
 		</div>
+		<div class="kanban">
+			<div class="kanban-container">Open</div>
+			<div class="kanban-container">ToDo</div>
+			<div class="kanban-container">Doing</div>
+			<div class="kanban-container">Done</div>
+			<div class="kanban-container">Closed</div>
+		</div>
 	</div>
 </main>
 
 <Modal bind:showModal>
 	<h2 slot="header">Create Plan</h2>
 	<div class="input-container">
-		<label for="appAcronym" style="margin-bottom: 10px;"
-			>App Acronym</label
-		>
+		<label for="appAcronym" style="margin-bottom: 10px;">App Acronym</label>
 		<span id="appAcronym">{$appWritable.App_Acronym}</span>
 	</div>
 	<div class="input-container">
 		<label for="planName" style="margin-bottom: 10px;"
 			>Plan MVP Name<span style="color: red;">*</span></label
 		>
-		<input type="text" id="planName" bind:value={newPlan.planName} class="editable" placeholder="name" required />
+		<input
+			type="text"
+			id="planName"
+			bind:value={newPlan.planName}
+			class="editable"
+			placeholder="name"
+			required
+		/>
 	</div>
 	<div class="input-container">
 		<label for="startDate" style="margin-bottom: 10px;"
@@ -150,10 +161,11 @@
 		<input type="date" id="endDate" bind:value={newPlan.endDate} class="editable" required />
 	</div>
 	<div class="input-container">
-		<label for="colour" style="margin-bottom: 10px;">Colour<span style="color: red;">*</span></label>
+		<label for="colour" style="margin-bottom: 10px;">Colour<span style="color: red;">*</span></label
+		>
 		<div class="color-box">
-			<input type="color" id="colour" bind:value={newPlan.colour} class="hidden-input">
 			<div class="custom-color-display" style="background-color: {newPlan.colour}"></div>
+			<input type="color" id="colour" bind:value={newPlan.colour} class="hidden-input" />
 		</div>
 	</div>
 	<div class="input-container">
@@ -255,7 +267,7 @@
 	.links:hover {
 		color: lightgray;
 	}
-	
+
 	.input-container {
 		display: flex;
 		align-items: center;
@@ -268,7 +280,6 @@
 		margin-right: 10px;
 	}
 
-	
 	.input-container input {
 		flex: 1;
 		padding: 8px;
@@ -282,6 +293,42 @@
 		width: 100%;
 	}
 
-	
+	.color-box {
+		flex: 1;
+		display: flex;
+	}
+
+	.custom-color-display {
+		flex: 90;
+		border-radius: 5px;
+		border: 1px solid #ccc;
+	}
+
+	.hidden-input {
+		flex:1;
+		cursor: pointer;
+	}
+
+	.kanban {
+		display: flex;
+		width: 100%; 
+		height: 70vh; 
+		box-sizing: border-box; /* Ensure padding and borders are included in the width */
+	}
+
+	.kanban-container {
+		flex-grow: 1; /* Make each container take up equal space */
+		border: 1px solid black;
+		padding: 20px; /* Optional: Add some padding inside the containers */
+		text-align: center; /* Center the text horizontally */
+		box-sizing: border-box; /* Include borders and padding in the width calculation */
+		overflow-y: auto; /* In case content overflows */
+	}
+
+	/* Optional: Add a bit of spacing between columns */
+	.kanban-container:not(:last-child) {
+		margin-right: 10px;
+	}
+
 
 </style>

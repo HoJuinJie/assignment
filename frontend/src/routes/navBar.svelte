@@ -148,11 +148,13 @@
 
 .NavContentRight {
     text-align: right; /* Align RightRight content to the right */
+	cursor: pointer;
 }
 
 .NavContentRightRight {
     text-align: right; /* Align RightRight content to the right */
     padding-right: 40px;
+	cursor: pointer;
 }
 
 .NavContentCenter {
