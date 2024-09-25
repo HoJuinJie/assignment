@@ -332,89 +332,109 @@
 	<h2 slot="header">Edit Application</h2>
 	{#if apps[editIndex]}
 		<!--wait for data to be fetched-->
-		<div class="input-container">
-			<label for="appAcronymEdit" style="margin-bottom: 10px;">App Acronym</label>
-			<span id="appAcronymEdit">
-				{apps[editIndex].App_Acronym}
-			</span>
+		<div class="editAppRow">
+			<div class="input-container input-left">
+				<label for="appAcronymEdit" style="margin-bottom: 10px;">App Acronym</label>
+				<span id="appAcronymEdit">
+					{apps[editIndex].App_Acronym}
+				</span>
+			</div>
+			<div class="input-container">
+				<label for="appRNumEdit" style="margin-bottom: 10px;">App R-Number</label>
+				<span id="appAcronymEdit">
+					{apps[editIndex].App_Rnumber}
+				</span>
+			</div>
 		</div>
-		<div class="input-container">
-			<label for="appRNumEdit" style="margin-bottom: 10px;">App R-Number</label>
-			<span id="appAcronymEdit">
-				{apps[editIndex].App_Rnumber}
-			</span>
+
+		<div class="editAppRow">
+			<div class="editAppColumn input-left">
+				<div class="input-container">
+					<label for="AppDesEdit" style="margin-bottom: 10px;">App Description</label>
+					<textarea
+						id="AppDesEdit"
+						bind:value={newApp.appDescription}
+						class="editable"
+						placeholder={apps[editIndex].App_Description}
+					/>
+				</div>
+			</div>
+
+			<div class="editAppColumn">
+				<div class="input-container">
+					<label for="startDateEdit" style="margin-bottom: 10px;"
+						>Start Date<span style="color: red;">*</span></label
+					>
+					<input
+						type="date"
+						id="startDateEdit"
+						bind:value={newApp.startDate}
+						class="editable"
+						required
+					/>
+				</div>
+
+				<div class="input-container">
+					<label for="endDateEdit" style="margin-bottom: 10px;"
+						>End Date<span style="color: red;">*</span></label
+					>
+					<input type="date" id="endDateEdit" bind:value={newApp.endDate} class="editable" required />
+				</div>
+				
+				<div class="input-container">
+					<label for="appPermitCreateEdit" style="margin-bottom: 10px;">App Permit Create</label>
+					<select class="inputfields" id="appPermitCreateEdit" bind:value={newApp.appPermitCreate}>
+						<option value="" disabled>- select group -</option>
+						{#each distinctGroups as distinctGroup}
+							<option class="options" value={distinctGroup}>{distinctGroup}</option>
+						{/each}
+					</select>
+				</div>
+			</div>
 		</div>
-		<div class="input-container">
-			<label for="AppDesEdit" style="margin-bottom: 10px;">App Description</label>
-			<textarea
-				id="AppDesEdit"
-				bind:value={newApp.appDescription}
-				class="editable"
-				placeholder={apps[editIndex].App_Description}
-			/>
+
+		<div class="editAppRow">
+			<div class="input-container input-left">
+				<label for="appPermitOpenEdit" style="margin-bottom: 10px;">App Permit Open</label>
+				<select class="inputfields" id="appPermitOpenEdit" bind:value={newApp.appPermitOpen}>
+					<option value="" disabled>- select group -</option>
+					{#each distinctGroups as distinctGroup}
+						<option class="options" value={distinctGroup}>{distinctGroup}</option>
+					{/each}
+				</select>
+			</div>
+
+			<div class="input-container">
+				<label for="appPermitToDoEdit" style="margin-bottom: 10px;">App Permit ToDo</label>
+				<select class="inputfields" id="appPermitToDoEdit" bind:value={newApp.appPermitToDo}>
+					<option value="" disabled>- select group -</option>
+					{#each distinctGroups as distinctGroup}
+						<option class="options" value={distinctGroup}>{distinctGroup}</option>
+					{/each}
+				</select>
+			</div>
 		</div>
-		<div class="input-container">
-			<label for="startDateEdit" style="margin-bottom: 10px;"
-				>Start Date<span style="color: red;">*</span></label
-			>
-			<input
-				type="date"
-				id="startDateEdit"
-				bind:value={newApp.startDate}
-				class="editable"
-				required
-			/>
-		</div>
-		<div class="input-container">
-			<label for="endDateEdit" style="margin-bottom: 10px;"
-				>End Date<span style="color: red;">*</span></label
-			>
-			<input type="date" id="endDateEdit" bind:value={newApp.endDate} class="editable" required />
-		</div>
-		<div class="input-container">
-			<label for="appPermitCreateEdit" style="margin-bottom: 10px;">App Permit Create</label>
-			<select class="inputfields" id="appPermitCreateEdit" bind:value={newApp.appPermitCreate}>
-				<option value="" disabled>- select group -</option>
-				{#each distinctGroups as distinctGroup}
-					<option class="options" value={distinctGroup}>{distinctGroup}</option>
-				{/each}
-			</select>
-		</div>
-		<div class="input-container">
-			<label for="appPermitOpenEdit" style="margin-bottom: 10px;">App Permit Open</label>
-			<select class="inputfields" id="appPermitOpenEdit" bind:value={newApp.appPermitOpen}>
-				<option value="" disabled>- select group -</option>
-				{#each distinctGroups as distinctGroup}
-					<option class="options" value={distinctGroup}>{distinctGroup}</option>
-				{/each}
-			</select>
-		</div>
-		<div class="input-container">
-			<label for="appPermitToDoEdit" style="margin-bottom: 10px;">App Permit ToDo</label>
-			<select class="inputfields" id="appPermitToDoEdit" bind:value={newApp.appPermitToDo}>
-				<option value="" disabled>- select group -</option>
-				{#each distinctGroups as distinctGroup}
-					<option class="options" value={distinctGroup}>{distinctGroup}</option>
-				{/each}
-			</select>
-		</div>
-		<div class="input-container">
-			<label for="appPermitDoingEdit" style="margin-bottom: 10px;">App Permit Doing</label>
-			<select class="inputfields" id="appPermitDoingEdit" bind:value={newApp.appPermitDoing}>
-				<option value="" disabled>- select group -</option>
-				{#each distinctGroups as distinctGroup}
-					<option class="options" value={distinctGroup}>{distinctGroup}</option>
-				{/each}
-			</select>
-		</div>
-		<div class="input-container">
-			<label for="appPermitDoneEdit" style="margin-bottom: 10px;">App Permit Done</label>
-			<select class="inputfields" id="appPermitDoneEdit" bind:value={newApp.appPermitDone}>
-				<option value="" disabled>- select group -</option>
-				{#each distinctGroups as distinctGroup}
-					<option class="options" value={distinctGroup}>{distinctGroup}</option>
-				{/each}
-			</select>
+
+		<div class="editAppRow">
+			<div class="input-container input-left">
+				<label for="appPermitDoingEdit" style="margin-bottom: 10px;">App Permit Doing</label>
+				<select class="inputfields" id="appPermitDoingEdit" bind:value={newApp.appPermitDoing}>
+					<option value="" disabled>- select group -</option>
+					{#each distinctGroups as distinctGroup}
+						<option class="options" value={distinctGroup}>{distinctGroup}</option>
+					{/each}
+				</select>
+			</div>
+
+			<div class="input-container">
+				<label for="appPermitDoneEdit" style="margin-bottom: 10px;">App Permit Done</label>
+				<select class="inputfields" id="appPermitDoneEdit" bind:value={newApp.appPermitDone}>
+					<option value="" disabled>- select group -</option>
+					{#each distinctGroups as distinctGroup}
+						<option class="options" value={distinctGroup}>{distinctGroup}</option>
+					{/each}
+				</select>
+			</div>
 		</div>
 	{/if}
 	<div class="input-container">
@@ -520,11 +540,13 @@
 		text-decoration: underline;
 	}
 
-	.createAppRow {
+	.createAppRow,
+	.editAppRow {
 		display: flex;
 	}
 
-	.createAppColumn {
+	.createAppColumn,
+	.editAppColumn {
 		flex: 1;
 	}
 
