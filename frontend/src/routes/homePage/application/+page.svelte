@@ -9,13 +9,10 @@
 	import { customAlert } from '../../../lib/errorHandler';
 	import ShowApp from '$lib/ShowApp.svelte';
 	import EditApp from '$lib/EditApp.svelte';
-
-	import { setContext } from 'svelte';
-	import { writable } from 'svelte/store';
+	import { appWritable } from './store';
 
 	const ApiUrl = import.meta.env.VITE_API_URL + ':' + import.meta.env.VITE_PORT + '/api/v1/auth';
 	const ApiUrl_TMS = import.meta.env.VITE_API_URL + ':' + import.meta.env.VITE_PORT + '/api/v1/tms';
-	const appWritable = writable();
 
 	let globalUsername;
 	let isAdmin;
@@ -40,7 +37,6 @@
 	let showModal = false;
 	let showEditApp = false;
 	let editIndex = null;
-
 
 	const getAllApps = async () => {
 		try {
@@ -68,13 +64,12 @@
 		try {
 			const response = await axios.get(ApiUrl + '/application', { withCredentials: true });
 			if (response.status === 401) goto('/login');
-			console.log('logging response.data', response.data);
+			// console.log('logging response.data', response.data); //
 			globalUsername = response.data.username;
 			isAdmin = response.data.isAdmin;
 			isPL = response.data.isPL;
 			getAllApps();
 			getAllGroups();
-			setContext('appStore', appWritable);
 		} catch (error) {
 			console.log(error.response.data.message);
 			toast.error(error.response.data.message);
@@ -199,7 +194,6 @@
 							}
 						: null}
 					gotoApp={() => {
-						console.log('pressing app');
 						appWritable.set(app);
 						goto('/homePage/application/kanban');
 					}}
@@ -220,7 +214,7 @@
 			id="appAcronym"
 			bind:value={newApp.appAcronym}
 			class="editable"
-			placeholder="Name"
+			placeholder="name"
 			required
 		/>
 	</div>
@@ -233,7 +227,7 @@
 			id="appRNum"
 			bind:value={newApp.rNumber}
 			class="editable"
-			placeholder="Number"
+			placeholder="number"
 			required
 		/>
 	</div>
@@ -243,34 +237,20 @@
 			id="AppDes"
 			bind:value={newApp.appDescription}
 			class="editable"
-			placeholder="Description"
+			placeholder="description"
 		/>
 	</div>
 	<div class="input-container">
 		<label for="startDate" style="margin-bottom: 10px;"
 			>Start Date<span style="color: red;">*</span></label
 		>
-		<input
-			type="date"
-			id="startDate"
-			bind:value={newApp.startDate}
-			class="editable"
-			placeholder="DD/MM/YYYY"
-			required
-		/>
+		<input type="date" id="startDate" bind:value={newApp.startDate} class="editable" required />
 	</div>
 	<div class="input-container">
 		<label for="endDate" style="margin-bottom: 10px;"
 			>End Date<span style="color: red;">*</span></label
 		>
-		<input
-			type="date"
-			id="endDate"
-			bind:value={newApp.endDate}
-			class="editable"
-			placeholder="DD/MM/YYYY"
-			required
-		/>
+		<input type="date" id="endDate" bind:value={newApp.endDate} class="editable" required />
 	</div>
 	<div class="input-container">
 		<label for="appPermitCreate" style="margin-bottom: 10px;">App Permit Create</label>
@@ -352,7 +332,9 @@
 			/>
 		</div>
 		<div class="input-container">
-			<label for="startDateEdit" style="margin-bottom: 10px;">Start Date</label>
+			<label for="startDateEdit" style="margin-bottom: 10px;"
+				>Start Date<span style="color: red;">*</span></label
+			>
 			<input
 				type="date"
 				id="startDateEdit"
@@ -362,7 +344,9 @@
 			/>
 		</div>
 		<div class="input-container">
-			<label for="endDateEdit" style="margin-bottom: 10px;">End Date</label>
+			<label for="endDateEdit" style="margin-bottom: 10px;"
+				>End Date<span style="color: red;">*</span></label
+			>
 			<input type="date" id="endDateEdit" bind:value={newApp.endDate} class="editable" required />
 		</div>
 		<div class="input-container">
@@ -411,6 +395,9 @@
 			</select>
 		</div>
 	{/if}
+	<div class="input-container">
+		<div style="color: red;">*required field</div>
+	</div>
 	<div slot="button">
 		<button class="modelCreateBtn" on:click={() => editApp()}>CONFIRM</button>
 	</div>

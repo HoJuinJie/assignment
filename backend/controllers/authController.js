@@ -141,7 +141,7 @@ exports.register = async (req, res) => {
     if (email && !validateEmail(email)) return res.status(400).json({ message: 'Invalid email format. Correct Format: example@domain.com' });
     try {
         const [resultsFromAccounts] = await getConnection().query('SELECT * FROM accounts WHERE username = ?', [username]);
-        if (resultsFromAccounts.length !== 0) return res.status(400).json({ message: 'Username already exists' });
+        if (resultsFromAccounts.length !== 0) return res.status(400).json({ message: `Username "${username}" already exists` });
 
         const hashedPassword = await bcrpyt.hash(password, 10);
         await getConnection().query(
@@ -166,7 +166,7 @@ exports.addGroup = async (req, res) => {
     if (!validateGroupName(user_group)) return res.status(400).json({ message: 'Invalid group name. Group name must only have alphanumeric characters including "_"' });
     try {
         const [result] = await getConnection().query('SELECT * FROM usergroup WHERE user_group = ?', [user_group]);
-        if (result.length !== 0) return res.status(400).json({ message: 'Group already exists' });
+        if (result.length !== 0) return res.status(400).json({ message: `Group "${user_group}"already exists` });
         await getConnection().query('INSERT INTO usergroup (user_group) VALUES (?)', [user_group]);
         res.status(201).json({ message: 'Group added successfully' })
     } catch (err) {

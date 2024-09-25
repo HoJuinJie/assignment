@@ -1,12 +1,10 @@
 <script>
-
 	export let showModal; // boolean
-  	import { Toaster } from 'svelte-sonner';
+	import { Toaster } from 'svelte-sonner';
 
 	let dialog; // HTMLDialogElement
 
 	$: if (dialog && showModal) dialog.showModal();
-
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events a11y-no-noninteractive-element-interactions -->
@@ -18,19 +16,31 @@
 	<!-- svelte-ignore a11y-no-static-element-interactions -->
 	<div class="ModalContainer" on:click|stopPropagation>
 		<slot name="header" />
-	
+
 		<slot />
 
 		<!-- svelte-ignore a11y-autofocus -->
 		<div class="input-container">
-		<slot name="button" />
-		<button class="modelCloseBtn" on:click={() => dialog.close()}>CANCEL</button>
+			<slot name="button" />
+			<button class="modelCloseBtn" on:click={() => dialog.close()}>CANCEL</button>
 		</div>
-	</div><Toaster expand={true} richColors = {true} />
+	</div>
+	<Toaster expand={true} richColors={true} />
 </dialog>
 
+<!--  
+.input-container label {
+	margin-right: 5px; /* Optional: add more space between the label and the input */
+	white-space: nowrap; /* Keeps the label text on one line */
+}
+
+.input-container input {
+	flex-grow: 1; /* Allows the input to take up any remaining space */
+}
+-->
+
 <style>
-	.ModalContainer{
+	.ModalContainer {
 		text-align: center;
 		width: 550px;
 		/* height: 180px; */
@@ -74,35 +84,21 @@
 		display: block;
 	}
 
-	.modelCloseBtn{
-  cursor: pointer;
-  padding: 5px 10px;
-  margin-top: 20px;
-  border: none;
-  color: white;
-  background-color: black;
-  width: 150px;
-  height: 35px;
-}
+	.modelCloseBtn {
+		cursor: pointer;
+		padding: 5px 10px;
+		margin-top: 20px;
+		border: none;
+		color: white;
+		background-color: black;
+		width: 150px;
+		height: 35px;
+	}
 
-.input-container {
-    display: flex;
-    align-items: center; /* This centers the items vertically */
-    justify-content: center;
-    gap: 10px; /* Adds space between the label and the input */
-}
-
-
-
+	.input-container {
+		display: flex;
+		align-items: center; /* This centers the items vertically */
+		justify-content: center;
+		gap: 10px; /* Adds space between the label and the input */
+	}
 </style>
-
-<!--  
-.input-container label {
-	margin-right: 5px; /* Optional: add more space between the label and the input */
-	white-space: nowrap; /* Keeps the label text on one line */
-}
-
-.input-container input {
-	flex-grow: 1; /* Allows the input to take up any remaining space */
-}
--->

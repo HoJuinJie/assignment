@@ -3,7 +3,8 @@ const router = require('express').Router();
 const {
     apps,
     createApp,
-    editApp
+    editApp,
+    createPlan
 } = require('../controllers/tmsController');
 
 const {
@@ -14,6 +15,7 @@ const {
 // Protected Routes
 router.post('/createApp', [isAuthenticatedUser, userBelongsTo(['PL']), createApp]);
 router.post('/editApp', [isAuthenticatedUser, userBelongsTo(['PL']), editApp]);
+router.post('/createPlan', [isAuthenticatedUser, userBelongsTo(['PL']), createPlan]);
 
 // FRONT-END Protected routes
 router.get('/apps', [isAuthenticatedUser, apps]);
