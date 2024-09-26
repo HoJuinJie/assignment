@@ -19,6 +19,7 @@
 	let showCreateTask = false;
 	let plans = [];
 	let distinctPlans = [];
+	let appTasks = [];
 
 	const ApiUrl = import.meta.env.VITE_API_URL + ':' + import.meta.env.VITE_PORT + '/api/v1/auth';
 	const ApiUrl_TMS = import.meta.env.VITE_API_URL + ':' + import.meta.env.VITE_PORT + '/api/v1/tms';
@@ -38,7 +39,7 @@
 		taskName: '',
 		taskDescription: null,
 		taskNotes: '',
-		taskState: 'Open',
+		taskState: 'open',
 		taskCreator: '',
 		taskOwner: '',
 		taskCreateDate: '',
@@ -63,6 +64,19 @@
 		newTask.taskDisplayDate = displayDate;
 	}
 
+	const getTasksInAppAtState = async (app, state) => {
+		try {
+			const response = await axios.post(ApiUrl_TMS + '/getTasksInAppAtState', {app, state}, {
+				withCredentials: true
+			});
+			appTasks = response.data;
+			console.log('logging tasks in app at state', appTasks);
+		} catch (error) {
+			toast.error(error.response.data.message);
+			if (error.response.status === 401) goto('/login');
+		}
+	};
+
 	const getPlansInApp = async (app) => {
 		console.log('testing get plans in app func by logging app', app);
 		try {
@@ -77,7 +91,7 @@
 		}
 	};
 
-	const getPlans = async () => {
+	const getPlans = async () => { // Dont need this function
 		try {
 			const planList = await axios.get(ApiUrl_TMS + '/plans', { withCredentials: true });
 			plans = planList.data;
@@ -146,7 +160,7 @@
 			taskName: '',
 			taskDescription: null,
 			taskNotes: '',
-			taskState: 'Open',
+			taskState: 'open',
 			taskCreator: '',
 			taskOwner: '',
 			taskCreateDate: '',
@@ -219,7 +233,7 @@
 <main>
 	<div class="container">
 		<div class="header">
-			<h1 class="head">{newPlan.appAcronym}'s Kanban</h1>
+			<h1 class="head">Kanban: {newPlan.appAcronym}</h1>
 			<div class="middle"></div>
 			<div class="createPlan">
 				<button
@@ -234,7 +248,6 @@
 			<div class="kanban-container">
 				<OpenState
 					createTask={() => {
-						console.log('pressing on create task');
 						showCreateTask = true;
 					}}
 				/>
@@ -368,7 +381,7 @@
 		</div>
 	</div>
 	<div slot="button">
-		<button class="modelCreateBtn" on:click={() => createNewTask()}>CONFIRM</button>
+		<button class="modelCreateBtn2" on:click={() => createNewTask()}>CONFIRM</button>
 	</div>
 </CreateTaskModel>
 
@@ -424,6 +437,17 @@
 	}
 
 	.modelCreateBtn {
+		cursor: pointer;
+		padding: 5px 10px;
+		margin-top: 20px;
+		border: none;
+		color: white;
+		background-color: black;
+		width: 150px;
+		height: 35px;
+	}
+
+	.modelCreateBtn2 {
 		cursor: pointer;
 		padding: 5px 10px;
 		margin-top: 0px;
@@ -589,11 +613,13 @@
 
 	.kanban-container {
 		flex-grow: 1; /* Make each container take up equal space */
-		padding: 20px; /* Optional: Add some padding inside the containers */
+		padding: 10px; /* Optional: Add some padding inside the containers */
 		text-align: center; /* Center the text horizontally */
 		box-sizing: border-box; /* Include borders and padding in the width calculation */
 		overflow-y: auto; /* In case content overflows */
 		background-color: #d8d8d8;
+		margin-left: 10px;
+		margin-right: 10px;
 	}
 
 	/* Optional: Add a bit of spacing between columns */

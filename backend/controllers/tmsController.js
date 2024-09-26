@@ -230,6 +230,7 @@ exports.createTask = async (req, res) => {
         console.log(JSON.stringify(err));
         return res.status(400).json({ message: 'An error occurred while creating application' });
     } finally {
+        // Release connection back to the pool
         connection.release();
     }
 };
