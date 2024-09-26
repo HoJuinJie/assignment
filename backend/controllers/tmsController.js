@@ -184,16 +184,39 @@ exports.createTask = async (req, res) => {
     const epochCreateDate = Math.floor(userCreateDate.getTime() / 1000);
     
     try {
+        // Handle Race Condition - Transaction with Row Locking
+
+        // Start transaction
+        await getConnection().beginTransaction();
+
+        // Lock the R_number row
+        const [rows] = await getConnection.query(
+            'SELECT App_Rnumber FROM application WHERE App_Acronym = ? FOR UPDATE', [appAcronym]
+        );
+
+        let rNumber = rows[0].App_Rnumber;
+        rNumber +=1;
+
+        // Update existing R-number
+        await getConnection.query(
+            'UPDATE application SET App_Rnumber = ? WHERE App_Acronym = ?', [rNumber, appAcronym]
+        );
+
+        let newTaskID = appAcronym + '_' + rNumber;
+
         if (planName === '') {
             await getConnection().query(
                 'INSERT INTO task (Task_id, Task_app_Acronym, Task_name, Task_description, Task_notes, Task_state, Task_creator, Task_owner, Task_createDate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-                [taskID, appAcronym, taskName, taskDescription, taskNotes, taskState, taskCreator, taskOwner, epochCreateDate]);
+                [newTaskID, appAcronym, taskName, taskDescription, taskNotes, taskState, taskCreator, taskOwner, epochCreateDate]);
         } else {
             await getConnection().query(
                 'INSERT INTO task (Task_id, Task_plan, Task_app_Acronym, Task_name, Task_description, Task_notes, Task_state, Task_creator, Task_owner, Task_createDate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-                [taskID, planName, appAcronym, taskName, taskDescription, taskNotes, taskState, taskCreator, taskOwner, epochCreateDate]);
+                [newTaskID, planName, appAcronym, taskName, taskDescription, taskNotes, taskState, taskCreator, taskOwner, epochCreateDate]);
         }
 
+        // commit the transaction
+        await getConnection().commit();
+        
         res.status(201).json({ message: 'Task created successfully' });
     } catch (err) {
         console.log(JSON.stringify(err));
