@@ -3,6 +3,7 @@ const router = require('express').Router();
 const {
     apps,
     plans,
+    getPlansInApp,
     createApp,
     editApp,
     createPlan
@@ -21,6 +22,7 @@ router.post('/createPlan', [isAuthenticatedUser, userBelongsTo(['PL']), createPl
 // FRONT-END Protected routes
 router.get('/apps', [isAuthenticatedUser, apps]);
 router.get('/plans', [isAuthenticatedUser, plans]);
+router.post('/getPlansInApp', [isAuthenticatedUser, getPlansInApp]);
 
 
 module.exports = router;

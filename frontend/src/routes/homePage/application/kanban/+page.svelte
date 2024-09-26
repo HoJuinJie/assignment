@@ -18,7 +18,7 @@
 	let showModal = false;
 	let showCreateTask = false;
 	let plans = [];
-	const taskIDName = '<App_Acronym>_<App_Rnumber>';
+	let distinctPlans = [];
 
 	const ApiUrl = import.meta.env.VITE_API_URL + ':' + import.meta.env.VITE_PORT + '/api/v1/auth';
 	const ApiUrl_TMS = import.meta.env.VITE_API_URL + ':' + import.meta.env.VITE_PORT + '/api/v1/tms';
@@ -45,9 +45,8 @@
 		taskDisplayDate: ''
 	};
 
-	console.log(`newTask: ${JSON.stringify(newTask)}`);
-
-	appWritable.subscribe((v) => console.log('logging sub', v));
+	// console.log(`newTask: ${JSON.stringify(newTask)}`);
+	// appWritable.subscribe((v) => console.log('logging sub', v));
 
 	function setCreateTaskFields() {
 		const today = new Date();
@@ -64,10 +63,25 @@
 		newTask.taskDisplayDate = displayDate;
 	}
 
+	const getPlansInApp = async (app) => {
+		console.log('testing get plans in app func by logging app', app);
+		try {
+			const response = await axios.post(ApiUrl_TMS + '/getPlansInApp', app, {
+				withCredentials: true
+			});
+			distinctPlans = response.data;
+			console.log('logging distinct plans', distinctPlans);
+		} catch (error) {
+			toast.error(error.response.data.message);
+			if (error.response.status === 401) goto('/login');
+		}
+	};
+
 	const getPlans = async () => {
 		try {
 			const planList = await axios.get(ApiUrl_TMS + '/plans', { withCredentials: true });
 			plans = planList.data;
+			console.log('logging all plans', plans);
 		} catch (error) {
 			console.log(error.response.data.message);
 			toast.error(error.response.data.message);
@@ -76,7 +90,7 @@
 	};
 
 	onMount(async () => {
-		// console.log('log appwritable:', $appWritable);
+		console.log('log appwritable:', $appWritable);
 		if (!$appWritable) {
 			goto('/homePage/application');
 			return;
@@ -89,9 +103,8 @@
 			isPL = response.data.isPL;
 			newPlan.appAcronym = $appWritable.App_Acronym;
 			getPlans();
-			console.log('before passing through functions', newTask);
 			setCreateTaskFields();
-			console.log('after through functions', newTask);
+			getPlansInApp($appWritable);
 		} catch (error) {
 			console.log(error.response.data.message);
 			toast.error(error.response.data.message);
@@ -122,10 +135,17 @@
 			toast.error(error.response.data.message);
 			if (error.response.status === 401) goto('/login');
 		}
-	};
+	}
 
 	function createNewTask() {
-		console.log('pressing on create new task')
+		console.log('pressing on create new task');
+
+		let now = new Date();
+		let hours = String(now.getHours()).padStart(2, '0');
+		let minutes = String(now.getMinutes()).padStart(2, '0');
+		let seconds = String(now.getSeconds()).padStart(2, '0');
+		let formattedTime = `${hours}:${minutes}:${seconds}`;
+		newTask.taskNotes = newTask.taskNotes +`\n[${newTask.taskCreator}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n`;
 	}
 
 	// async function createNewTask() {
@@ -275,7 +295,12 @@
 			<div class="input-container2">
 				<label for="plan-name" style="margin-bottom: 10px;">Plan Name</label>
 				<select class="inputfields" id="plan-name" bind:value={newTask.planName}>
-					<option value="" disabled>- select group -</option>
+					<option value="" disabled>- select plan -</option>
+					{#each distinctPlans as distinctPlan}
+						<option class="options" value={distinctPlan.Plan_MVP_name}
+							>{distinctPlan.Plan_MVP_name}</option
+						>
+					{/each}
 				</select>
 			</div>
 			<div class="input-container2">
@@ -293,14 +318,16 @@
 		</div>
 		<div class="right-container">
 			<div class="input-container2 notes-box">
-				<label for="taskNotes" style="margin-bottom: 10px;">Notes</label>
-				<textarea id="taskNotes" bind:value={newTask.taskNotes} placeholder={newTask.taskNotes} disabled/>
+				<label for="taskNotes">Notes</label>
+				<textarea
+					id="taskNotes"
+					bind:value={newTask.taskNotes}
+					placeholder={newTask.taskNotes}
+					disabled
+				/>
 			</div>
 			<div class="input-container2 comments">
-				<textarea
-				bind:value={newTask.taskNotes}
-				placeholder="comments"
-			/>
+				<textarea bind:value={newTask.taskNotes} placeholder="comments" />
 			</div>
 		</div>
 	</div>
@@ -431,7 +458,7 @@
 
 	.createTaskHeader {
 		padding: 0;
-		margin-top: 0;
+		margin-top: 7px;
 		margin-bottom: 0;
 	}
 
@@ -463,7 +490,7 @@
 		height: 100px; /* Make the textarea larger */
 		resize: none; /* Allow vertical resizing only */
 	}
-	
+
 	.comments textarea {
 		height: 60px;
 	}
@@ -495,7 +522,7 @@
 
 	#taskNotes {
 		border: none;
-		background-color: #D8D8D8;
+		background-color: #d8d8d8;
 	}
 
 	.editable {

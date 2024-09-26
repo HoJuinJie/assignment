@@ -22,6 +22,17 @@ exports.plans = async (req, res) => { // rmb to only fetch plans that exist in t
     }
 };
 
+exports.getPlansInApp = async (req, res) => {
+    const { App_Acronym } = req.body;
+    try {
+        const [rows] = await getConnection().query(`SELECT * from plan WHERE Plan_app_Acronym = ?`, [App_Acronym]);
+        res.status(200).json(rows);
+    } catch {
+        console.log(JSON.stringify(err));
+        return res.status(400).json({ message: 'An error occurred while fetching plans from application' });
+    }
+};
+
 
 // backend
 exports.createApp = async (req, res) => {
@@ -150,5 +161,4 @@ exports.createPlan = async (req, res) => {
         console.log(JSON.stringify(err));
         return res.status(400).json({ message: 'An error occurred while creating plan' });
     }
-
 };
