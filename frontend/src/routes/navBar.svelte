@@ -84,7 +84,9 @@
  <main>
   <nav class="NavContainer">
     <div class="NavContentLeft"><slot name="NavContentLeft" /></div>
-    <div class="NavContentCenter"><slot name="NavContentCenter" /></div>
+    <div class="NavContentCenter">
+        <slot name="NavContentCenter" />
+    </div>
     <div class="NavContentRight"  on:click={() => openModel()}><slot name="NavContentRight" /></div>
     <div class="NavContentRightRight"  on:click={() => logout()}><slot name="NavContentRightRight" /></div>
   </nav>
@@ -160,6 +162,9 @@
 .NavContentCenter {
     flex: 2; /* Center element takes up more space */
     text-align: center; /* Center content horizontally */
+    padding-left: 0;
+    padding-right: 0;
+    justify-content: space-between;
 }
 
 

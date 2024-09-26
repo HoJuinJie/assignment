@@ -169,7 +169,7 @@
 
 <NavBar>
 	<span slot="NavContentLeft">Hello, {globalUsername}</span>
-	<div slot="NavContentCenter">
+	<div slot="NavContentCenter" class="navCenter">
 		<a
 			href="/homePage/application"
 			class:active={$page.url.pathname === '/homePage/application'}
@@ -576,6 +576,12 @@
 		height: 35px;
 	}
 
+	.navCenter {
+		display: flex;
+		justify-content: space-evenly;
+	}
+
+
 	.links:hover,
 	.edit:hover,
 	.logout:hover {
@@ -587,6 +593,8 @@
 		font-weight: bold;
 		color: white;
 		text-decoration: none;
+		padding-left: 0;
+		padding-right: 0;
 	}
 
 	.links:visited {

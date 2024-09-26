@@ -145,7 +145,7 @@
 
 <Layout bind:globalUsername>
 	<span slot="NavContentLeft" class="greet">Hello, {globalUsername}</span>
-	<div slot="NavContentCenter">
+	<div slot="NavContentCenter" class="navCenter">
 		<a
 			href="/homePage/application"
 			class:active={$page.url.pathname === '/homePage/application'}
@@ -380,6 +380,11 @@
 		font-weight: bold; /* Optional: Make it bold */
 	}
 
+	.navCenter {
+		display: flex;
+		justify-content: space-evenly;
+	}
+
 	.links:hover,
 	.edit:hover,
 	.logout:hover {
@@ -390,6 +395,9 @@
 	.links {
 		font-weight: bold; /* Optional: Make it bold */
 		text-decoration: none;
+		padding-left: 0;
+		padding-right: 0;
+		color: white;
 	}
 
 	.links:visited {
