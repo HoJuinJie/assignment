@@ -145,7 +145,17 @@
 		let minutes = String(now.getMinutes()).padStart(2, '0');
 		let seconds = String(now.getSeconds()).padStart(2, '0');
 		let formattedTime = `${hours}:${minutes}:${seconds}`;
-		newTask.taskNotes = newTask.taskNotes +`\n[${newTask.taskCreator}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n`;
+		
+		if (newTask.taskNotes === '') {
+			newTask.taskNotes = `${newTask.taskCreator} created the task " ${newTask.taskName}" [${newTask.taskDisplayDate} at ${formattedTime}]\n\n]`;	
+		} else {
+			newTask.taskNotes = 
+			`${newTask.taskCreator} created the task "${newTask.taskName}" [${newTask.taskDisplayDate} at ${formattedTime}]\n\n]`+ 
+			newTask.taskNotes +
+			`\n[${newTask.taskCreator}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n`;
+		}
+
+
 	}
 
 	// async function createNewTask() {
