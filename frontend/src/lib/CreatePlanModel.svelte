@@ -31,7 +31,7 @@
 <style>
 	.ModalContainer {
 		text-align: center;
-		width: 1200px;
+		width: 550px;
 		/* height: 180px; */
 	}
 	dialog {

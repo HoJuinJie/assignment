@@ -5,7 +5,7 @@
 	import { page } from '$app/stores';
 	import { toast } from 'svelte-sonner';
 	import Layout from '../../../navBar.svelte';
-	import Modal from '../../../../lib/CreateAppModel.svelte';
+	import Modal from '../../../../lib/CreatePlanModel.svelte';
 	import { customAlert } from '../../../../lib/errorHandler';
 	import OpenState from '$lib/OpenState.svelte';
 	import CreateTaskModel from '$lib/createTaskModel.svelte';
@@ -243,7 +243,7 @@
 </Modal>
 
 <CreateTaskModel bind:showCreateTask>
-	<h2 slot="header">Create Task</h2>
+	<h2 slot="header" class="createTaskHeader">Create Task</h2>
 	<div class="task-container">
 		<div class="left-container">
 			<div class="input-container2">
@@ -287,7 +287,7 @@
 				<span id="taskState">{newTask.taskCreator}</span>
 			</div>
 			<div class="input-container2">
-				<label for="taskState" style="margin-bottom: 10px;">Task Create Date (dd/mm/yyyy)</label>
+				<label for="taskState" style="margin-bottom: 10px;">Create Date (dd/mm/yyyy)</label>
 				<span id="taskState">{newTask.taskDisplayDate}</span>
 			</div>
 		</div>
@@ -428,10 +428,17 @@
 		box-sizing: border-box;
 		width: 100%; /* Ensures inputs and selects take full width */
 	}
+
+	.createTaskHeader {
+		padding: 0;
+		margin-top: 0;
+		margin-bottom: 0;
+	}
+
 	.input-container2 {
 		display: flex;
 		align-items: center;
-		margin-bottom: 15px;
+		margin-bottom: 10px;
 	}
 
 	.input-container2 label {
@@ -453,12 +460,12 @@
 	}
 
 	.input-container2 textarea {
-		height: 150px; /* Make the textarea larger */
+		height: 100px; /* Make the textarea larger */
 		resize: none; /* Allow vertical resizing only */
 	}
 	
 	.comments textarea {
-		height: 80px;
+		height: 60px;
 	}
 
 	.task-container {

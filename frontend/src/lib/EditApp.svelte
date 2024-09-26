@@ -31,7 +31,7 @@
 <style>
 	.editContainer {
 		text-align: center;
-		width: 1500px;
+		width: 1200px;
 		/* height: 180px; */
 	}
 	dialog {
