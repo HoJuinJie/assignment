@@ -32,7 +32,10 @@
 	.editContainer {
 		text-align: center;
 		width: 1200px;
+		padding-bottom: 10px;
+		
 	}
+
 	dialog {
 		max-width: 2000px;
 		border-radius: 0.2em;
@@ -76,7 +79,7 @@
 	.modelCloseBtn {
 		cursor: pointer;
 		padding: 5px 10px;
-		margin-top: 20px;
+		margin-top: 0px;
 		border: none;
 		color: white;
 		background-color: black;

@@ -164,16 +164,16 @@
 		let seconds = String(now.getSeconds()).padStart(2, '0');
 		let formattedTime = `${hours}:${minutes}:${seconds}`;
 
-		if (newTask.planName) {
-			if (newTask.taskNotes === '') {
-				newTask.taskNotes = `${newTask.taskCreator} created the task " ${newTask.taskName}" \n[${newTask.taskCreator}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n`;
-			} else {
-				newTask.taskNotes =
-					`${newTask.taskCreator} created the task " ${newTask.taskName}" \n[${newTask.taskCreator}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n` +
-					newTask.taskNotes +
-					`\n[${newTask.taskCreator}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n`;
-			}
+		if (newTask.taskNotes === '') {
+			newTask.taskNotes = `${newTask.taskCreator} created the task " ${newTask.taskName}" \n[${newTask.taskCreator}, Current State: ${newTask.taskState}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n`;
+		} else {
+			newTask.taskNotes =
+				`${newTask.taskCreator} created the task " ${newTask.taskName}" \n[${newTask.taskCreator}, Current state: ${newTask.taskState}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n` +
+				newTask.taskNotes +
+				`\n[${newTask.taskCreator}, Current state: ${newTask.taskState}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n`;
 		}
+		// if (newTask.planName) {
+		// }
 
 		console.log('logging new task from createnewtask function', newTask);
 		console.log(newTask.taskNotes);
@@ -348,6 +348,9 @@
 				<label for="taskState" style="margin-bottom: 10px;">Create Date (dd/mm/yyyy)</label>
 				<span id="taskState">{newTask.taskDisplayDate}</span>
 			</div>
+			<div class="input-container2">
+				<div style="color: red;">*required field</div>
+			</div>
 		</div>
 		<div class="right-container">
 			<div class="input-container2 notes-box">
@@ -423,7 +426,7 @@
 	.modelCreateBtn {
 		cursor: pointer;
 		padding: 5px 10px;
-		margin-top: 20px;
+		margin-top: 0px;
 		border: none;
 		color: white;
 		background-color: black;
@@ -491,7 +494,7 @@
 
 	.createTaskHeader {
 		padding: 0;
-		margin-top: 7px;
+		margin-top: 5px;
 		margin-bottom: 0;
 	}
 
@@ -534,7 +537,6 @@
 
 	.left-container {
 		width: 38%;
-		border-right: 1px solid black;
 		padding-right: 10px;
 	}
 

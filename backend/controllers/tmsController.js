@@ -183,14 +183,18 @@ exports.createTask = async (req, res) => {
     const userCreateDate = new Date(taskCreateDate);
     const epochCreateDate = Math.floor(userCreateDate.getTime() / 1000);
     
+    // Get a connection from the pool
+    const connection = await getConnection().getConnection();
+    
     try {
         // Handle Race Condition - Transaction with Row Locking
-
+        console.log('step1');
         // Start transaction
-        await getConnection().beginTransaction();
+        await connection.beginTransaction();
+        console.log('managed to begin transaction')
 
         // Lock the R_number row
-        const [rows] = await getConnection.query(
+        const [rows] = await connection.query(
             'SELECT App_Rnumber FROM application WHERE App_Acronym = ? FOR UPDATE', [appAcronym]
         );
 
@@ -198,28 +202,34 @@ exports.createTask = async (req, res) => {
         rNumber +=1;
 
         // Update existing R-number
-        await getConnection.query(
+        await connection.query(
             'UPDATE application SET App_Rnumber = ? WHERE App_Acronym = ?', [rNumber, appAcronym]
         );
 
         let newTaskID = appAcronym + '_' + rNumber;
 
+        console.log('logging newtaskID', newTaskID);
+
         if (planName === '') {
-            await getConnection().query(
-                'INSERT INTO task (Task_id, Task_app_Acronym, Task_name, Task_description, Task_notes, Task_state, Task_creator, Task_owner, Task_createDate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            await connection.query(
+                'INSERT INTO task (Task_id, Task_app_Acronym, Task_name, Task_description, Task_notes, Task_state, Task_creator, Task_owner, Task_createDate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
                 [newTaskID, appAcronym, taskName, taskDescription, taskNotes, taskState, taskCreator, taskOwner, epochCreateDate]);
         } else {
-            await getConnection().query(
+            await connection.query(
                 'INSERT INTO task (Task_id, Task_plan, Task_app_Acronym, Task_name, Task_description, Task_notes, Task_state, Task_creator, Task_owner, Task_createDate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
                 [newTaskID, planName, appAcronym, taskName, taskDescription, taskNotes, taskState, taskCreator, taskOwner, epochCreateDate]);
         }
 
         // commit the transaction
-        await getConnection().commit();
-        
+        await connection.commit();
+
         res.status(201).json({ message: 'Task created successfully' });
     } catch (err) {
+        // if any error occurs, rollback the transaction
+        await connection.rollback();
         console.log(JSON.stringify(err));
         return res.status(400).json({ message: 'An error occurred while creating application' });
+    } finally {
+        connection.release();
     }
 };
