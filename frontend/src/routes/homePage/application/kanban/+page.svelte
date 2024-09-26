@@ -35,7 +35,7 @@
 		taskID: '',
 		planName: '',
 		appAcronym: '',
-		taskName: null,
+		taskName: '',
 		taskDescription: null,
 		taskNotes: '',
 		taskState: 'Open',
@@ -90,7 +90,7 @@
 	};
 
 	onMount(async () => {
-		console.log('log appwritable:', $appWritable);
+		// console.log('log appwritable:', $appWritable);
 		if (!$appWritable) {
 			goto('/homePage/application');
 			return;
@@ -137,7 +137,25 @@
 		}
 	}
 
-	function createNewTask() {
+	function resetNewTask() {
+		console.log('reset new task');
+		newTask = {
+			taskID: '',
+			planName: '',
+			appAcronym: '',
+			taskName: '',
+			taskDescription: null,
+			taskNotes: '',
+			taskState: 'Open',
+			taskCreator: '',
+			taskOwner: '',
+			taskCreateDate: '',
+			taskDisplayDate: ''
+		};
+		setCreateTaskFields();
+	}
+
+	async function createNewTask() {
 		console.log('pressing on create new task');
 
 		let now = new Date();
@@ -145,32 +163,37 @@
 		let minutes = String(now.getMinutes()).padStart(2, '0');
 		let seconds = String(now.getSeconds()).padStart(2, '0');
 		let formattedTime = `${hours}:${minutes}:${seconds}`;
-		
-		if (newTask.taskNotes === '') {
-			newTask.taskNotes = `${newTask.taskCreator} created the task " ${newTask.taskName}" [${newTask.taskDisplayDate} at ${formattedTime}]\n\n]`;	
-		} else {
-			newTask.taskNotes = 
-			`${newTask.taskCreator} created the task "${newTask.taskName}" [${newTask.taskDisplayDate} at ${formattedTime}]\n\n]`+ 
-			newTask.taskNotes +
-			`\n[${newTask.taskCreator}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n`;
+
+		if (newTask.planName) {
+			if (newTask.taskNotes === '') {
+				newTask.taskNotes = `${newTask.taskCreator} created the task " ${newTask.taskName}" \n[${newTask.taskCreator}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n`;
+			} else {
+				newTask.taskNotes =
+					`${newTask.taskCreator} created the task " ${newTask.taskName}" \n[${newTask.taskCreator}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n` +
+					newTask.taskNotes +
+					`\n[${newTask.taskCreator}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n`;
+			}
 		}
 
+		console.log('logging new task from createnewtask function', newTask);
+		console.log(newTask.taskNotes);
+		try {
+			const response = await axios.post(ApiUrl_TMS + '/createTask', newTask, {
+				withCredentials: true
+			});
+			
+			
+			customAlert(`New task: ${newTask.taskName} created`);
+			resetNewTask();
 
+		console.log('logging newTask after creating task', newTask);
+
+		} catch (error) {
+			console.log(error.response.data.message);
+			toast.error(error.response.data.message);
+			if (error.response.status === 401) goto('/login');
+		}
 	}
-
-	// async function createNewTask() {
-	// 	try {
-	// 		const response = await axios.post(ApiUrl_TMS + '/createTask', newPlan, {
-	// 			withCredentials: true
-	// 		});
-	// 		customAlert(`New plan: ${newPlan.planName} created`);
-	// 		resetNewPlan();
-	// 	} catch (error) {
-	// 		console.log(error.response.data.message);
-	// 		toast.error(error.response.data.message);
-	// 		if (error.response.status === 401) goto('/login');
-	// 	}
-	// }
 </script>
 
 <Layout bind:globalUsername>

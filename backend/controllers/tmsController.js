@@ -16,7 +16,7 @@ exports.plans = async (req, res) => { // rmb to only fetch plans that exist in t
     try {
         const [rows] = await getConnection().query(`SELECT * from plan`);
         res.status(200).json(rows);
-    } catch {
+    } catch (err) {
         console.log(JSON.stringify(err));
         return res.status(400).json({ message: 'An error occurred while fetching plans' });
     }
@@ -27,7 +27,7 @@ exports.getPlansInApp = async (req, res) => {
     try {
         const [rows] = await getConnection().query(`SELECT * from plan WHERE Plan_app_Acronym = ?`, [App_Acronym]);
         res.status(200).json(rows);
-    } catch {
+    } catch (err) {
         console.log(JSON.stringify(err));
         return res.status(400).json({ message: 'An error occurred while fetching plans from application' });
     }
@@ -160,5 +160,43 @@ exports.createPlan = async (req, res) => {
     } catch (err) {
         console.log(JSON.stringify(err));
         return res.status(400).json({ message: 'An error occurred while creating plan' });
+    }
+};
+
+exports.createTask = async (req, res) => {
+    const {
+        taskID,
+        planName,
+        appAcronym,
+        taskName,
+        taskDescription,
+        taskNotes,
+        taskState,
+        taskCreator,
+        taskOwner,
+        taskCreateDate
+    } = req.body;
+
+    if (!taskName) return res.status(400).json({ message: 'Required fields cannot be empty' });
+
+    // convert date to epoch
+    const userCreateDate = new Date(taskCreateDate);
+    const epochCreateDate = Math.floor(userCreateDate.getTime() / 1000);
+    
+    try {
+        if (planName === '') {
+            await getConnection().query(
+                'INSERT INTO task (Task_id, Task_app_Acronym, Task_name, Task_description, Task_notes, Task_state, Task_creator, Task_owner, Task_createDate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                [taskID, appAcronym, taskName, taskDescription, taskNotes, taskState, taskCreator, taskOwner, epochCreateDate]);
+        } else {
+            await getConnection().query(
+                'INSERT INTO task (Task_id, Task_plan, Task_app_Acronym, Task_name, Task_description, Task_notes, Task_state, Task_creator, Task_owner, Task_createDate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                [taskID, planName, appAcronym, taskName, taskDescription, taskNotes, taskState, taskCreator, taskOwner, epochCreateDate]);
+        }
+
+        res.status(201).json({ message: 'Task created successfully' });
+    } catch (err) {
+        console.log(JSON.stringify(err));
+        return res.status(400).json({ message: 'An error occurred while creating application' });
     }
 };
