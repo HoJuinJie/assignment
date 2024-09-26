@@ -64,13 +64,13 @@
 		newTask.taskDisplayDate = displayDate;
 	}
 
-	const getTasksInAppAtState = async (app, state) => {
+	const getTasksInApp = async (app) => {
 		try {
-			const response = await axios.post(ApiUrl_TMS + '/getTasksInAppAtState', {app, state}, {
+			const response = await axios.post(ApiUrl_TMS + '/getTasksInAppAtState', app, {
 				withCredentials: true
 			});
 			appTasks = response.data;
-			console.log('logging tasks in app at state', appTasks);
+			console.log('logging tasks in app', appTasks);
 		} catch (error) {
 			toast.error(error.response.data.message);
 			if (error.response.status === 401) goto('/login');
