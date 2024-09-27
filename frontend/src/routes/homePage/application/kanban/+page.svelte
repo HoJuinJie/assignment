@@ -9,6 +9,8 @@
 	import { customAlert } from '../../../../lib/errorHandler';
 	import OpenState from '$lib/OpenState.svelte';
 	import CreateTaskModel from '$lib/createTaskModel.svelte';
+	import ShowTask from '../../../../lib/showTask.svelte';
+	
 
 	import { appWritable } from '../store';
 
@@ -66,7 +68,7 @@
 
 	const getTasksInApp = async (app) => {
 		try {
-			const response = await axios.post(ApiUrl_TMS + '/getTasksInAppAtState', app, {
+			const response = await axios.post(ApiUrl_TMS + '/getTasksInApp', app, {
 				withCredentials: true
 			});
 			appTasks = response.data;
@@ -75,6 +77,7 @@
 			toast.error(error.response.data.message);
 			if (error.response.status === 401) goto('/login');
 		}
+		// console.log('logging tasks in app', appTasks);
 	};
 
 	const getPlansInApp = async (app) => {
@@ -104,7 +107,7 @@
 	};
 
 	onMount(async () => {
-		// console.log('log appwritable:', $appWritable);
+		console.log('log appwritable:', $appWritable);
 		if (!$appWritable) {
 			goto('/homePage/application');
 			return;
@@ -119,6 +122,7 @@
 			getPlans();
 			setCreateTaskFields();
 			getPlansInApp($appWritable);
+			getTasksInApp($appWritable);
 		} catch (error) {
 			console.log(error.response.data.message);
 			toast.error(error.response.data.message);
@@ -129,7 +133,7 @@
 	function resetNewPlan() {
 		newPlan = {
 			planName: null,
-			appAcronym: null,
+			appAcronym: $appWritable.App_Acronym,
 			startDate: null,
 			endDate: null,
 			colour: '#000000'
@@ -144,6 +148,8 @@
 			});
 			customAlert(`New plan: ${newPlan.planName} created`);
 			resetNewPlan();
+			getPlansInApp($appWritable);
+
 		} catch (error) {
 			console.log(error.response.data.message);
 			toast.error(error.response.data.message);
@@ -177,17 +183,17 @@
 		let minutes = String(now.getMinutes()).padStart(2, '0');
 		let seconds = String(now.getSeconds()).padStart(2, '0');
 		let formattedTime = `${hours}:${minutes}:${seconds}`;
-
-		if (newTask.taskNotes === '') {
-			newTask.taskNotes = `${newTask.taskCreator} created the task " ${newTask.taskName}" \n[${newTask.taskCreator}, Current State: ${newTask.taskState}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n`;
-		} else {
-			newTask.taskNotes =
-				`${newTask.taskCreator} created the task " ${newTask.taskName}" \n[${newTask.taskCreator}, Current state: ${newTask.taskState}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n` +
-				newTask.taskNotes +
-				`\n[${newTask.taskCreator}, Current state: ${newTask.taskState}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n`;
+		
+		if (newTask.taskName) {
+			if (newTask.taskNotes === '') {
+				newTask.taskNotes = `${newTask.taskCreator} created the task " ${newTask.taskName}" \n[${newTask.taskCreator}, Current State: ${newTask.taskState}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n`;
+			} else {
+				newTask.taskNotes =
+					`${newTask.taskCreator} created the task " ${newTask.taskName}" \n[${newTask.taskCreator}, Current state: ${newTask.taskState}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n` +
+					newTask.taskNotes +
+					`\n[${newTask.taskCreator}, Current state: ${newTask.taskState}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n`;
+			}
 		}
-		// if (newTask.planName) {
-		// }
 
 		console.log('logging new task from createnewtask function', newTask);
 		console.log(newTask.taskNotes);
@@ -199,8 +205,9 @@
 			
 			customAlert(`New task: ${newTask.taskName} created`);
 			resetNewTask();
+			getTasksInApp($appWritable);
 
-		console.log('logging newTask after creating task', newTask);
+			console.log('logging newTask after creating task', newTask);
 
 		} catch (error) {
 			console.log(error.response.data.message);
@@ -208,6 +215,12 @@
 			if (error.response.status === 401) goto('/login');
 		}
 	}
+
+	function getPlanColor(planName) {
+		const result = distinctPlans.filter((plan) => plan.Plan_MVP_name === planName);
+		return result[0].Plan_colour;
+	}
+
 </script>
 
 <Layout bind:globalUsername>
@@ -251,6 +264,17 @@
 						showCreateTask = true;
 					}}
 				/>
+				<div class="kanbanTask">
+					{#each appTasks as task, index}
+						<ShowTask
+							taskDetails={task}
+							color = {getPlanColor(task.Task_plan) || 'white'}
+							viewTask={()=> {
+								console.log('pressing on task')
+							}}
+						/>
+					{/each}
+				</div>
 			</div>
 			<div class="kanban-container">ToDo</div>
 			<div class="kanban-container">Doing</div>
@@ -314,7 +338,7 @@
 		<div class="left-container">
 			<div class="input-container2">
 				<label for="taskID" style="margin-bottom: 10px;">Task ID</label>
-				<span id="taskID">{newTask.taskID}</span>
+				<span id="taskID">- Task not yet created -</span>
 			</div>
 			<div class="input-container2">
 				<label for="taskName" style="margin-bottom: 10px;"
@@ -626,4 +650,6 @@
 	.kanban-container:not(:last-child) {
 		margin-right: 10px;
 	}
+
+
 </style>

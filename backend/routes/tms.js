@@ -4,6 +4,7 @@ const {
     apps,
     plans,
     getPlansInApp,
+    getTasksInApp,
     createApp,
     editApp,
     createPlan,
@@ -25,6 +26,7 @@ router.post('/createTask', [isAuthenticatedUser, createTask]); // remember to re
 router.get('/apps', [isAuthenticatedUser, apps]);
 router.get('/plans', [isAuthenticatedUser, plans]);
 router.post('/getPlansInApp', [isAuthenticatedUser, getPlansInApp]);
+router.post('/getTasksInApp', [isAuthenticatedUser, getTasksInApp]);
 
 
 module.exports = router;

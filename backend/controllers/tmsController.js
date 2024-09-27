@@ -33,6 +33,17 @@ exports.getPlansInApp = async (req, res) => {
     }
 };
 
+exports.getTasksInApp = async (req, res) => {
+    const { App_Acronym } = req.body;
+    try {
+        const [rows] = await getConnection().query(`SELECT * from task WHERE Task_app_Acronym = ?`, [App_Acronym]);
+        res.status(200).json(rows);
+    } catch (err) {
+        console.log(JSON.stringify(err));
+        return res.status(400).json({ message: 'An error occurred while fetching tasks from application' });
+    }
+};
+
 
 // backend
 exports.createApp = async (req, res) => {
