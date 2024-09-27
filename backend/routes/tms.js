@@ -8,7 +8,8 @@ const {
     createApp,
     editApp,
     createPlan,
-    createTask
+    createTask,
+    saveTaskChanges
 } = require('../controllers/tmsController');
 
 const {
@@ -27,6 +28,7 @@ router.get('/apps', [isAuthenticatedUser, apps]);
 router.get('/plans', [isAuthenticatedUser, plans]);
 router.post('/getPlansInApp', [isAuthenticatedUser, getPlansInApp]);
 router.post('/getTasksInApp', [isAuthenticatedUser, getTasksInApp]);
+router.post('/saveTaskChanges', [isAuthenticatedUser, saveTaskChanges]);
 
 
 module.exports = router;

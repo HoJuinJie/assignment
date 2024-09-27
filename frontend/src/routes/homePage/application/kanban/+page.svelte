@@ -182,7 +182,7 @@
 	}
 
 	async function createNewTask() {
-		console.log('pressing on create new task');
+		console.log('clicking on create new task');
 
 		let now = new Date();
 		let hours = String(now.getHours()).padStart(2, '0');
@@ -227,12 +227,38 @@
 		return result[0].Plan_colour;
 	}
 
-	function releaseTask() {
-		console.log("clicking on release task");
+	function promoteTask() {
+		console.log("clicking on promote task");
 	}
 
-	function saveChanges() {
+	async function saveChanges() {
 		console.log("clicking on save changes");
+		console.log("logging newTask fields in edit mode", newTask);
+
+		let now = new Date();
+		let hours = String(now.getHours()).padStart(2, '0');
+		let minutes = String(now.getMinutes()).padStart(2, '0');
+		let seconds = String(now.getSeconds()).padStart(2, '0');
+		let formattedTime = `${hours}:${minutes}:${seconds}`;
+
+		if (newTask.notesToAdd !== '') {
+			newTask.taskNotes += `${newTask.notesToAdd} \n[${newTask.taskOwner}, Current State: ${newTask.taskState}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n`;
+		}
+
+		try {
+			const response = await axios.post(ApiUrl_TMS + '/saveTaskChanges', newTask, {
+				withCredentials: true
+			});
+
+			customAlert(`${newTask.taskName} updated sucessfully`);
+			newTask.notesToAdd = '';
+
+
+		} catch (error) {
+			console.log(error.response.data.message);
+			toast.error(error.response.data.message);
+			if (error.response.status === 401) goto('/login');
+		}
 	}
 </script>
 
@@ -502,7 +528,7 @@
 		</div>
 	{/if}
 	<div slot="button1">
-		<button class="modelCreateBtn3" on:click={() => releaseTask()}>RELEASE TASK</button>
+		<button class="modelCreateBtn3" on:click={() => promoteTask()}>RELEASE TASK</button>
 	</div>
 	<div slot="button2">
 		<button class="modelCreateBtn2" on:click={() => saveChanges()}>SAVE CHANGES</button>
