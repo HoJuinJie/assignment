@@ -10,7 +10,7 @@
 	import OpenState from '$lib/OpenState.svelte';
 	import CreateTaskModel from '$lib/createTaskModel.svelte';
 	import ShowTask from '../../../../lib/showTask.svelte';
-	
+	import EditTask from '$lib/EditTask.svelte';
 
 	import { appWritable } from '../store';
 
@@ -22,6 +22,9 @@
 	let plans = [];
 	let distinctPlans = [];
 	let appTasks = [];
+
+	let showEditTask = false;
+	let editTaskIndex = null;
 
 	const ApiUrl = import.meta.env.VITE_API_URL + ':' + import.meta.env.VITE_PORT + '/api/v1/auth';
 	const ApiUrl_TMS = import.meta.env.VITE_API_URL + ':' + import.meta.env.VITE_PORT + '/api/v1/tms';
@@ -39,13 +42,14 @@
 		planName: '',
 		appAcronym: '',
 		taskName: '',
-		taskDescription: null,
+		taskDescription: '',//
 		taskNotes: '',
 		taskState: 'open',
 		taskCreator: '',
 		taskOwner: '',
 		taskCreateDate: '',
-		taskDisplayDate: ''
+		taskDisplayDate: '',
+		notesToAdd: ''
 	};
 
 	// console.log(`newTask: ${JSON.stringify(newTask)}`);
@@ -94,7 +98,8 @@
 		}
 	};
 
-	const getPlans = async () => { // Dont need this function
+	const getPlans = async () => {
+		// Dont need this function
 		try {
 			const planList = await axios.get(ApiUrl_TMS + '/plans', { withCredentials: true });
 			plans = planList.data;
@@ -121,8 +126,8 @@
 			newPlan.appAcronym = $appWritable.App_Acronym;
 			getPlans();
 			setCreateTaskFields();
-			getPlansInApp($appWritable);
-			getTasksInApp($appWritable);
+			await getPlansInApp($appWritable);
+			await getTasksInApp($appWritable);
 		} catch (error) {
 			console.log(error.response.data.message);
 			toast.error(error.response.data.message);
@@ -149,7 +154,6 @@
 			customAlert(`New plan: ${newPlan.planName} created`);
 			resetNewPlan();
 			getPlansInApp($appWritable);
-
 		} catch (error) {
 			console.log(error.response.data.message);
 			toast.error(error.response.data.message);
@@ -164,13 +168,14 @@
 			planName: '',
 			appAcronym: '',
 			taskName: '',
-			taskDescription: null,
+			taskDescription: '',//
 			taskNotes: '',
 			taskState: 'open',
 			taskCreator: '',
 			taskOwner: '',
 			taskCreateDate: '',
-			taskDisplayDate: ''
+			taskDisplayDate: '',
+			notesToAdd: ''
 		};
 		setCreateTaskFields();
 	}
@@ -183,15 +188,15 @@
 		let minutes = String(now.getMinutes()).padStart(2, '0');
 		let seconds = String(now.getSeconds()).padStart(2, '0');
 		let formattedTime = `${hours}:${minutes}:${seconds}`;
-		
+
 		if (newTask.taskName) {
-			if (newTask.taskNotes === '') {
+			if (newTask.notesToAdd === '') {
 				newTask.taskNotes = `${newTask.taskCreator} created the task " ${newTask.taskName}" \n[${newTask.taskCreator}, Current State: ${newTask.taskState}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n`;
 			} else {
 				newTask.taskNotes =
-					`${newTask.taskCreator} created the task " ${newTask.taskName}" \n[${newTask.taskCreator}, Current state: ${newTask.taskState}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n` +
-					newTask.taskNotes +
-					`\n[${newTask.taskCreator}, Current state: ${newTask.taskState}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n`;
+					`${newTask.taskCreator} created the task "${newTask.taskName}" \n[${newTask.taskCreator}, Current state: ${newTask.taskState}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n` +
+					newTask.notesToAdd +
+					`[${newTask.taskCreator}, Current state: ${newTask.taskState}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n`;
 			}
 		}
 
@@ -201,14 +206,12 @@
 			const response = await axios.post(ApiUrl_TMS + '/createTask', newTask, {
 				withCredentials: true
 			});
-			
-			
+
 			customAlert(`New task: ${newTask.taskName} created`);
 			resetNewTask();
 			getTasksInApp($appWritable);
 
 			console.log('logging newTask after creating task', newTask);
-
 		} catch (error) {
 			console.log(error.response.data.message);
 			toast.error(error.response.data.message);
@@ -217,10 +220,11 @@
 	}
 
 	function getPlanColor(planName) {
+		if (!planName) return "white";
+
 		const result = distinctPlans.filter((plan) => plan.Plan_MVP_name === planName);
 		return result[0].Plan_colour;
 	}
-
 </script>
 
 <Layout bind:globalUsername>
@@ -261,18 +265,32 @@
 			<div class="kanban-container">
 				<OpenState
 					createTask={() => {
+						resetNewTask(); //
 						showCreateTask = true;
 					}}
 				/>
 				<div class="kanbanTask">
 					{#each appTasks as task, index}
-						<ShowTask
-							taskDetails={task}
-							color = {getPlanColor(task.Task_plan) || 'white'}
-							viewTask={()=> {
-								console.log('pressing on task')
-							}}
-						/>
+						{#if task.Task_state === 'open'}
+							<ShowTask
+								taskDetails={task}
+								color={getPlanColor(task.Task_plan)}
+								viewTask={() => {
+									showEditTask = true;
+									editTaskIndex = index;
+									newTask.taskID = appTasks[editTaskIndex].Task_id;
+									newTask.planName = appTasks[editTaskIndex].Task_plan || "";
+									newTask.appAcronym = appTasks[editTaskIndex].Task_app_Acronym;
+									newTask.taskName = appTasks[editTaskIndex].Task_name;
+									newTask.taskDescription = appTasks[editTaskIndex].Task_description;
+									newTask.taskNotes = appTasks[editTaskIndex].Task_notes;
+									newTask.taskState = appTasks[editTaskIndex].Task_state;
+									newTask.taskCreator = appTasks[editTaskIndex].Task_creator;
+									newTask.taskOwner = appTasks[editTaskIndex].Task_owner;
+									newTask.taskCreateDate = appTasks[editTaskIndex].Task_createDate;
+								}}
+							/>
+						{/if}
 					{/each}
 				</div>
 			</div>
@@ -378,12 +396,12 @@
 				<span id="taskState">{newTask.taskState}</span>
 			</div>
 			<div class="input-container2">
-				<label for="taskState" style="margin-bottom: 10px;">Task Creator</label>
-				<span id="taskState">{newTask.taskCreator}</span>
+				<label for="taskCreator" style="margin-bottom: 10px;">Task Creator</label>
+				<span id="taskCreator">{newTask.taskCreator}</span>
 			</div>
 			<div class="input-container2">
-				<label for="taskState" style="margin-bottom: 10px;">Create Date (dd/mm/yyyy)</label>
-				<span id="taskState">{newTask.taskDisplayDate}</span>
+				<label for="createDate" style="margin-bottom: 10px;">Create Date (dd/mm/yyyy)</label>
+				<span id="createDate">{newTask.taskDisplayDate}</span>
 			</div>
 			<div class="input-container2">
 				<div style="color: red;">*required field</div>
@@ -395,12 +413,12 @@
 				<textarea
 					id="taskNotes"
 					bind:value={newTask.taskNotes}
-					placeholder={newTask.taskNotes}
-					disabled
+					placeholder="~ Task notes will be recorded here ~"
+					readonly
 				/>
 			</div>
 			<div class="input-container2 comments">
-				<textarea bind:value={newTask.taskNotes} placeholder="comments" />
+				<textarea bind:value={newTask.notesToAdd} placeholder="comments" />
 			</div>
 		</div>
 	</div>
@@ -408,6 +426,73 @@
 		<button class="modelCreateBtn2" on:click={() => createNewTask()}>CONFIRM</button>
 	</div>
 </CreateTaskModel>
+
+<EditTask bind:showEditTask>
+	{#if appTasks[editTaskIndex]}
+		<h2 class="createTaskHeader">{appTasks[editTaskIndex].Task_id}</h2>
+		<div class="task-container">
+			<div class="left-container">
+				<div class="input-container2">
+					<label for="taskID" style="margin-bottom: 10px;">Task ID</label>
+					<span id="taskID">{appTasks[editTaskIndex].Task_id}</span>
+				</div>
+				<div class="input-container2">
+					<label for="taskName" style="margin-bottom: 10px;"
+						>Task Name</label
+					>
+					<span id="taskName">{appTasks[editTaskIndex].Task_name}</span>
+				</div>
+				<div class="input-container2">
+					<label for="taskDes" style="margin-bottom: 10px;">Task Description</label>
+					<span id="taskDes">{appTasks[editTaskIndex].Task_description}</span>
+
+				</div>
+				<div class="input-container2">
+					<label for="plan-name" style="margin-bottom: 10px;">Plan Name</label>
+					<select class="inputfields" id="plan-name" bind:value={newTask.planName}>
+						<option value="" disabled>- select plan -</option>
+						<option value=""></option>
+						{#each distinctPlans as distinctPlan}
+							<option class="options" value={distinctPlan.Plan_MVP_name}
+								>{distinctPlan.Plan_MVP_name}</option
+							>
+						{/each}
+					</select>
+				</div>
+				<div class="input-container2">
+					<label for="taskState" style="margin-bottom: 10px;">Task State</label>
+					<span id="taskState">{newTask.taskState}</span>
+				</div>
+				<div class="input-container2">
+					<label for="taskCreator" style="margin-bottom: 10px;">Task Creator</label>
+					<span id="taskCreator">{newTask.taskCreator}</span>
+				</div>
+				<div class="input-container2">
+					<label for="taskOwner" style="margin-bottom: 10px;">Task Owner</label>
+					<span id="taskOwner">{newTask.taskOwner}</span>
+				</div>
+				<div class="input-container2">
+					<label for="createDate" style="margin-bottom: 10px;">Create Date (dd/mm/yyyy)</label>
+					<span id="createDate">{newTask.taskDisplayDate}</span>
+				</div>
+			</div>
+			<div class="right-container">
+				<div class="input-container2 notes-box">
+					<label for="taskNotes">Notes</label>
+					<textarea
+						id="taskNotes"
+						bind:value={newTask.taskNotes}
+						placeholder={newTask.taskNotes}
+						readonly
+					/>
+				</div>
+				<div class="input-container2 comments">
+					<textarea bind:value={newTask.notesToAdd} placeholder="comments" />
+				</div>
+			</div>
+		</div>
+	{/if}
+</EditTask>
 
 <style>
 	.container {
@@ -650,6 +735,4 @@
 	.kanban-container:not(:last-child) {
 		margin-right: 10px;
 	}
-
-
 </style>
