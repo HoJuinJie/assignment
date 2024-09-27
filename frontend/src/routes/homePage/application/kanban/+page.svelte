@@ -66,6 +66,7 @@
 		newTask.taskID = $appWritable.App_Acronym + '_' + $appWritable.App_Rnumber.toString();
 		newTask.appAcronym = $appWritable.App_Acronym;
 		newTask.taskCreator = globalUsername;
+		newTask.taskOwner = globalUsername;
 		newTask.taskCreateDate = formattedDate;
 		newTask.taskDisplayDate = displayDate;
 	}
@@ -196,7 +197,7 @@
 				newTask.taskNotes =
 					`${newTask.taskCreator} created the task "${newTask.taskName}" \n[${newTask.taskCreator}, Current state: ${newTask.taskState}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n` +
 					newTask.notesToAdd +
-					`[${newTask.taskCreator}, Current state: ${newTask.taskState}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n`;
+					`\n[${newTask.taskCreator}, Current state: ${newTask.taskState}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n`;
 			}
 		}
 
@@ -224,6 +225,14 @@
 
 		const result = distinctPlans.filter((plan) => plan.Plan_MVP_name === planName);
 		return result[0].Plan_colour;
+	}
+
+	function releaseTask() {
+		console.log("clicking on release task");
+	}
+
+	function saveChanges() {
+		console.log("clicking on save changes");
 	}
 </script>
 
@@ -492,6 +501,12 @@
 			</div>
 		</div>
 	{/if}
+	<div slot="button1">
+		<button class="modelCreateBtn3" on:click={() => releaseTask()}>RELEASE TASK</button>
+	</div>
+	<div slot="button2">
+		<button class="modelCreateBtn2" on:click={() => saveChanges()}>SAVE CHANGES</button>
+	</div>
 </EditTask>
 
 <style>
@@ -563,6 +578,17 @@
 		border: none;
 		color: white;
 		background-color: black;
+		width: 150px;
+		height: 35px;
+	}
+
+	.modelCreateBtn3 {
+		cursor: pointer;
+		padding: 5px 10px;
+		margin-top: 0px;
+		border: none;
+		color: white;
+		background-color: #00A400;
 		width: 150px;
 		height: 35px;
 	}

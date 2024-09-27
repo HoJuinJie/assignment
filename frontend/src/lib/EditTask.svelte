@@ -21,7 +21,8 @@
 
 		<!-- svelte-ignore a11y-autofocus -->
 		<div class="input-container">
-			<slot name="button" />
+			<slot class="buttons" name="button1" />
+			<slot class="buttons" name="button2" />
 			<button class="modelCloseBtn" on:click={() => dialog.close()}>CANCEL</button>
 		</div>
 	</div>
@@ -93,4 +94,9 @@
 		justify-content: center;
 		gap: 10px; /* Adds space between the label and the input */
 	}
+
+    .button1 {
+        background-color: green;
+    }
+
 </style>

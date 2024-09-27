@@ -4,7 +4,7 @@
 
 <div>
     <div class="header">
-        <h3 class="title-header">Open</h3>
+        <h2 class="title-header">Open</h2>
         <button class="createTask-button" on:click|stopPropagation={createTask()}>CREATE TASK</button>
     </div>
 </div>
@@ -14,8 +14,10 @@
     .header {
         display: flex;
         justify-content: space-between;
+		margin-left: 10px;
+		margin-right: 10px;
     }
-
+	
     .createTask-button {
 		width: auto;
 		appearance: button;
