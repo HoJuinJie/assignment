@@ -352,7 +352,7 @@
 					class="createPlanBtn"
 					on:click={() => {
 						showModal = true;
-					}}>CREATE PLAN</button
+					}}>+PLAN</button
 				>
 			</div>
 		</div>

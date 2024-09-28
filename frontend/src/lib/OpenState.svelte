@@ -5,7 +5,7 @@
 <div>
     <div class="header">
         <h2 class="title-header">Open</h2>
-        <button class="createTask-button" on:click|stopPropagation={createTask()}>CREATE TASK</button>
+        <button class="createTask-button" on:click|stopPropagation={createTask()}>+TASK</button>
     </div>
 </div>
 

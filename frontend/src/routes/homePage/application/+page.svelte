@@ -165,7 +165,7 @@
 					on:click={() => {
 						resetNewApp();
 						showModal = true;
-					}}>CREATE APP</button
+					}}>+APP</button
 				>
 			</div>
 		</div>
