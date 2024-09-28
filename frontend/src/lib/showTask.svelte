@@ -7,6 +7,14 @@
 	export let viewTask;
 	export let color;
 
+
+	$: if (color) {
+		const card = document.getElementById(taskDetails.Task_id);
+		if (card) {
+			card.style.borderLeft = `4px solid ${color}`;
+		}
+	}
+
 	function getDateFromEpoch(epochTime) {
 		const date = new Date(epochTime * 1000);
 		// Extract day, month, and year

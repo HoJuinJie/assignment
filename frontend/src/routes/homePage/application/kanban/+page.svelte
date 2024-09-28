@@ -267,7 +267,7 @@
 
 			customAlert(`${newTask.taskName} changed state`);
 			newTask.notesToAdd = '';
-
+			getTasksInApp($appWritable);
 
 		} catch (error) {
 			console.log(error.response.data.message);
@@ -310,7 +310,7 @@
 
 			customAlert(`${newTask.taskName} updated sucessfully`);
 			newTask.notesToAdd = '';
-
+			getTasksInApp($appWritable);
 
 		} catch (error) {
 			console.log(error.response.data.message);
