@@ -42,7 +42,7 @@
 		planName: '',
 		appAcronym: '',
 		taskName: '',
-		taskDescription: '',//
+		taskDescription: '', //
 		taskNotes: '',
 		taskState: 'open',
 		taskCreator: '',
@@ -171,7 +171,7 @@
 			planName: '',
 			appAcronym: '',
 			taskName: '',
-			taskDescription: '',//
+			taskDescription: '', //
 			taskNotes: '',
 			taskState: 'open',
 			taskCreator: '',
@@ -192,7 +192,8 @@
 		let seconds = String(now.getSeconds()).padStart(2, '0');
 		let formattedTime = `${hours}:${minutes}:${seconds}`;
 
-		if (newTask.taskName) { // may need to change the [user from onwer/creator to globalusername]
+		if (newTask.taskName) {
+			// may need to change the [user from onwer/creator to globalusername]
 			if (newTask.notesToAdd === '') {
 				newTask.taskNotes = `${newTask.taskCreator} created the task " ${newTask.taskName}" \n[${newTask.taskCreator}, Current State: ${newTask.taskState}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n`;
 			} else {
@@ -223,33 +224,34 @@
 	}
 
 	function getPlanColor(planName) {
-		if (!planName) return "white";
+		if (!planName) return 'white';
 		const result = distinctPlans.filter((plan) => plan.Plan_MVP_name === planName);
 		return result[0].Plan_colour;
 	}
 
 	async function promoteTask(state) {
-		console.log("clicking on promote task");
+		console.log('clicking on promote task');
 		let now = new Date();
 		let hours = String(now.getHours()).padStart(2, '0');
 		let minutes = String(now.getMinutes()).padStart(2, '0');
 		let seconds = String(now.getSeconds()).padStart(2, '0');
 		let formattedTime = `${hours}:${minutes}:${seconds}`;
 
-		// changes to plan
-		if(newTask.planName !== newTask.taskExistingPlan) { // may need to change the [user from onwer/creator to globalusername]
-			if (newTask.planName === "") {
+		// changes to plan (OPEN state)
+		if (newTask.planName !== newTask.taskExistingPlan) {
+			// may need to change the [user from onwer/creator to globalusername]
+			if (newTask.planName === '') {
 				newTask.taskNotes += `${newTask.taskOwner} removed the plan \n[${newTask.taskOwner}, Current State: ${newTask.taskState}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n`;
 				newTask.taskExistingPlan = newTask.planName;
-			} else if (newTask.taskExistingPlan === "") {
+			} else if (newTask.taskExistingPlan === '') {
 				newTask.taskNotes += `${newTask.taskOwner} updated the plan to ${newTask.planName} \n[${newTask.taskOwner}, Current State: ${newTask.taskState}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n`;
 				newTask.taskExistingPlan = newTask.planName;
 			} else {
 				newTask.taskNotes += `${newTask.taskOwner} updated the plan from ${newTask.taskExistingPlan} to ${newTask.planName} \n[${newTask.taskOwner}, Current State: ${newTask.taskState}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n`;
 				newTask.taskExistingPlan = newTask.planName;
 			}
-		} 
-		
+		}
+
 		// changes to notes
 		if (newTask.notesToAdd !== '') {
 			newTask.taskNotes += `${newTask.notesToAdd} \n[${newTask.taskOwner}, Current State: ${newTask.taskState}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n`;
@@ -259,7 +261,7 @@
 		newTask.taskNotes += `${newTask.taskOwner} moved ${newTask.taskName} from ${newTask.taskState} to ${state} \n[${newTask.taskOwner}, Current State: ${newTask.taskState}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n`;
 
 		// update state in database
-		newTask.taskState = "to do";
+		newTask.taskState = newTask.taskNextState;
 		try {
 			const response = await axios.post(ApiUrl_TMS + '/saveTaskChanges', newTask, {
 				withCredentials: true
@@ -268,7 +270,6 @@
 			customAlert(`${newTask.taskName} changed state`);
 			newTask.notesToAdd = '';
 			getTasksInApp($appWritable);
-
 		} catch (error) {
 			console.log(error.response.data.message);
 			toast.error(error.response.data.message);
@@ -277,8 +278,8 @@
 	}
 
 	async function saveChanges() {
-		console.log("clicking on save changes");
-		console.log("logging newTask fields in edit mode", newTask);
+		console.log('clicking on save changes');
+		console.log('logging newTask fields in edit mode', newTask);
 
 		let now = new Date();
 		let hours = String(now.getHours()).padStart(2, '0');
@@ -286,20 +287,22 @@
 		let seconds = String(now.getSeconds()).padStart(2, '0');
 		let formattedTime = `${hours}:${minutes}:${seconds}`;
 
-		if(newTask.planName !== newTask.taskExistingPlan) { // may need to change the [user from onwer/creator to globalusername]
-			if (newTask.planName === "") {
+		if (newTask.planName !== newTask.taskExistingPlan) {
+			// may need to change the [user from onwer/creator to globalusername]
+			if (newTask.planName === '') {
 				newTask.taskNotes += `${newTask.taskOwner} removed the plan \n[${newTask.taskOwner}, Current State: ${newTask.taskState}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n`;
 				newTask.taskExistingPlan = newTask.planName;
-			} else if (newTask.taskExistingPlan === "") {
+			} else if (newTask.taskExistingPlan === '') {
 				newTask.taskNotes += `${newTask.taskOwner} updated the plan to ${newTask.planName} \n[${newTask.taskOwner}, Current State: ${newTask.taskState}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n`;
 				newTask.taskExistingPlan = newTask.planName;
 			} else {
 				newTask.taskNotes += `${newTask.taskOwner} updated the plan from ${newTask.taskExistingPlan} to ${newTask.planName} \n[${newTask.taskOwner}, Current State: ${newTask.taskState}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n`;
 				newTask.taskExistingPlan = newTask.planName;
 			}
-		} 
+		}
 
 		if (newTask.notesToAdd !== '') {
+			// may need to change the [user from onwer/creator to globalusername]
 			newTask.taskNotes += `${newTask.notesToAdd} \n[${newTask.taskOwner}, Current State: ${newTask.taskState}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n`;
 		}
 
@@ -311,7 +314,6 @@
 			customAlert(`${newTask.taskName} updated sucessfully`);
 			newTask.notesToAdd = '';
 			getTasksInApp($appWritable);
-
 		} catch (error) {
 			console.log(error.response.data.message);
 			toast.error(error.response.data.message);
@@ -372,7 +374,7 @@
 									showEditTask = true;
 									editTaskIndex = index;
 									newTask.taskID = appTasks[editTaskIndex].Task_id;
-									newTask.planName = appTasks[editTaskIndex].Task_plan || "";
+									newTask.planName = appTasks[editTaskIndex].Task_plan || '';
 									newTask.appAcronym = appTasks[editTaskIndex].Task_app_Acronym;
 									newTask.taskName = appTasks[editTaskIndex].Task_name;
 									newTask.taskDescription = appTasks[editTaskIndex].Task_description;
@@ -381,20 +383,20 @@
 									newTask.taskCreator = appTasks[editTaskIndex].Task_creator;
 									newTask.taskOwner = appTasks[editTaskIndex].Task_owner;
 									newTask.taskCreateDate = appTasks[editTaskIndex].Task_createDate;
-									newTask.taskExistingPlan = appTasks[editTaskIndex].Task_plan || "";
-									newTask.taskNextState = "to do";
-
+									newTask.taskExistingPlan = appTasks[editTaskIndex].Task_plan || '';
+									newTask.taskNextState = 'to do';
 								}}
 							/>
 						{/if}
 					{/each}
 				</div>
 			</div>
+
 			<div class="kanban-container">
 				<h2 class="title-header">To Do</h2>
 				<div class="kanbanTask">
 					{#each appTasks as task, index}
-						{#if task.Task_state === "to do"}
+						{#if task.Task_state === 'to do'}
 							<ShowTask
 								taskDetails={task}
 								color={getPlanColor(task.Task_plan)}
@@ -402,7 +404,7 @@
 									showEditTask = true;
 									editTaskIndex = index;
 									newTask.taskID = appTasks[editTaskIndex].Task_id;
-									newTask.planName = appTasks[editTaskIndex].Task_plan || "";
+									newTask.planName = appTasks[editTaskIndex].Task_plan || '';
 									newTask.appAcronym = appTasks[editTaskIndex].Task_app_Acronym;
 									newTask.taskName = appTasks[editTaskIndex].Task_name;
 									newTask.taskDescription = appTasks[editTaskIndex].Task_description;
@@ -411,16 +413,105 @@
 									newTask.taskCreator = appTasks[editTaskIndex].Task_creator;
 									newTask.taskOwner = appTasks[editTaskIndex].Task_owner;
 									newTask.taskCreateDate = appTasks[editTaskIndex].Task_createDate;
-									newTask.taskExistingPlan = appTasks[editTaskIndex].Task_plan || "";
+									newTask.taskExistingPlan = appTasks[editTaskIndex].Task_plan || '';
+									newTask.taskNextState = 'doing';
 								}}
 							/>
 						{/if}
 					{/each}
 				</div>
 			</div>
-			<div class="kanban-container">Doing</div>
-			<div class="kanban-container">Done</div>
-			<div class="kanban-container">Closed</div>
+
+			<div class="kanban-container">
+				<h2 class="title-header">Doing</h2>
+				<div class="kanbanTask">
+					{#each appTasks as task, index}
+						{#if task.Task_state === 'doing'}
+							<ShowTask
+								taskDetails={task}
+								color={getPlanColor(task.Task_plan)}
+								viewTask={() => {
+									showEditTask = true;
+									editTaskIndex = index;
+									newTask.taskID = appTasks[editTaskIndex].Task_id;
+									newTask.planName = appTasks[editTaskIndex].Task_plan || '';
+									newTask.appAcronym = appTasks[editTaskIndex].Task_app_Acronym;
+									newTask.taskName = appTasks[editTaskIndex].Task_name;
+									newTask.taskDescription = appTasks[editTaskIndex].Task_description;
+									newTask.taskNotes = appTasks[editTaskIndex].Task_notes;
+									newTask.taskState = appTasks[editTaskIndex].Task_state;
+									newTask.taskCreator = appTasks[editTaskIndex].Task_creator;
+									newTask.taskOwner = appTasks[editTaskIndex].Task_owner;
+									newTask.taskCreateDate = appTasks[editTaskIndex].Task_createDate;
+									newTask.taskExistingPlan = appTasks[editTaskIndex].Task_plan || '';
+									newTask.taskNextState = 'done';
+								}}
+							/>
+						{/if}
+					{/each}
+				</div>
+			</div>
+
+			<div class="kanban-container">
+				<h2 class="title-header">Done</h2>
+				<div class="kanbanTask">
+					{#each appTasks as task, index}
+						{#if task.Task_state === 'done'}
+							<ShowTask
+								taskDetails={task}
+								color={getPlanColor(task.Task_plan)}
+								viewTask={() => {
+									showEditTask = true;
+									editTaskIndex = index;
+									newTask.taskID = appTasks[editTaskIndex].Task_id;
+									newTask.planName = appTasks[editTaskIndex].Task_plan || '';
+									newTask.appAcronym = appTasks[editTaskIndex].Task_app_Acronym;
+									newTask.taskName = appTasks[editTaskIndex].Task_name;
+									newTask.taskDescription = appTasks[editTaskIndex].Task_description;
+									newTask.taskNotes = appTasks[editTaskIndex].Task_notes;
+									newTask.taskState = appTasks[editTaskIndex].Task_state;
+									newTask.taskCreator = appTasks[editTaskIndex].Task_creator;
+									newTask.taskOwner = appTasks[editTaskIndex].Task_owner;
+									newTask.taskCreateDate = appTasks[editTaskIndex].Task_createDate;
+									newTask.taskExistingPlan = appTasks[editTaskIndex].Task_plan || '';
+									newTask.taskNextState = 'closed';
+								}}
+							/>
+						{/if}
+					{/each}
+				</div>
+			</div>
+
+			<div class="kanban-container">
+				<h2 class="title-header">Closed</h2>
+				<div class="kanbanTask">
+					{#each appTasks as task, index}
+						{#if task.Task_state === 'closed'}
+							<ShowTask
+								taskDetails={task}
+								color={getPlanColor(task.Task_plan)}
+								viewTask={() => {
+									showEditTask = true;
+									editTaskIndex = index;
+									newTask.taskID = appTasks[editTaskIndex].Task_id;
+									newTask.planName = appTasks[editTaskIndex].Task_plan || '';
+									newTask.appAcronym = appTasks[editTaskIndex].Task_app_Acronym;
+									newTask.taskName = appTasks[editTaskIndex].Task_name;
+									newTask.taskDescription = appTasks[editTaskIndex].Task_description;
+									newTask.taskNotes = appTasks[editTaskIndex].Task_notes;
+									newTask.taskState = appTasks[editTaskIndex].Task_state;
+									newTask.taskCreator = appTasks[editTaskIndex].Task_creator;
+									newTask.taskOwner = appTasks[editTaskIndex].Task_owner;
+									newTask.taskCreateDate = appTasks[editTaskIndex].Task_createDate;
+									newTask.taskExistingPlan = appTasks[editTaskIndex].Task_plan || '';
+									newTask.taskNextState = 'closed';
+								}}
+							/>
+						{/if}
+					{/each}
+				</div>
+			</div>
+
 		</div>
 	</div>
 </main>
@@ -560,27 +651,29 @@
 					<span id="taskID">{appTasks[editTaskIndex].Task_id}</span>
 				</div>
 				<div class="input-container2">
-					<label for="taskName" style="margin-bottom: 10px;"
-						>Task Name</label
-					>
+					<label for="taskName" style="margin-bottom: 10px;">Task Name</label>
 					<span id="taskName">{appTasks[editTaskIndex].Task_name}</span>
 				</div>
 				<div class="input-container2">
 					<label for="taskDes" style="margin-bottom: 10px;">Task Description</label>
 					<span id="taskDes">{appTasks[editTaskIndex].Task_description}</span>
-
 				</div>
 				<div class="input-container2">
-					<label for="plan-name" style="margin-bottom: 10px;">Plan Name</label>
-					<select class="inputfields" id="plan-name" bind:value={newTask.planName}>
-						<option value="" disabled>- select plan -</option>
-						<option value=""></option>
-						{#each distinctPlans as distinctPlan}
-							<option class="options" value={distinctPlan.Plan_MVP_name}
-								>{distinctPlan.Plan_MVP_name}</option
-							>
-						{/each}
-					</select>
+					{#if newTask.taskState === 'open'}
+						<label for="plan-name" style="margin-bottom: 10px;">Plan Name</label>
+						<select class="inputfields" id="plan-name" bind:value={newTask.planName}>
+							<option value="" disabled>- select plan -</option>
+							<option value=""></option>
+							{#each distinctPlans as distinctPlan}
+								<option class="options" value={distinctPlan.Plan_MVP_name}
+									>{distinctPlan.Plan_MVP_name}</option
+								>
+							{/each}
+						</select>
+						{:else}
+						<label for="taskplan" style="margin-bottom: 10px;">Plan Name</label>
+						<span id="taskplan">{newTask.planName}</span>
+					{/if}
 				</div>
 				<div class="input-container2">
 					<label for="taskState" style="margin-bottom: 10px;">Task State</label>
@@ -616,10 +709,31 @@
 		</div>
 	{/if}
 	<div slot="button1">
-		<button class="modelCreateBtn3" on:click={() => promoteTask(newTask.taskNextState)}>RELEASE TASK</button>
-	</div>
-	<div slot="button2">
 		<button class="modelCreateBtn2" on:click={() => saveChanges()}>SAVE CHANGES</button>
+	</div>
+
+	<div slot="button2">
+		{#if newTask.taskState === 'open'}
+			<button class="modelCreateBtn3" on:click={() => promoteTask(newTask.taskNextState)}
+				>RELEASE TASK</button
+			>
+		{/if}
+		{#if newTask.taskState === 'to do'}
+			<button class="modelCreateBtn3" on:click={() => promoteTask(newTask.taskNextState)}
+				>TAKE ON</button
+			>
+		{/if}
+		{#if newTask.taskState === 'doing'} <!-- to include send email with on click i.e sendEmail()-->
+			<button class="modelCreateBtn3" on:click={() => promoteTask(newTask.taskNextState)}
+				>TO REVIEW</button
+			>
+		{/if}
+	</div>
+	
+	<div slot="button3">
+		{#if newTask.taskState === 'doing'}
+			<button class="modelCreateBtn4" on:click={() => demoteTask()}>FORFEIT TASK</button>
+		{/if}
 	</div>
 </EditTask>
 
@@ -702,7 +816,18 @@
 		margin-top: 0px;
 		border: none;
 		color: white;
-		background-color: #00A400;
+		background-color: #00a400;
+		width: 150px;
+		height: 35px;
+	}
+
+	.modelCreateBtn4 {
+		cursor: pointer;
+		padding: 5px 10px;
+		margin-top: 0px;
+		border: none;
+		color: white;
+		background-color: #d02929;
 		width: 150px;
 		height: 35px;
 	}

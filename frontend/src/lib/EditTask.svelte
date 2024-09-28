@@ -21,9 +21,10 @@
 
 		<!-- svelte-ignore a11y-autofocus -->
 		<div class="input-container">
+			<button class="modelCloseBtn" on:click={() => dialog.close()}>CANCEL</button>
 			<slot class="buttons" name="button1" />
 			<slot class="buttons" name="button2" />
-			<button class="modelCloseBtn" on:click={() => dialog.close()}>CANCEL</button>
+			<slot class="buttons" name="button3" />
 		</div>
 	</div>
 	<Toaster expand={true} richColors={true} />
