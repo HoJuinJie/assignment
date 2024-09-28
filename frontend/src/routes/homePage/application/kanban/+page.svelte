@@ -258,7 +258,7 @@
 		}
 
 		// changes state  // may need to change the [user from onwer/creator to globalusername]
-		newTask.taskNotes += `${newTask.taskOwner} moved ${newTask.taskName} from ${newTask.taskState} to ${state} \n[${newTask.taskOwner}, Current State: ${newTask.taskState}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n`;
+		newTask.taskNotes += `${newTask.taskOwner} moved ${newTask.taskName} from <${newTask.taskState}> state to <${state}> state \n[${newTask.taskOwner}, Current State: ${newTask.taskState}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n`;
 
 		// update state in database
 		newTask.taskState = newTask.taskNextState;
@@ -357,6 +357,7 @@
 			</div>
 		</div>
 		<div class="kanban">
+
 			<div class="kanban-container">
 				<OpenState
 					createTask={() => {
@@ -728,11 +729,19 @@
 				>TO REVIEW</button
 			>
 		{/if}
+		{#if newTask.taskState === 'done'} <!-- to include send email with on click i.e sendEmail()-->
+			<button class="modelCreateBtn3" on:click={() => promoteTask(newTask.taskNextState)}
+				>CLOSE TASK</button
+			>
+		{/if}
 	</div>
 	
 	<div slot="button3">
 		{#if newTask.taskState === 'doing'}
 			<button class="modelCreateBtn4" on:click={() => demoteTask()}>FORFEIT TASK</button>
+		{/if}
+		{#if newTask.taskState === 'done'}
+			<button class="modelCreateBtn4" on:click={() => demoteTask()}>REJECT TASK</button>
 		{/if}
 	</div>
 </EditTask>
@@ -994,6 +1003,7 @@
 		background-color: #d8d8d8;
 		margin-left: 10px;
 		margin-right: 10px;
+		width: 20%;
 	}
 
 	/* Optional: Add a bit of spacing between columns */
