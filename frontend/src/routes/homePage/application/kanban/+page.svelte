@@ -343,7 +343,7 @@
 <main>
 	<div class="container">
 		<div class="header">
-			<h1 class="head">Kanban: {newPlan.appAcronym}</h1>
+			<h1 class="head">Task Management Board: {newPlan.appAcronym}</h1>
 			<div class="middle"></div>
 			<div class="createPlan">
 				<button
