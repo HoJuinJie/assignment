@@ -229,7 +229,7 @@
 		return result[0].Plan_colour;
 	}
 
-	async function promoteTask(state) {
+	async function promoteTask() {
 		console.log('clicking on promote task');
 		let now = new Date();
 		let hours = String(now.getHours()).padStart(2, '0');
@@ -258,7 +258,7 @@
 		}
 
 		// changes state  // may need to change the [user from onwer/creator to globalusername]
-		newTask.taskNotes += `${newTask.taskOwner} moved ${newTask.taskName} from <${newTask.taskState}> state to <${state}> state \n[${newTask.taskOwner}, Current State: ${newTask.taskState}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n`;
+		newTask.taskNotes += `${newTask.taskOwner} moved ${newTask.taskName} from <${newTask.taskState}> state to <${newTask.taskNextState}> state \n[${newTask.taskOwner}, Current State: ${newTask.taskState}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n`;
 
 		// update state in database
 		newTask.taskState = newTask.taskNextState;
@@ -266,10 +266,10 @@
 			const response = await axios.post(ApiUrl_TMS + '/saveTaskChanges', newTask, {
 				withCredentials: true
 			});
-
 			customAlert(`${newTask.taskName} changed state`);
 			newTask.notesToAdd = '';
 			getTasksInApp($appWritable);
+			showEditTask = false;
 		} catch (error) {
 			console.log(error.response.data.message);
 			toast.error(error.response.data.message);
@@ -715,22 +715,22 @@
 
 	<div slot="button2">
 		{#if newTask.taskState === 'open'}
-			<button class="modelCreateBtn3" on:click={() => promoteTask(newTask.taskNextState)}
+			<button class="modelCreateBtn3" on:click={() => promoteTask()}
 				>RELEASE TASK</button
 			>
 		{/if}
 		{#if newTask.taskState === 'to do'}
-			<button class="modelCreateBtn3" on:click={() => promoteTask(newTask.taskNextState)}
+			<button class="modelCreateBtn3" on:click={() => promoteTask()}
 				>TAKE ON</button
 			>
 		{/if}
 		{#if newTask.taskState === 'doing'} <!-- to include send email with on click i.e sendEmail()-->
-			<button class="modelCreateBtn3" on:click={() => promoteTask(newTask.taskNextState)}
+			<button class="modelCreateBtn3" on:click={() => promoteTask()}
 				>TO REVIEW</button
 			>
 		{/if}
 		{#if newTask.taskState === 'done'} <!-- to include send email with on click i.e sendEmail()-->
-			<button class="modelCreateBtn3" on:click={() => promoteTask(newTask.taskNextState)}
+			<button class="modelCreateBtn3" on:click={() => promoteTask()}
 				>CLOSE TASK</button
 			>
 		{/if}
