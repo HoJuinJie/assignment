@@ -229,7 +229,7 @@
 		return result[0].Plan_colour;
 	}
 
-	async function promoteTask() {
+	async function changeTaskStateTo(state) {
 		console.log('clicking on promote task');
 		let now = new Date();
 		let hours = String(now.getHours()).padStart(2, '0');
@@ -258,10 +258,10 @@
 		}
 
 		// changes state  // may need to change the [user from onwer/creator to globalusername]
-		newTask.taskNotes += `${newTask.taskOwner} moved ${newTask.taskName} from <${newTask.taskState}> state to <${newTask.taskNextState}> state \n[${newTask.taskOwner}, Current State: ${newTask.taskState}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n`;
+		newTask.taskNotes += `${newTask.taskOwner} moved ${newTask.taskName} from <${newTask.taskState}> state to <${state}> state \n[${newTask.taskOwner}, Current State: ${newTask.taskState}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n`;
 
 		// update state in database
-		newTask.taskState = newTask.taskNextState;
+		newTask.taskState = state;
 		try {
 			const response = await axios.post(ApiUrl_TMS + '/saveTaskChanges', newTask, {
 				withCredentials: true
@@ -715,22 +715,22 @@
 
 	<div slot="button2">
 		{#if newTask.taskState === 'open'}
-			<button class="modelCreateBtn3" on:click={() => promoteTask()}
+			<button class="modelCreateBtn3" on:click={() => changeTaskStateTo('to do')}
 				>RELEASE TASK</button
 			>
 		{/if}
 		{#if newTask.taskState === 'to do'}
-			<button class="modelCreateBtn3" on:click={() => promoteTask()}
+			<button class="modelCreateBtn3" on:click={() => changeTaskStateTo('doing')}
 				>TAKE ON</button
 			>
 		{/if}
 		{#if newTask.taskState === 'doing'} <!-- to include send email with on click i.e sendEmail()-->
-			<button class="modelCreateBtn3" on:click={() => promoteTask()}
+			<button class="modelCreateBtn3" on:click={() => changeTaskStateTo('done')}
 				>TO REVIEW</button
 			>
 		{/if}
 		{#if newTask.taskState === 'done'} <!-- to include send email with on click i.e sendEmail()-->
-			<button class="modelCreateBtn3" on:click={() => promoteTask()}
+			<button class="modelCreateBtn3" on:click={() => changeTaskStateTo('closed')}
 				>CLOSE TASK</button
 			>
 		{/if}
@@ -738,10 +738,10 @@
 	
 	<div slot="button3">
 		{#if newTask.taskState === 'doing'}
-			<button class="modelCreateBtn4" on:click={() => demoteTask()}>FORFEIT TASK</button>
+			<button class="modelCreateBtn4" on:click={() => changeTaskStateTo('to do')}>FORFEIT TASK</button>
 		{/if}
 		{#if newTask.taskState === 'done'}
-			<button class="modelCreateBtn4" on:click={() => demoteTask()}>REJECT TASK</button>
+			<button class="modelCreateBtn4" on:click={() => changeTaskStateTo('doing')}>REJECT TASK</button>
 		{/if}
 	</div>
 </EditTask>
