@@ -251,20 +251,21 @@ exports.saveTaskChanges = async (req, res) => {
         taskID,
         planName,
         taskNotes,
+        taskState
     } = req.body;
 
     // consider race condition if you have the time
-    console.log('taskid, planname, tasknotes', [taskID,planName,taskNotes]);
+    console.log('taskid, planname, tasknotes, taskState', [taskID,planName,taskNotes,taskState]);
     try {
         if (planName === '') {
             await getConnection().query(
-                'UPDATE task SET Task_plan =?, Task_notes = ? WHERE Task_id = ?',
-                [null, taskNotes, taskID]
+                'UPDATE task SET Task_plan = ?, Task_notes = ?, Task_state = ? WHERE Task_id = ?',
+                [null, taskNotes, taskState, taskID]
             );
         } else {
             await getConnection().query(
-                'UPDATE task SET Task_plan = ?, Task_notes = ? WHERE Task_id = ?',
-                [planName, taskNotes, taskID]
+                'UPDATE task SET Task_plan = ?, Task_notes = ?, Task_state = ? WHERE Task_id = ?',
+                [planName, taskNotes, taskState, taskID]
             );
         }
 
@@ -276,3 +277,8 @@ exports.saveTaskChanges = async (req, res) => {
         return res.status(400).json({ message: 'An error occurred while updating task' });
     }
 }
+
+ 
+ 
+ 
+ 
