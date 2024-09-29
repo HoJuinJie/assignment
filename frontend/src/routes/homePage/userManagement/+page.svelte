@@ -190,7 +190,7 @@
 		<h1 class="head">User Management</h1>
 		<div class="middle"></div>
 		<div class="addGroup">
-			<button class="AddGroupBtn" on:click={() => (showModal = true)}>ADD GROUP</button>
+			<button class="AddGroupBtn" on:click={() => (showModal = true)}>+GROUP</button>
 		</div>
 	</div>
 	<div class="header-wrapper">
@@ -326,7 +326,7 @@
 </div>
 
 <Modal bind:showModal>
-	<h2 slot="header">Add Group</h2>
+	<h2 slot="header">Create Group</h2>
 
 	<div class="input-container">
 		<label for="groupName" style="margin-bottom: 10px;">Group Name:</label>
