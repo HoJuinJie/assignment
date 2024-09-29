@@ -1,5 +1,6 @@
 const { getConnection } = require('../database');
-const { validateAppAcronym } = require('../functions')
+const { validateAppAcronym } = require('../functions');
+const nodemailer = require('nodemailer');
 
 // frontend
 exports.apps = async (req, res) => {
@@ -276,6 +277,37 @@ exports.saveTaskChanges = async (req, res) => {
         console.log(err);
         console.log(JSON.stringify(err));
         return res.status(400).json({ message: 'An error occurred while updating task' });
+    }
+}
+
+exports.sendEmail = async (req, res) => {
+    const {
+        to,
+        subject,
+        message
+    } = req.body;
+
+    let transporter = nodemailer.createTransport({
+        service: 'gmail',
+        port: 587, 
+        secure: false,
+        auth: {
+            user: 'jjstengg98@gmail.com',
+            pass: 'baij vtna snhp opqz',
+        },
+    });
+
+    try {
+        await transporter.sendMail({
+            from: '"Dev Team" <jjstengg98@gmail.com>',
+            to,
+            subject,
+            text: message,
+        });
+        res.status(200).send('Email sent successfully!');
+    } catch (error) {
+        console.error('Error sending email:', error);
+        res.status(500).send('Failed to send email');
     }
 }
 
