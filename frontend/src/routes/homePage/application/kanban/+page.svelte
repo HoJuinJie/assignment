@@ -311,7 +311,8 @@
 				newTask.taskExistingPlan = newTask.planName;
 			}
 		}
-
+		
+		// changes to notes
 		if (newTask.notesToAdd !== '') {
 			// may need to change the [user from onwer/creator to globalusername]
 			newTask.taskNotes += `(NOTE) ${newTask.notesToAdd} \n[${globalUsername}, Current State: ${newTask.taskState}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n`;
