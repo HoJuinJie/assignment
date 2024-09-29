@@ -620,7 +620,7 @@
 					<option value="" disabled>- select plan -</option>
 					{#each distinctPlans as distinctPlan}
 						<option class="options" value={distinctPlan.Plan_MVP_name}
-							>{distinctPlan.Plan_MVP_name} ("hello")</option
+							>{distinctPlan.Plan_MVP_name} ({distinctPlan.displayStartDate} to {distinctPlan.displayEndDate})</option
 						>
 					{/each}
 				</select>
