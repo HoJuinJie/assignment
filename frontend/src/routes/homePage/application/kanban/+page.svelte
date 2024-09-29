@@ -210,7 +210,7 @@
 		let seconds = String(now.getSeconds()).padStart(2, '0');
 		let formattedTime = `${hours}:${minutes}:${seconds}`;
 
-		if (newTask.taskName) {
+		if (newTask.taskName && newTask.taskName.length <=255) {
 			if (newTask.notesToAdd === '') {
 				newTask.taskNotes = `(ACTION) ${newTask.taskCreator} created the task "${newTask.taskName}" \n[${newTask.taskCreator}, Current State: ${newTask.taskState}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n`;
 			} else {

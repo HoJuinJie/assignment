@@ -190,6 +190,7 @@ exports.createTask = async (req, res) => {
     } = req.body;
 
     if (!taskName) return res.status(400).json({ message: 'Required fields cannot be empty' });
+    if (taskName.length >255) return res.status(400).json({ message: 'plan name exceeded limit of 255' });
 
     // convert date to epoch
     const userCreateDate = new Date(taskCreateDate);
