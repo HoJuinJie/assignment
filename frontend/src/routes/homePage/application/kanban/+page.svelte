@@ -43,7 +43,7 @@
 		planName: '',
 		appAcronym: '',
 		taskName: '',
-		taskDescription: '', //
+		taskDescription: '', 
 		taskNotes: '',
 		taskState: 'open',
 		taskCreator: '',
@@ -52,11 +52,7 @@
 		taskDisplayDate: '',
 		notesToAdd: '',
 		taskExistingPlan: '',
-		// taskNextState: ''
 	};
-
-	// console.log(`newTask: ${JSON.stringify(newTask)}`);
-	// appWritable.subscribe((v) => console.log('logging sub', v));
 
 	function setCreateTaskFields() {
 		const today = new Date();
@@ -85,7 +81,6 @@
 			toast.error(error.response.data.message);
 			if (error.response.status === 401) goto('/login');
 		}
-		// console.log('logging tasks in app', appTasks);
 	};
 
 	function convertEpochToDisplay(epochTime) {
@@ -112,7 +107,6 @@
                 plan.displayEndDate = convertEpochToDisplay(plan.Plan_endDate);
             });
 
-			console.log('logging distinct plans', distinctPlans);
 		} catch (error) {
 			toast.error(error.response.data.message);
 			if (error.response.status === 401) goto('/login');
@@ -124,7 +118,6 @@
 		try {
 			const planList = await axios.get(ApiUrl_TMS + '/plans', { withCredentials: true });
 			plans = planList.data;
-			console.log('logging all plans', plans);
 		} catch (error) {
 			console.log(error.response.data.message);
 			toast.error(error.response.data.message);
@@ -203,8 +196,6 @@
 	}
 
 	async function createNewTask() {
-		console.log('clicking on create new task');
-
 		let now = new Date();
 		let hours = String(now.getHours()).padStart(2, '0');
 		let minutes = String(now.getMinutes()).padStart(2, '0');
@@ -235,7 +226,6 @@
 			resetNewTask();
 			getTasksInApp($appWritable);
 
-			console.log('logging newTask after creating task', newTask);
 		} catch (error) {
 			console.log(error.response.data.message);
 			toast.error(error.response.data.message);
@@ -250,7 +240,6 @@
 	}
 
 	async function changeTaskStateTo(state, promote) {
-		console.log('clicking on promote task');
 		let now = new Date();
 		let hours = String(now.getHours()).padStart(2, '0');
 		let minutes = String(now.getMinutes()).padStart(2, '0');
@@ -301,9 +290,7 @@
 	}
 
 	async function saveChanges() {
-		console.log('clicking on save changes');
-		console.log('logging newTask fields in edit mode', newTask);
-
+		// console.log('logging newTask fields in edit mode', newTask);
 		let now = new Date();
 		let hours = String(now.getHours()).padStart(2, '0');
 		let minutes = String(now.getMinutes()).padStart(2, '0');
