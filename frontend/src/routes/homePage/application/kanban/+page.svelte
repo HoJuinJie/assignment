@@ -211,7 +211,7 @@
 
 			} else { // task name/plan/notes all filled
 				newTask.taskNotes =
-					`${newTask.taskCreator} created the task '${newTask.taskName}'' \n[${newTask.taskCreator}, Current state: ${newTask.taskState}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n` +
+					`${newTask.taskCreator} created the task '${newTask.taskName}' \n[${newTask.taskCreator}, Current state: ${newTask.taskState}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n` +
 					`${newTask.taskCreator} updated the plan to '${newTask.planName}' \n[${globalUsername}, Current State: ${newTask.taskState}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n` +
 					`"${newTask.notesToAdd}" \n[${newTask.taskCreator}, Current state: ${newTask.taskState}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n`;
 			}
@@ -1028,11 +1028,17 @@
 		margin-left: 10px;
 		margin-right: 10px;
 		width: 20%;
+		scrollbar-width: none; /* For Firefox */
+		-ms-overflow-style: none; /* For Internet Explorer and Edge */
 	}
 
 	/* Optional: Add a bit of spacing between columns */
 	.kanban-container:not(:last-child) {
 		margin-right: 10px;
+	}
+
+	.kanban-container::-webkit-scrollbar {
+		display: none;
 	}
 
 	.title-header {
