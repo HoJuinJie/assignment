@@ -196,7 +196,8 @@
 			taskOwner: '',
 			taskCreateDate: '',
 			taskDisplayDate: '',
-			notesToAdd: ''
+			notesToAdd: '',
+			taskExistingPlan: ''
 		};
 		setCreateTaskFields();
 	}
@@ -211,13 +212,17 @@
 		let formattedTime = `${hours}:${minutes}:${seconds}`;
 
 		if (newTask.taskName && newTask.taskName.length <=255) {
-			if (newTask.notesToAdd === '') {
+			if (newTask.notesToAdd === '' && newTask.planName === '') { // only task name is filled 
 				newTask.taskNotes = `(ACTION) ${newTask.taskCreator} created the task "${newTask.taskName}" \n[${newTask.taskCreator}, Current State: ${newTask.taskState}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n`;
-			} else {
+			} else if (newTask.notesToAdd === '' && newTask.planName) { // both task name and plan name filled
+				newTask.taskNotes = `(ACTION) ${newTask.taskCreator} created the task "${newTask.taskName}" \n[${newTask.taskCreator}, Current State: ${newTask.taskState}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n` +
+				`(ACTION) ${newTask.taskCreator} updated the plan to "${newTask.planName}" \n[${globalUsername}, Current State: ${newTask.taskState}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n`;
+
+			} else { // task name/plan/notes all filled
 				newTask.taskNotes =
 					`(ACTION) ${newTask.taskCreator} created the task "${newTask.taskName}" \n[${newTask.taskCreator}, Current state: ${newTask.taskState}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n` +
-					`(NOTE) ${newTask.notesToAdd}` +
-					`\n[${newTask.taskCreator}, Current state: ${newTask.taskState}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n`;
+					`(ACTION) ${newTask.taskCreator} updated the plan to "${newTask.planName}" \n[${globalUsername}, Current State: ${newTask.taskState}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n` +
+					`(NOTE) ${newTask.notesToAdd} \n[${newTask.taskCreator}, Current state: ${newTask.taskState}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n`;
 			}
 		}
 
@@ -729,7 +734,11 @@
 		</div>
 	{/if}
 	<div slot="button1">
-		<button class="modelCreateBtn2" on:click={() => saveChanges()}>SAVE CHANGES</button>
+		{#if newTask.taskState === 'done'}
+			<button class="modelCreateBtn2" on:click={() => saveChanges()} disabled={newTask.planName !== newTask.taskExistingPlan}>SAVE CHANGES</button>
+			{:else}
+			<button class="modelCreateBtn2" on:click={() => saveChanges()}>SAVE CHANGES</button>
+		{/if}
 	</div>
 
 	<div slot="button2">
@@ -745,12 +754,12 @@
 			>
 		{/if}
 		{#if newTask.taskState === 'doing'} <!-- to include send email with on click i.e sendEmail()-->
-			<button class="modelCreateBtn3" on:click={() => changeTaskStateTo('done', true)}
+			<button class="modelCreateBtn3" on:click={() => changeTaskStateTo('done', true)} 
 				>TO REVIEW</button
 			>
 		{/if}
 		{#if newTask.taskState === 'done'} <!-- to include send email with on click i.e sendEmail()-->
-			<button class="modelCreateBtn3" on:click={() => changeTaskStateTo('closed', true)}
+			<button class="modelCreateBtn3" on:click={() => changeTaskStateTo('closed', true)} disabled={newTask.planName !== newTask.taskExistingPlan}
 				>CLOSE TASK</button
 			>
 		{/if}
@@ -850,6 +859,7 @@
 		height: 35px;
 	}
 
+	.modelCreateBtn2:disabled,
 	.modelCreateBtn3:disabled,
 	.modelCreateBtn4:disabled {
         background-color: gray;
