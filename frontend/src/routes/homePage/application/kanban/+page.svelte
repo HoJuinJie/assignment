@@ -88,6 +88,17 @@
 		// console.log('logging tasks in app', appTasks);
 	};
 
+	function convertEpochToDisplay(epochTime) {
+		const date = new Date(epochTime * 1000);
+		// Extract day, month, and year
+		const day = date.getDate().toString().padStart(2, '0'); // pad with 0 if needed
+		const month = (date.getMonth() + 1).toString().padStart(2, '0'); // months are 0-indexed, so add 1
+		const year = date.getFullYear();
+		// Format as DD/MM/YYYY
+		const formattedDate = `${day}/${month}/${year}`;
+		return formattedDate;
+	}
+
 	const getPlansInApp = async (app) => {
 		console.log('testing get plans in app func by logging app', app);
 		try {
@@ -95,6 +106,12 @@
 				withCredentials: true
 			});
 			distinctPlans = response.data;
+
+			distinctPlans.forEach(plan => {
+                plan.displayStartDate = convertEpochToDisplay(plan.Plan_startDate);
+                plan.displayEndDate = convertEpochToDisplay(plan.Plan_endDate);
+            });
+
 			console.log('logging distinct plans', distinctPlans);
 		} catch (error) {
 			toast.error(error.response.data.message);
@@ -227,7 +244,7 @@
 		return result[0].Plan_colour;
 	}
 
-	async function changeTaskStateTo(state) {
+	async function changeTaskStateTo(state, promote) {
 		console.log('clicking on promote task');
 		let now = new Date();
 		let hours = String(now.getHours()).padStart(2, '0');
@@ -235,7 +252,7 @@
 		let seconds = String(now.getSeconds()).padStart(2, '0');
 		let formattedTime = `${hours}:${minutes}:${seconds}`;
 
-		// changes to plan (OPEN state)
+		// changes to plan (OPEN/DONE state)
 		if (newTask.planName !== newTask.taskExistingPlan) {
 			// may need to change the [user from onwer/creator to globalusername]
 			if (newTask.planName === '') {
@@ -260,6 +277,9 @@
 
 		// To update state in database
 		newTask.taskState = state;
+
+		// update task owner ONLY if promote
+		if (promote === true) newTask.taskOwner = globalUsername;
 		try {
 			const response = await axios.post(ApiUrl_TMS + '/saveTaskChanges', newTask, {
 				withCredentials: true
@@ -285,16 +305,17 @@
 		let seconds = String(now.getSeconds()).padStart(2, '0');
 		let formattedTime = `${hours}:${minutes}:${seconds}`;
 
+		// changes to plan (OPEN/DONE state)
 		if (newTask.planName !== newTask.taskExistingPlan) {
 			// may need to change the [user from onwer/creator to globalusername]
 			if (newTask.planName === '') {
 				newTask.taskNotes += `(ACTION) ${globalUsername} removed the plan \n[${globalUsername}, Current State: ${newTask.taskState}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n`;
 				newTask.taskExistingPlan = newTask.planName;
 			} else if (newTask.taskExistingPlan === '') {
-				newTask.taskNotes += `(ACTION) ${globalUsername} updated the plan to ${newTask.planName} \n[${globalUsername}, Current State: ${newTask.taskState}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n`;
+				newTask.taskNotes += `(ACTION) ${globalUsername} updated the plan to "${newTask.planName}" \n[${globalUsername}, Current State: ${newTask.taskState}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n`;
 				newTask.taskExistingPlan = newTask.planName;
 			} else {
-				newTask.taskNotes += `(ACTION) ${globalUsername} updated the plan from ${newTask.taskExistingPlan} to ${newTask.planName} \n[${globalUsername}, Current State: ${newTask.taskState}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n`;
+				newTask.taskNotes += `(ACTION) ${globalUsername} updated the plan from "${newTask.taskExistingPlan}" to "${newTask.planName}" \n[${globalUsername}, Current State: ${newTask.taskState}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n`;
 				newTask.taskExistingPlan = newTask.planName;
 			}
 		}
@@ -569,7 +590,7 @@
 		<div class="left-container">
 			<div class="input-container2">
 				<label for="taskID" style="margin-bottom: 10px;">Task ID</label>
-				<span id="taskID">{createTaskID} (auto generate)</span>
+				<span id="taskID">{createTaskID} (automatic)</span>
 			</div>
 			<div class="input-container2">
 				<label for="taskName" style="margin-bottom: 10px;"
@@ -599,7 +620,7 @@
 					<option value="" disabled>- select plan -</option>
 					{#each distinctPlans as distinctPlan}
 						<option class="options" value={distinctPlan.Plan_MVP_name}
-							>{distinctPlan.Plan_MVP_name}</option
+							>{distinctPlan.Plan_MVP_name} ("hello")</option
 						>
 					{/each}
 				</select>
@@ -658,14 +679,14 @@
 					<span id="taskDes">{appTasks[editTaskIndex].Task_description}</span>
 				</div>
 				<div class="input-container2">
-					{#if newTask.taskState === 'open'}
+					{#if newTask.taskState === 'open' || newTask.taskState === 'done'}
 						<label for="plan-name" style="margin-bottom: 10px;">Plan Name</label>
 						<select class="inputfields" id="plan-name" bind:value={newTask.planName}>
 							<option value="" disabled>- select plan -</option>
 							<option value=""></option>
 							{#each distinctPlans as distinctPlan}
 								<option class="options" value={distinctPlan.Plan_MVP_name}
-									>{distinctPlan.Plan_MVP_name}</option
+									>{distinctPlan.Plan_MVP_name} ({distinctPlan.displayStartDate} to {distinctPlan.displayEndDate})</option
 								>
 							{/each}
 						</select>
@@ -713,23 +734,23 @@
 
 	<div slot="button2">
 		{#if newTask.taskState === 'open'}
-			<button class="modelCreateBtn3" on:click={() => changeTaskStateTo('to do')}
+			<button class="modelCreateBtn3" on:click={() => changeTaskStateTo('to do', true)}
 				disabled={newTask.planName === ""}
 				>RELEASE TASK</button
 			>
 		{/if}
 		{#if newTask.taskState === 'to do'}
-			<button class="modelCreateBtn3" on:click={() => changeTaskStateTo('doing')}
+			<button class="modelCreateBtn3" on:click={() => changeTaskStateTo('doing', true)}
 				>TAKE ON</button
 			>
 		{/if}
 		{#if newTask.taskState === 'doing'} <!-- to include send email with on click i.e sendEmail()-->
-			<button class="modelCreateBtn3" on:click={() => changeTaskStateTo('done')}
+			<button class="modelCreateBtn3" on:click={() => changeTaskStateTo('done', true)}
 				>TO REVIEW</button
 			>
 		{/if}
 		{#if newTask.taskState === 'done'} <!-- to include send email with on click i.e sendEmail()-->
-			<button class="modelCreateBtn3" on:click={() => changeTaskStateTo('closed')}
+			<button class="modelCreateBtn3" on:click={() => changeTaskStateTo('closed', true)}
 				>CLOSE TASK</button
 			>
 		{/if}
@@ -737,10 +758,10 @@
 	
 	<div slot="button3">
 		{#if newTask.taskState === 'doing'}
-			<button class="modelCreateBtn4" on:click={() => changeTaskStateTo('to do')}>FORFEIT TASK</button>
+			<button class="modelCreateBtn4" on:click={() => changeTaskStateTo('to do', false)}>FORFEIT TASK</button>
 		{/if}
 		{#if newTask.taskState === 'done'}
-			<button class="modelCreateBtn4" on:click={() => changeTaskStateTo('doing')}>REJECT TASK</button>
+			<button class="modelCreateBtn4" on:click={() => changeTaskStateTo('doing', false)} disabled={newTask.planName === ""}>REJECT TASK</button>
 		{/if}
 	</div>
 </EditTask>
@@ -829,7 +850,8 @@
 		height: 35px;
 	}
 
-	.modelCreateBtn3:disabled {
+	.modelCreateBtn3:disabled,
+	.modelCreateBtn4:disabled {
         background-color: gray;
         cursor: not-allowed;
     }
@@ -1013,5 +1035,9 @@
 	/* Optional: Add a bit of spacing between columns */
 	.kanban-container:not(:last-child) {
 		margin-right: 10px;
+	}
+
+	.title-header {
+		margin-bottom: 29.92px;
 	}
 </style>

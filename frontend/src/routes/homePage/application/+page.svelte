@@ -225,7 +225,7 @@
 				>App R-Number<span style="color: red;">*</span></label
 			>
 			<input
-				type="text"
+				type="number"
 				id="appRNum"
 				bind:value={newApp.rNumber}
 				class="editable"

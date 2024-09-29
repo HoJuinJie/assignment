@@ -251,7 +251,8 @@ exports.saveTaskChanges = async (req, res) => {
         taskID,
         planName,
         taskNotes,
-        taskState
+        taskState,
+        taskOwner
     } = req.body;
 
     // consider race condition if you have the time
@@ -259,13 +260,13 @@ exports.saveTaskChanges = async (req, res) => {
     try {
         if (planName === '') {
             await getConnection().query(
-                'UPDATE task SET Task_plan = ?, Task_notes = ?, Task_state = ? WHERE Task_id = ?',
-                [null, taskNotes, taskState, taskID]
+                'UPDATE task SET Task_plan = ?, Task_notes = ?, Task_state = ?, Task_owner = ? WHERE Task_id = ?',
+                [null, taskNotes, taskState, taskOwner, taskID]
             );
         } else {
             await getConnection().query(
-                'UPDATE task SET Task_plan = ?, Task_notes = ?, Task_state = ? WHERE Task_id = ?',
-                [planName, taskNotes, taskState, taskID]
+                'UPDATE task SET Task_plan = ?, Task_notes = ?, Task_state = ?, Task_owner = ? WHERE Task_id = ?',
+                [planName, taskNotes, taskState, taskOwner, taskID]
             );
         }
 
