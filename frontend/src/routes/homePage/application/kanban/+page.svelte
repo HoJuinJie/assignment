@@ -15,6 +15,7 @@
 	import { appWritable } from '../store';
 
 	let globalUsername;
+	let createTaskID = "<App_Acronym>_<App_Rnumber>";
 	let isAdmin = false;
 	let isPL = false;
 	let showModal = false;
@@ -51,7 +52,7 @@
 		taskDisplayDate: '',
 		notesToAdd: '',
 		taskExistingPlan: '',
-		taskNextState: ''
+		// taskNextState: ''
 	};
 
 	// console.log(`newTask: ${JSON.stringify(newTask)}`);
@@ -193,19 +194,16 @@
 		let formattedTime = `${hours}:${minutes}:${seconds}`;
 
 		if (newTask.taskName) {
-			// may need to change the [user from onwer/creator to globalusername]
 			if (newTask.notesToAdd === '') {
-				newTask.taskNotes = `${newTask.taskCreator} created the task " ${newTask.taskName}" \n[${newTask.taskCreator}, Current State: ${newTask.taskState}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n`;
+				newTask.taskNotes = `(ACTION) ${newTask.taskCreator} created the task "${newTask.taskName}" \n[${newTask.taskCreator}, Current State: ${newTask.taskState}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n`;
 			} else {
 				newTask.taskNotes =
-					`${newTask.taskCreator} created the task "${newTask.taskName}" \n[${newTask.taskCreator}, Current state: ${newTask.taskState}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n` +
-					newTask.notesToAdd +
+					`(ACTION) ${newTask.taskCreator} created the task "${newTask.taskName}" \n[${newTask.taskCreator}, Current state: ${newTask.taskState}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n` +
+					`(NOTE) ${newTask.notesToAdd}` +
 					`\n[${newTask.taskCreator}, Current state: ${newTask.taskState}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n`;
 			}
 		}
 
-		console.log('logging new task from createnewtask function', newTask);
-		console.log(newTask.taskNotes);
 		try {
 			const response = await axios.post(ApiUrl_TMS + '/createTask', newTask, {
 				withCredentials: true
@@ -241,26 +239,26 @@
 		if (newTask.planName !== newTask.taskExistingPlan) {
 			// may need to change the [user from onwer/creator to globalusername]
 			if (newTask.planName === '') {
-				newTask.taskNotes += `${newTask.taskOwner} removed the plan \n[${newTask.taskOwner}, Current State: ${newTask.taskState}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n`;
+				newTask.taskNotes += `(ACTION) ${globalUsername} removed the plan \n[${globalUsername}, Current State: ${newTask.taskState}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n`;
 				newTask.taskExistingPlan = newTask.planName;
 			} else if (newTask.taskExistingPlan === '') {
-				newTask.taskNotes += `${newTask.taskOwner} updated the plan to ${newTask.planName} \n[${newTask.taskOwner}, Current State: ${newTask.taskState}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n`;
+				newTask.taskNotes += `(ACTION) ${globalUsername} updated the plan to "${newTask.planName}" \n[${globalUsername}, Current State: ${newTask.taskState}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n`;
 				newTask.taskExistingPlan = newTask.planName;
 			} else {
-				newTask.taskNotes += `${newTask.taskOwner} updated the plan from ${newTask.taskExistingPlan} to ${newTask.planName} \n[${newTask.taskOwner}, Current State: ${newTask.taskState}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n`;
+				newTask.taskNotes += `(ACTION) ${globalUsername} updated the plan from "${newTask.taskExistingPlan}" to "${newTask.planName}" \n[${globalUsername}, Current State: ${newTask.taskState}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n`;
 				newTask.taskExistingPlan = newTask.planName;
 			}
 		}
 
 		// changes to notes
 		if (newTask.notesToAdd !== '') {
-			newTask.taskNotes += `${newTask.notesToAdd} \n[${newTask.taskOwner}, Current State: ${newTask.taskState}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n`;
+			newTask.taskNotes += `(NOTE) ${newTask.notesToAdd} \n[${globalUsername}, Current State: ${newTask.taskState}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n`;
 		}
 
-		// changes state  // may need to change the [user from onwer/creator to globalusername]
-		newTask.taskNotes += `${newTask.taskOwner} moved ${newTask.taskName} from <${newTask.taskState}> state to <${state}> state \n[${newTask.taskOwner}, Current State: ${newTask.taskState}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n`;
+		// changes in state  // may need to change the [user from onwer/creator to globalusername]
+		newTask.taskNotes += `(ACTION) ${globalUsername} moved "${newTask.taskName}" from <${newTask.taskState}> state to <${state}> state \n[${globalUsername}, Current State: ${newTask.taskState}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n`;
 
-		// update state in database
+		// To update state in database
 		newTask.taskState = state;
 		try {
 			const response = await axios.post(ApiUrl_TMS + '/saveTaskChanges', newTask, {
@@ -290,20 +288,20 @@
 		if (newTask.planName !== newTask.taskExistingPlan) {
 			// may need to change the [user from onwer/creator to globalusername]
 			if (newTask.planName === '') {
-				newTask.taskNotes += `${newTask.taskOwner} removed the plan \n[${newTask.taskOwner}, Current State: ${newTask.taskState}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n`;
+				newTask.taskNotes += `(ACTION) ${globalUsername} removed the plan \n[${globalUsername}, Current State: ${newTask.taskState}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n`;
 				newTask.taskExistingPlan = newTask.planName;
 			} else if (newTask.taskExistingPlan === '') {
-				newTask.taskNotes += `${newTask.taskOwner} updated the plan to ${newTask.planName} \n[${newTask.taskOwner}, Current State: ${newTask.taskState}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n`;
+				newTask.taskNotes += `(ACTION) ${globalUsername} updated the plan to ${newTask.planName} \n[${globalUsername}, Current State: ${newTask.taskState}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n`;
 				newTask.taskExistingPlan = newTask.planName;
 			} else {
-				newTask.taskNotes += `${newTask.taskOwner} updated the plan from ${newTask.taskExistingPlan} to ${newTask.planName} \n[${newTask.taskOwner}, Current State: ${newTask.taskState}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n`;
+				newTask.taskNotes += `(ACTION) ${globalUsername} updated the plan from ${newTask.taskExistingPlan} to ${newTask.planName} \n[${globalUsername}, Current State: ${newTask.taskState}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n`;
 				newTask.taskExistingPlan = newTask.planName;
 			}
 		}
 
 		if (newTask.notesToAdd !== '') {
 			// may need to change the [user from onwer/creator to globalusername]
-			newTask.taskNotes += `${newTask.notesToAdd} \n[${newTask.taskOwner}, Current State: ${newTask.taskState}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n`;
+			newTask.taskNotes += `(NOTE) ${newTask.notesToAdd} \n[${globalUsername}, Current State: ${newTask.taskState}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n`;
 		}
 
 		try {
@@ -385,7 +383,7 @@
 									newTask.taskOwner = appTasks[editTaskIndex].Task_owner;
 									newTask.taskCreateDate = appTasks[editTaskIndex].Task_createDate;
 									newTask.taskExistingPlan = appTasks[editTaskIndex].Task_plan || '';
-									newTask.taskNextState = 'to do';
+									// newTask.taskNextState = 'to do';
 								}}
 							/>
 						{/if}
@@ -415,7 +413,7 @@
 									newTask.taskOwner = appTasks[editTaskIndex].Task_owner;
 									newTask.taskCreateDate = appTasks[editTaskIndex].Task_createDate;
 									newTask.taskExistingPlan = appTasks[editTaskIndex].Task_plan || '';
-									newTask.taskNextState = 'doing';
+									// newTask.taskNextState = 'doing';
 								}}
 							/>
 						{/if}
@@ -445,7 +443,7 @@
 									newTask.taskOwner = appTasks[editTaskIndex].Task_owner;
 									newTask.taskCreateDate = appTasks[editTaskIndex].Task_createDate;
 									newTask.taskExistingPlan = appTasks[editTaskIndex].Task_plan || '';
-									newTask.taskNextState = 'done';
+									// newTask.taskNextState = 'done';
 								}}
 							/>
 						{/if}
@@ -475,7 +473,7 @@
 									newTask.taskOwner = appTasks[editTaskIndex].Task_owner;
 									newTask.taskCreateDate = appTasks[editTaskIndex].Task_createDate;
 									newTask.taskExistingPlan = appTasks[editTaskIndex].Task_plan || '';
-									newTask.taskNextState = 'closed';
+									// newTask.taskNextState = 'closed';
 								}}
 							/>
 						{/if}
@@ -505,7 +503,7 @@
 									newTask.taskOwner = appTasks[editTaskIndex].Task_owner;
 									newTask.taskCreateDate = appTasks[editTaskIndex].Task_createDate;
 									newTask.taskExistingPlan = appTasks[editTaskIndex].Task_plan || '';
-									newTask.taskNextState = 'closed';
+									// newTask.taskNextState = 'closed';
 								}}
 							/>
 						{/if}
@@ -571,7 +569,7 @@
 		<div class="left-container">
 			<div class="input-container2">
 				<label for="taskID" style="margin-bottom: 10px;">Task ID</label>
-				<span id="taskID">- Task not yet created -</span>
+				<span id="taskID">{createTaskID} (auto generate)</span>
 			</div>
 			<div class="input-container2">
 				<label for="taskName" style="margin-bottom: 10px;"
@@ -716,6 +714,7 @@
 	<div slot="button2">
 		{#if newTask.taskState === 'open'}
 			<button class="modelCreateBtn3" on:click={() => changeTaskStateTo('to do')}
+				disabled={newTask.planName === ""}
 				>RELEASE TASK</button
 			>
 		{/if}
@@ -829,6 +828,11 @@
 		width: 150px;
 		height: 35px;
 	}
+
+	.modelCreateBtn3:disabled {
+        background-color: gray;
+        cursor: not-allowed;
+    }
 
 	.modelCreateBtn4 {
 		cursor: pointer;
