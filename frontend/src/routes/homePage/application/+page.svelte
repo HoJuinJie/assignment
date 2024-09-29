@@ -15,6 +15,7 @@
 	const ApiUrl_TMS = import.meta.env.VITE_API_URL + ':' + import.meta.env.VITE_PORT + '/api/v1/tms';
 
 	let globalUsername;
+	let globalUserBelongsTo = [];
 	let isAdmin;
 	let apps = [];
 	let isPL = true;
@@ -42,6 +43,7 @@
 		try {
 			const appList = await axios.get(ApiUrl_TMS + '/apps', { withCredentials: true });
 			apps = appList.data;
+			console.log('logging apps: ', apps);
 		} catch (error) {
 			console.log(error.response.data.message);
 			toast.error(error.response.data.message);
@@ -64,18 +66,35 @@
 		try {
 			const response = await axios.get(ApiUrl + '/application', { withCredentials: true });
 			if (response.status === 401) goto('/login');
-			// console.log('logging response.data', response.data); //
+			console.log('logging response.data', response.data); //
 			globalUsername = response.data.username;
+			globalUserBelongsTo = response.data.result;
+			console.log('logging globaluserBelongsTo', globalUserBelongsTo)
 			isAdmin = response.data.isAdmin;
 			isPL = response.data.isPL;
-			getAllApps();
-			getAllGroups();
+			await getAllApps();
+			await getAllGroups();
 		} catch (error) {
 			console.log(error.response.data.message);
 			toast.error(error.response.data.message);
 			goto('/login');
 		}
 	});
+
+	function globalUserBelongsToApp(application) {
+		let appPermits = [
+			application.App_permit_Open,
+			application.App_permit_toDoList,
+			application.App_permit_Doing,
+			application.App_permit_Done,
+			application.App_permit_Create
+		];
+
+		const userInPermits = appPermits.filter((group) => globalUserBelongsTo.includes(group));
+
+		console.log('logging globaluserbelongs to function', userInPermits);
+		return userInPermits.length > 0;
+	}
 
 	function resetNewApp() {
 		newApp = {
@@ -172,32 +191,31 @@
 
 		<div class="app-container">
 			{#each apps as app, index}
-				<ShowApp
-					appDetails={app}
-					editApp={isPL
-						? () => {
-								showEditApp = true;
-								editIndex = index;
-								newApp.appAcronym = apps[editIndex].App_Acronym;
-								newApp.rNumber = apps[editIndex].App_Rnumber;
-								newApp.appDescription = apps[editIndex].App_Description;
-								newApp.startDate = getDateFromEpochEdit(apps[editIndex].App_startDate);
-								newApp.endDate = getDateFromEpochEdit(apps[editIndex].App_endDate);
-								newApp.appPermitCreate = apps[editIndex].App_permit_Create;
-								newApp.appPermitOpen = apps[editIndex].App_permit_Open;
-								newApp.appPermitToDo = apps[editIndex].App_permit_toDoList;
-								newApp.appPermitDoing = apps[editIndex].App_permit_Doing;
-								newApp.appPermitDone = apps[editIndex].App_permit_Done;
-
-								console.log('showing app:', app);
-								console.log('showing application array:', apps);
-							}
-						: null}
-					gotoApp={() => {
-						appWritable.set(app);
-						goto('/homePage/application/kanban');
-					}}
-				/>
+				{#if globalUserBelongsToApp(app)}
+					<ShowApp
+						appDetails={app}
+						editApp={isPL // this only allows 'PL' to edit the app
+							? () => {
+									showEditApp = true;
+									editIndex = index;
+									newApp.appAcronym = apps[editIndex].App_Acronym;
+									newApp.rNumber = apps[editIndex].App_Rnumber;
+									newApp.appDescription = apps[editIndex].App_Description;
+									newApp.startDate = getDateFromEpochEdit(apps[editIndex].App_startDate);
+									newApp.endDate = getDateFromEpochEdit(apps[editIndex].App_endDate);
+									newApp.appPermitCreate = apps[editIndex].App_permit_Create;
+									newApp.appPermitOpen = apps[editIndex].App_permit_Open;
+									newApp.appPermitToDo = apps[editIndex].App_permit_toDoList;
+									newApp.appPermitDoing = apps[editIndex].App_permit_Doing;
+									newApp.appPermitDone = apps[editIndex].App_permit_Done;
+								}
+							: null}
+						gotoApp={() => {
+							appWritable.set(app);
+							goto('/homePage/application/kanban');
+						}}
+					/>
+				{/if}
 			{/each}
 		</div>
 	</div>
@@ -240,10 +258,10 @@
 			<div class="input-container">
 				<label for="AppDes" style="margin-bottom: 10px;">App Description</label>
 				<textarea
-				id="AppDes"
-				bind:value={newApp.appDescription}
-				class="editable"
-				placeholder="description"
+					id="AppDes"
+					bind:value={newApp.appDescription}
+					class="editable"
+					placeholder="description"
 				/>
 			</div>
 		</div>
@@ -378,9 +396,15 @@
 					<label for="endDateEdit" style="margin-bottom: 10px;"
 						>End Date<span style="color: red;">*</span></label
 					>
-					<input type="date" id="endDateEdit" bind:value={newApp.endDate} class="editable" required />
+					<input
+						type="date"
+						id="endDateEdit"
+						bind:value={newApp.endDate}
+						class="editable"
+						required
+					/>
 				</div>
-				
+
 				<div class="input-container">
 					<label for="appPermitCreateEdit" style="margin-bottom: 10px;">App Permit Create</label>
 					<select class="inputfields" id="appPermitCreateEdit" bind:value={newApp.appPermitCreate}>
