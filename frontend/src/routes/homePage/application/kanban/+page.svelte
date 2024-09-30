@@ -267,7 +267,7 @@
 		}
 
 		// changes in state  // may need to change the [user from onwer/creator to globalusername]
-		newTask.taskNotes += `${globalUsername} moved '${newTask.taskName}' from <${newTask.taskState}> state to <${state}> state \n[${globalUsername}, Current State: ${newTask.taskState}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n`;
+		newTask.taskNotes += `${globalUsername} moved '${newTask.taskName}' from <${newTask.taskState}> state to <${state}> state \n[${globalUsername}, Current State: ${state}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n`;
 
 		// To update state in database
 		newTask.taskState = state;

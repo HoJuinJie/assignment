@@ -15,7 +15,8 @@ const {
 
 const {
     isAuthenticatedUser,
-    userBelongsTo
+    userBelongsTo,
+    testing
 } = require('../middleware/auth');
 
 // Protected Routes
@@ -26,7 +27,7 @@ router.post('/createTask', [isAuthenticatedUser, createTask]); // remember to re
 router.get('/apps', [isAuthenticatedUser, apps]);
 router.get('/plans', [isAuthenticatedUser, plans]);
 router.post('/getPlansInApp', [isAuthenticatedUser, getPlansInApp]);
-router.post('/getTasksInApp', [isAuthenticatedUser, getTasksInApp]);
+router.post('/getTasksInApp', [isAuthenticatedUser, testing, getTasksInApp]);
 router.post('/saveTaskChanges', [isAuthenticatedUser, saveTaskChanges]);
 router.post('/sendEmail',[isAuthenticatedUser, sendEmail] )
 

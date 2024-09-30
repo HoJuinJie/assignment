@@ -20,7 +20,8 @@ const {
 
 const {
     isAuthenticatedUser,
-    userBelongsTo
+    userBelongsTo,
+    testing
     // isActive,
     // isAdminUser,
 } = require('../middleware/auth');
