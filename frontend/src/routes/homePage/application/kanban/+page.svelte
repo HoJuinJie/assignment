@@ -377,18 +377,17 @@
 		</div>
 		<div class="kanban">
 			<div class="kanban-container">
-				{#if globalUserBelongsTo}
-				<div class = 'open-header'>
+				<div class="open-header">
 					<h2 class="title-header">Open</h2>
-
-					<OpenState
-						createTask={() => {
-							resetNewTask();
-							showCreateTask = true;
-						}}
-					/>
+					{#if globalUserBelongsTo.includes($appWritable.App_permit_Create)}
+						<OpenState
+							createTask={() => {
+								resetNewTask();
+								showCreateTask = true;
+							}}
+						/>
+					{/if}
 				</div>
-				{/if}
 				<div class="kanbanTask">
 					{#each appTasks as task, index}
 						{#if task.Task_state === 'open'}
@@ -594,7 +593,7 @@
 		<div class="left-container">
 			<div class="input-container2">
 				<label for="taskID" style="margin-bottom: 10px;">Task ID</label>
-				<span id="taskID">{createTaskID} (automatic)</span>
+				<span id="taskID">{createTaskID} (To be generated)</span>
 			</div>
 			<div class="input-container2">
 				<label for="taskName" style="margin-bottom: 10px;"
@@ -683,7 +682,18 @@
 					<span id="taskDes">{appTasks[editTaskIndex].Task_description}</span>
 				</div>
 				<div class="input-container2">
-					{#if newTask.taskState === 'open' || newTask.taskState === 'done'}
+					{#if newTask.taskState === 'open' && globalUserBelongsTo.includes($appWritable.App_permit_Open)}
+						<label for="plan-name" style="margin-bottom: 10px;">Plan Name</label>
+						<select class="inputfields" id="plan-name" bind:value={newTask.planName}>
+							<option value="" disabled>- select plan -</option>
+							<option value=""></option>
+							{#each distinctPlans as distinctPlan}
+								<option class="options" value={distinctPlan.Plan_MVP_name}
+									>{distinctPlan.Plan_MVP_name} ({distinctPlan.displayStartDate} to {distinctPlan.displayEndDate})</option
+								>
+							{/each}
+						</select>
+					{:else if newTask.taskState === 'done' && globalUserBelongsTo.includes($appWritable.App_permit_Done)}
 						<label for="plan-name" style="margin-bottom: 10px;">Plan Name</label>
 						<select class="inputfields" id="plan-name" bind:value={newTask.planName}>
 							<option value="" disabled>- select plan -</option>
@@ -695,8 +705,21 @@
 							{/each}
 						</select>
 					{:else}
-						<label for="taskplan" style="margin-bottom: 10px;">Plan Name</label>
-						<span id="taskplan">{newTask.planName}</span>
+						<label for="plan-name" style="margin-bottom: 10px;">Plan Name</label>
+						<select
+							class="inputfields planNameContainer"
+							id="plan-name"
+							bind:value={newTask.planName}
+							disabled
+						>
+							<option value="" disabled>- select plan -</option>
+							<option value=""></option>
+							{#each distinctPlans as distinctPlan}
+								<option class="options" value={distinctPlan.Plan_MVP_name}
+									>{distinctPlan.Plan_MVP_name} ({distinctPlan.displayStartDate} to {distinctPlan.displayEndDate})</option
+								>
+							{/each}
+						</select>
 					{/if}
 				</div>
 				<div class="input-container2">
@@ -726,44 +749,68 @@
 						readonly
 					/>
 				</div>
-				<div class="input-container2 comments">
-					<textarea bind:value={newTask.notesToAdd} placeholder="comments" />
-				</div>
+				{#if newTask.taskState === 'open' && globalUserBelongsTo.includes($appWritable.App_permit_Open)}
+					<div class="input-container2 comments">
+						<textarea bind:value={newTask.notesToAdd} placeholder="comments" />
+					</div>
+				{:else if newTask.taskState === 'to do' && globalUserBelongsTo.includes($appWritable.App_permit_toDoList)}
+					<div class="input-container2 comments">
+						<textarea bind:value={newTask.notesToAdd} placeholder="comments" />
+					</div>
+				{:else if newTask.taskState === 'doing' && globalUserBelongsTo.includes($appWritable.App_permit_Doing)}
+					<div class="input-container2 comments">
+						<textarea bind:value={newTask.notesToAdd} placeholder="comments" />
+					</div>
+				{:else if newTask.taskState === 'done' && globalUserBelongsTo.includes($appWritable.App_permit_Done)}
+					<div class="input-container2 comments">
+						<textarea bind:value={newTask.notesToAdd} placeholder="comments" />
+					</div>
+				{:else}
+					<div class="input-container2 comments">
+						<textarea bind:value={newTask.notesToAdd} placeholder="comments" disabled />
+					</div>
+				{/if}
 			</div>
 		</div>
 	{/if}
 	<div slot="button1">
-		{#if newTask.taskState === 'done'}
+		{#if newTask.taskState === 'done' && globalUserBelongsTo.includes($appWritable.App_permit_Done)}
 			<button
 				class="modelCreateBtn2"
 				on:click={() => saveChanges()}
 				disabled={newTask.planName !== newTask.taskExistingPlan}>SAVE CHANGES</button
 			>
-		{:else}
+		{:else if newTask.taskState === 'open' && globalUserBelongsTo.includes($appWritable.App_permit_Open)}
 			<button class="modelCreateBtn2" on:click={() => saveChanges()}>SAVE CHANGES</button>
+		{:else if newTask.taskState === 'to do' && globalUserBelongsTo.includes($appWritable.App_permit_toDoList)}
+			<button class="modelCreateBtn2" on:click={() => saveChanges()}>SAVE CHANGES</button>
+		{:else if newTask.taskState === 'doing' && globalUserBelongsTo.includes($appWritable.App_permit_Doing)}
+			<button class="modelCreateBtn2" on:click={() => saveChanges()}>SAVE CHANGES</button>
+		{:else}
+			<div></div>
 		{/if}
 	</div>
 
 	<div slot="button2">
-		{#if newTask.taskState === 'open'}
-			<button
-				class="modelCreateBtn3"
-				on:click={() => changeTaskStateTo('to do', true)}
-				disabled={newTask.planName === ''}>RELEASE TASK</button
-			>
+		{#if globalUserBelongsTo.includes($appWritable.App_permit_Open)}
+			{#if newTask.taskState === 'open'}
+				<button class="modelCreateBtn3" on:click={() => changeTaskStateTo('to do', true)}
+					>RELEASE TASK</button
+				>
+			{/if}
 		{/if}
-		{#if newTask.taskState === 'to do'}
+		{#if newTask.taskState === 'to do' && globalUserBelongsTo.includes($appWritable.App_permit_toDoList)}
 			<button class="modelCreateBtn3" on:click={() => changeTaskStateTo('doing', true)}
 				>TAKE ON</button
 			>
 		{/if}
-		{#if newTask.taskState === 'doing'}
+		{#if newTask.taskState === 'doing' && globalUserBelongsTo.includes($appWritable.App_permit_Doing)}
 			<!-- to include send email with on click i.e sendEmail()-->
 			<button class="modelCreateBtn3" on:click={() => changeTaskStateTo('done', true)}
 				>TO REVIEW</button
 			>
 		{/if}
-		{#if newTask.taskState === 'done'}
+		{#if newTask.taskState === 'done' && globalUserBelongsTo.includes($appWritable.App_permit_Done)}
 			<!-- to include send email with on click i.e sendEmail()-->
 			<button
 				class="modelCreateBtn3"
@@ -774,16 +821,14 @@
 	</div>
 
 	<div slot="button3">
-		{#if newTask.taskState === 'doing'}
+		{#if newTask.taskState === 'doing' && globalUserBelongsTo.includes($appWritable.App_permit_Doing)}
 			<button class="modelCreateBtn4" on:click={() => changeTaskStateTo('to do', false)}
 				>FORFEIT TASK</button
 			>
 		{/if}
-		{#if newTask.taskState === 'done'}
-			<button
-				class="modelCreateBtn4"
-				on:click={() => changeTaskStateTo('doing', false)}
-				disabled={newTask.planName === ''}>REJECT TASK</button
+		{#if newTask.taskState === 'done' && globalUserBelongsTo.includes($appWritable.App_permit_Done)}
+			<button class="modelCreateBtn4" on:click={() => changeTaskStateTo('doing', false)}
+				>REJECT TASK</button
 			>
 		{/if}
 	</div>
@@ -1071,6 +1116,7 @@
 		display: flex;
 		justify-content: space-between;
 	}
+
 
 	/* .title-header {
 		margin-bottom: 29.92px;

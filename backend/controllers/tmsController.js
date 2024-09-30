@@ -161,7 +161,7 @@ exports.createPlan = async (req, res) => {
     const epochEndDate = Math.floor(userEndDate.getTime() / 1000);
     
     try {
-        const [results] = await getConnection().query('SELECT * FROM plan WHERE Plan_MVP_name = ?', [planName]);
+        const [results] = await getConnection().query('SELECT * FROM plan WHERE Plan_MVP_name = ? AND Plan_MVP_name = ?', [planName, appAcronym]);
         if (results.length !== 0) return res.status(400).json({ message: `Plan MVP name "${planName}" already exists` });
 
         await getConnection().query(

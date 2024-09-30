@@ -3,17 +3,20 @@ const jwt = require('jsonwebtoken');
 const { checkGroup } = require('../functions');
 const { JWT_SECRET } = require('../config/config');
 
-exports.testing = async (req, res, next) => { // rename this to belong in application
+exports.belongInAppPermit = (state) => async (req, res, next) => {
+    console.log('logging state', state);
     console.log('logging req.body', req.body);
-
+    
+    const appAcronym = req.body.appAcronym;
+    console.log('logging appAcronym:', req.body.appAcronym);
     try {
-        const permittedGroups = [
-            req.body.App_permit_Open,
-            req.body.App_permit_toDoList,
-            req.body.App_permit_Doing,
-            req.body.App_permit_Done,
-            req.body.App_permit_Create
-        ];
+        const [result] = await getConnection().query(`
+            SELECT ${state}
+            FROM application
+            WHERE App_Acronym = ?`, [appAcronym]);
+    
+        console.log('logging result in belonginapppermit:', result);
+        console.log('logging result[0] in belonginapppermit:', result[0][state]);
     
         const token = req.cookies.token;
         const decoded = jwt.verify(token, JWT_SECRET);
@@ -22,8 +25,7 @@ exports.testing = async (req, res, next) => { // rename this to belong in applic
             FROM accounts a
             LEFT JOIN usergroup ug ON a.username = ug.username
             WHERE a.username = ?
-            GROUP BY a.username
-            `, [decoded.username]);
+            GROUP BY a.username`, [decoded.username]);
     
         const filteredRows = rows.map(element => {
             return {
@@ -35,15 +37,29 @@ exports.testing = async (req, res, next) => { // rename this to belong in applic
         const userGroups = filteredRows[0].user_groups;
         console.log('logging userGroups', userGroups);
     
-        const userInPermits = permittedGroups.filter((group) => userGroups.includes(group));
-        console.log('userinpermits:', userInPermits);
-
-        if (userInPermits.length === 0) return res.status(401).json({ message: 'Access denied, unauthorised user' });
+        console.log(userGroups.includes(result[0][state]));
+        if (!userGroups.includes(result[0][state])) res.status(401).json({ message: 'Access denied, unauthorised user' });    
     } catch (err) {
         return res.status(400).json({ message: 'Error when checking if Account belongs to permitted groups', error: err });
     }
-    
     next();
+
+    // try {
+    //     const permittedGroups = [
+    //         req.body.App_permit_Open,
+    //         req.body.App_permit_toDoList,
+    //         req.body.App_permit_Doing,
+    //         req.body.App_permit_Done,
+    //         req.body.App_permit_Create
+    //     ];
+    //     const userInPermits = permittedGroups.filter((group) => userGroups.includes(group));
+    //     console.log('userinpermits:', userInPermits);
+
+    //     if (userInPermits.length === 0) return res.status(401).json({ message: 'Access denied, unauthorised user' });
+    // } catch (err) {
+    //     return res.status(400).json({ message: 'Error when checking if Account belongs to permitted groups', error: err });
+    // }
+
     // const [sql] = await getConnection().query(`
     //     SELECT DISTINCT a.* 
     //     FROM application a

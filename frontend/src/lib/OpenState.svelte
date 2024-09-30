@@ -11,10 +11,10 @@
 <style>
     .header {
         display: flex;
-        justify-content: space-between; /* To space the button and title apart */
         align-items: center; /* Align the button and title vertically */
         margin-left: 10px;
         margin-right: 10px;
+        margin-top: 15px;
     }
 
     .createTask-button {

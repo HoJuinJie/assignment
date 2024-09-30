@@ -21,7 +21,7 @@ const {
 const {
     isAuthenticatedUser,
     userBelongsTo,
-    testing
+    belongInAppPermit
     // isActive,
     // isAdminUser,
 } = require('../middleware/auth');
