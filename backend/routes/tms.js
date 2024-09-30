@@ -22,12 +22,12 @@ const {
 // Protected Routes
 router.post('/createApp', [isAuthenticatedUser, userBelongsTo(['PL']), createApp]);
 router.post('/editApp', [isAuthenticatedUser, userBelongsTo(['PL']), editApp]);
-router.post('/createPlan', [isAuthenticatedUser, userBelongsTo(['PL']), createPlan]);
+router.post('/createPlan', [isAuthenticatedUser, userBelongsTo(['PM']), createPlan]);
 router.post('/createTask', [isAuthenticatedUser, createTask]); // remember to review permissions 
 router.get('/apps', [isAuthenticatedUser, apps]);
 router.get('/plans', [isAuthenticatedUser, plans]);
 router.post('/getPlansInApp', [isAuthenticatedUser, getPlansInApp]);
-router.post('/getTasksInApp', [isAuthenticatedUser, testing, getTasksInApp]);
+router.post('/getTasksInApp', [isAuthenticatedUser, getTasksInApp]);
 router.post('/saveTaskChanges', [isAuthenticatedUser, saveTaskChanges]);
 router.post('/sendEmail',[isAuthenticatedUser, sendEmail] )
 

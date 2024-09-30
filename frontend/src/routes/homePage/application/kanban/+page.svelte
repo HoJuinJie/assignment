@@ -15,9 +15,11 @@
 	import { appWritable } from '../store';
 
 	let globalUsername;
-	let createTaskID = "<App_Acronym>_<App_Rnumber>";
+	let globalUserBelongsTo = [];
+	let createTaskID = '<App_Acronym>_<App_Rnumber>';
 	let isAdmin = false;
 	let isPL = false;
+	let isPM = false;
 	let showModal = false;
 	let showCreateTask = false;
 	let plans = [];
@@ -43,7 +45,7 @@
 		planName: '',
 		appAcronym: '',
 		taskName: '',
-		taskDescription: '', 
+		taskDescription: '',
 		taskNotes: '',
 		taskState: 'open',
 		taskCreator: '',
@@ -51,7 +53,7 @@
 		taskCreateDate: '',
 		taskDisplayDate: '',
 		notesToAdd: '',
-		taskExistingPlan: '',
+		taskExistingPlan: ''
 	};
 
 	function setCreateTaskFields() {
@@ -102,11 +104,10 @@
 			});
 			distinctPlans = response.data;
 
-			distinctPlans.forEach(plan => {
-                plan.displayStartDate = convertEpochToDisplay(plan.Plan_startDate);
-                plan.displayEndDate = convertEpochToDisplay(plan.Plan_endDate);
-            });
-
+			distinctPlans.forEach((plan) => {
+				plan.displayStartDate = convertEpochToDisplay(plan.Plan_startDate);
+				plan.displayEndDate = convertEpochToDisplay(plan.Plan_endDate);
+			});
 		} catch (error) {
 			toast.error(error.response.data.message);
 			if (error.response.status === 401) goto('/login');
@@ -135,8 +136,10 @@
 			const response = await axios.get(ApiUrl + '/application', { withCredentials: true });
 			if (response.status === 401) goto('/login');
 			globalUsername = response.data.username;
+			globalUserBelongsTo = response.data.result;
 			isAdmin = response.data.isAdmin;
 			isPL = response.data.isPL;
+			isPM = response.data.isPM;
 			newPlan.appAcronym = $appWritable.App_Acronym;
 			getPlans();
 			setCreateTaskFields();
@@ -202,14 +205,17 @@
 		let seconds = String(now.getSeconds()).padStart(2, '0');
 		let formattedTime = `${hours}:${minutes}:${seconds}`;
 
-		if (newTask.taskName && newTask.taskName.length <=255) {
-			if (newTask.notesToAdd === '' && newTask.planName === '') { // only task name is filled 
+		if (newTask.taskName && newTask.taskName.length <= 255) {
+			if (newTask.notesToAdd === '' && newTask.planName === '') {
+				// only task name is filled
 				newTask.taskNotes = `${newTask.taskCreator} created the task '${newTask.taskName}' \n[${newTask.taskCreator}, Current State: ${newTask.taskState}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n`;
-			} else if (newTask.notesToAdd === '' && newTask.planName) { // both task name and plan name filled
-				newTask.taskNotes = `${newTask.taskCreator} created the task '${newTask.taskName}' \n[${newTask.taskCreator}, Current State: ${newTask.taskState}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n` +
-				`${newTask.taskCreator} updated the plan to '${newTask.planName}' \n[${globalUsername}, Current State: ${newTask.taskState}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n`;
-
-			} else { // task name/plan/notes all filled
+			} else if (newTask.notesToAdd === '' && newTask.planName) {
+				// both task name and plan name filled
+				newTask.taskNotes =
+					`${newTask.taskCreator} created the task '${newTask.taskName}' \n[${newTask.taskCreator}, Current State: ${newTask.taskState}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n` +
+					`${newTask.taskCreator} updated the plan to '${newTask.planName}' \n[${globalUsername}, Current State: ${newTask.taskState}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n`;
+			} else {
+				// task name/plan/notes all filled
 				newTask.taskNotes =
 					`${newTask.taskCreator} created the task '${newTask.taskName}' \n[${newTask.taskCreator}, Current state: ${newTask.taskState}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n` +
 					`${newTask.taskCreator} updated the plan to '${newTask.planName}' \n[${globalUsername}, Current State: ${newTask.taskState}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n` +
@@ -225,7 +231,6 @@
 			customAlert(`New task: ${newTask.taskName} created`);
 			resetNewTask();
 			getTasksInApp($appWritable);
-
 		} catch (error) {
 			console.log(error.response.data.message);
 			toast.error(error.response.data.message);
@@ -311,7 +316,7 @@
 				newTask.taskExistingPlan = newTask.planName;
 			}
 		}
-		
+
 		// changes to notes
 		if (newTask.notesToAdd !== '') {
 			// may need to change the [user from onwer/creator to globalusername]
@@ -359,24 +364,31 @@
 		<div class="header">
 			<h1 class="head">Task Management Board: {newPlan.appAcronym}</h1>
 			<div class="middle"></div>
-			<div class="createPlan">
-				<button
-					class="createPlanBtn"
-					on:click={() => {
-						showModal = true;
-					}}>+PLAN</button
-				>
-			</div>
+			{#if isPM}
+				<div class="createPlan">
+					<button
+						class="createPlanBtn"
+						on:click={() => {
+							showModal = true;
+						}}>+PLAN</button
+					>
+				</div>
+			{/if}
 		</div>
 		<div class="kanban">
-
 			<div class="kanban-container">
-				<OpenState
-					createTask={() => {
-						resetNewTask();
-						showCreateTask = true;
-					}}
-				/>
+				{#if globalUserBelongsTo}
+				<div class = 'open-header'>
+					<h2 class="title-header">Open</h2>
+
+					<OpenState
+						createTask={() => {
+							resetNewTask();
+							showCreateTask = true;
+						}}
+					/>
+				</div>
+				{/if}
 				<div class="kanbanTask">
 					{#each appTasks as task, index}
 						{#if task.Task_state === 'open'}
@@ -524,7 +536,6 @@
 					{/each}
 				</div>
 			</div>
-
 		</div>
 	</div>
 </main>
@@ -683,7 +694,7 @@
 								>
 							{/each}
 						</select>
-						{:else}
+					{:else}
 						<label for="taskplan" style="margin-bottom: 10px;">Plan Name</label>
 						<span id="taskplan">{newTask.planName}</span>
 					{/if}
@@ -723,17 +734,22 @@
 	{/if}
 	<div slot="button1">
 		{#if newTask.taskState === 'done'}
-			<button class="modelCreateBtn2" on:click={() => saveChanges()} disabled={newTask.planName !== newTask.taskExistingPlan}>SAVE CHANGES</button>
-			{:else}
+			<button
+				class="modelCreateBtn2"
+				on:click={() => saveChanges()}
+				disabled={newTask.planName !== newTask.taskExistingPlan}>SAVE CHANGES</button
+			>
+		{:else}
 			<button class="modelCreateBtn2" on:click={() => saveChanges()}>SAVE CHANGES</button>
 		{/if}
 	</div>
 
 	<div slot="button2">
 		{#if newTask.taskState === 'open'}
-			<button class="modelCreateBtn3" on:click={() => changeTaskStateTo('to do', true)}
-				disabled={newTask.planName === ""}
-				>RELEASE TASK</button
+			<button
+				class="modelCreateBtn3"
+				on:click={() => changeTaskStateTo('to do', true)}
+				disabled={newTask.planName === ''}>RELEASE TASK</button
 			>
 		{/if}
 		{#if newTask.taskState === 'to do'}
@@ -741,24 +757,34 @@
 				>TAKE ON</button
 			>
 		{/if}
-		{#if newTask.taskState === 'doing'} <!-- to include send email with on click i.e sendEmail()-->
-			<button class="modelCreateBtn3" on:click={() => changeTaskStateTo('done', true)} 
+		{#if newTask.taskState === 'doing'}
+			<!-- to include send email with on click i.e sendEmail()-->
+			<button class="modelCreateBtn3" on:click={() => changeTaskStateTo('done', true)}
 				>TO REVIEW</button
 			>
 		{/if}
-		{#if newTask.taskState === 'done'} <!-- to include send email with on click i.e sendEmail()-->
-			<button class="modelCreateBtn3" on:click={() => changeTaskStateTo('closed', true)} disabled={newTask.planName !== newTask.taskExistingPlan}
-				>CLOSE TASK</button
+		{#if newTask.taskState === 'done'}
+			<!-- to include send email with on click i.e sendEmail()-->
+			<button
+				class="modelCreateBtn3"
+				on:click={() => changeTaskStateTo('closed', true)}
+				disabled={newTask.planName !== newTask.taskExistingPlan}>APPROVE TASK</button
 			>
 		{/if}
 	</div>
-	
+
 	<div slot="button3">
 		{#if newTask.taskState === 'doing'}
-			<button class="modelCreateBtn4" on:click={() => changeTaskStateTo('to do', false)}>FORFEIT TASK</button>
+			<button class="modelCreateBtn4" on:click={() => changeTaskStateTo('to do', false)}
+				>FORFEIT TASK</button
+			>
 		{/if}
 		{#if newTask.taskState === 'done'}
-			<button class="modelCreateBtn4" on:click={() => changeTaskStateTo('doing', false)} disabled={newTask.planName === ""}>REJECT TASK</button>
+			<button
+				class="modelCreateBtn4"
+				on:click={() => changeTaskStateTo('doing', false)}
+				disabled={newTask.planName === ''}>REJECT TASK</button
+			>
 		{/if}
 	</div>
 </EditTask>
@@ -850,9 +876,9 @@
 	.modelCreateBtn2:disabled,
 	.modelCreateBtn3:disabled,
 	.modelCreateBtn4:disabled {
-        background-color: gray;
-        cursor: not-allowed;
-    }
+		background-color: gray;
+		cursor: not-allowed;
+	}
 
 	.modelCreateBtn4 {
 		cursor: pointer;
@@ -1041,7 +1067,12 @@
 		display: none;
 	}
 
-	.title-header {
-		margin-bottom: 29.92px;
+	.open-header {
+		display: flex;
+		justify-content: space-between;
 	}
+
+	/* .title-header {
+		margin-bottom: 29.92px;
+	} */
 </style>

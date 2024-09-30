@@ -69,7 +69,7 @@
 			console.log('logging response.data', response.data); //
 			globalUsername = response.data.username;
 			globalUserBelongsTo = response.data.result;
-			console.log('logging globaluserBelongsTo', globalUserBelongsTo)
+			console.log('logging globaluserBelongsTo', globalUserBelongsTo);
 			isAdmin = response.data.isAdmin;
 			isPL = response.data.isPL;
 			await getAllApps();
@@ -178,44 +178,46 @@
 		<div class="header">
 			<h1 class="head">Applications</h1>
 			<div class="middle"></div>
-			<div class="createApp">
-				<button
-					class="createAppBtn"
-					on:click={() => {
-						resetNewApp();
-						showModal = true;
-					}}>+APP</button
-				>
-			</div>
+			{#if isPL}
+				<div class="createApp">
+					<button
+						class="createAppBtn"
+						on:click={() => {
+							resetNewApp();
+							showModal = true;
+						}}>+APP</button
+					>
+				</div>
+			{/if}
 		</div>
 
 		<div class="app-container">
 			{#each apps as app, index}
-				{#if globalUserBelongsToApp(app)}
-					<ShowApp
-						appDetails={app}
-						editApp={isPL // this only allows 'PL' to edit the app
-							? () => {
-									showEditApp = true;
-									editIndex = index;
-									newApp.appAcronym = apps[editIndex].App_Acronym;
-									newApp.rNumber = apps[editIndex].App_Rnumber;
-									newApp.appDescription = apps[editIndex].App_Description;
-									newApp.startDate = getDateFromEpochEdit(apps[editIndex].App_startDate);
-									newApp.endDate = getDateFromEpochEdit(apps[editIndex].App_endDate);
-									newApp.appPermitCreate = apps[editIndex].App_permit_Create;
-									newApp.appPermitOpen = apps[editIndex].App_permit_Open;
-									newApp.appPermitToDo = apps[editIndex].App_permit_toDoList;
-									newApp.appPermitDoing = apps[editIndex].App_permit_Doing;
-									newApp.appPermitDone = apps[editIndex].App_permit_Done;
-								}
-							: null}
-						gotoApp={() => {
-							appWritable.set(app);
-							goto('/homePage/application/kanban');
-						}}
-					/>
-				{/if}
+				<!-- {#if globalUserBelongsToApp(app)} -->
+				<ShowApp
+					appDetails={app}
+					editApp={isPL // this only allows 'PL' to edit the app
+						? () => {
+								showEditApp = true;
+								editIndex = index;
+								newApp.appAcronym = apps[editIndex].App_Acronym;
+								newApp.rNumber = apps[editIndex].App_Rnumber;
+								newApp.appDescription = apps[editIndex].App_Description;
+								newApp.startDate = getDateFromEpochEdit(apps[editIndex].App_startDate);
+								newApp.endDate = getDateFromEpochEdit(apps[editIndex].App_endDate);
+								newApp.appPermitCreate = apps[editIndex].App_permit_Create;
+								newApp.appPermitOpen = apps[editIndex].App_permit_Open;
+								newApp.appPermitToDo = apps[editIndex].App_permit_toDoList;
+								newApp.appPermitDoing = apps[editIndex].App_permit_Doing;
+								newApp.appPermitDone = apps[editIndex].App_permit_Done;
+							}
+						: null}
+					gotoApp={() => {
+						appWritable.set(app);
+						goto('/homePage/application/kanban');
+					}}
+				/>
+				<!-- {/if} -->
 			{/each}
 		</div>
 	</div>

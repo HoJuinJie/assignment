@@ -106,7 +106,8 @@ exports.BelongsTo = async (req, res) => {
         const filteredRows = rows.map(element => element.user_group);
         const isAdmin = filteredRows.includes('admin');
         const isPL = filteredRows.includes('PL');
-        res.status(200).json({ result: filteredRows, isAdmin, isPL, username: req.user.username });
+        const isPM = filteredRows.includes('PM');
+        res.status(200).json({ result: filteredRows, isAdmin, isPL, isPM, username: req.user.username });
     } catch (err) {
         console.log(JSON.stringify(err));
         return res.status(401).json({ message: `An error occurred while fetching user's groups` });
