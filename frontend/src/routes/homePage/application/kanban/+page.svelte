@@ -337,6 +337,19 @@
 			if (error.response.status === 401) goto('/login');
 		}
 	}
+
+	async function sendEmail() {
+		try {
+			const response = await axios.post(ApiUrl_TMS + '/sendEmail', newTask, {
+				withCredentials: true
+			});
+
+		} catch (error) {
+			console.log(error.response.data.message);
+			toast.error(error.response.data.message);
+			if (error.response.status === 401) goto('/login');
+		}
+	}
 </script>
 
 <Layout bind:globalUsername>
@@ -806,12 +819,14 @@
 		{/if}
 		{#if newTask.taskState === 'doing' && globalUserBelongsTo.includes($appWritable.App_permit_Doing)}
 			<!-- to include send email with on click i.e sendEmail()-->
-			<button class="modelCreateBtn3" on:click={() => changeTaskStateTo('done', true)}
+			<button class="modelCreateBtn3" on:click={() => {
+				changeTaskStateTo('done', true);
+				sendEmail();
+				}}
 				>TO REVIEW</button
 			>
 		{/if}
 		{#if newTask.taskState === 'done' && globalUserBelongsTo.includes($appWritable.App_permit_Done)}
-			<!-- to include send email with on click i.e sendEmail()-->
 			<button
 				class="modelCreateBtn3"
 				on:click={() => changeTaskStateTo('closed', true)}

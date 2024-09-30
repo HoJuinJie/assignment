@@ -152,14 +152,14 @@ exports.createPlan = async (req, res) => {
     if (!planName || !startDate || !endDate) return res.status(400).json({ message: 'Required fields cannot be empty' });
 
     // rmb to validate plan name
-    if (planName.length >255) return res.status(400).json({ message: 'plan name exceeded limit of 255' });
+    if (planName.length > 255) return res.status(400).json({ message: 'plan name exceeded limit of 255' });
 
     // convert date to epoch
     const userStartDate = new Date(startDate);
     const epochStartDate = Math.floor(userStartDate.getTime() / 1000);
     const userEndDate = new Date(endDate);
     const epochEndDate = Math.floor(userEndDate.getTime() / 1000);
-    
+
     try {
         const [results] = await getConnection().query('SELECT * FROM plan WHERE Plan_MVP_name = ? AND Plan_MVP_name = ?', [planName, appAcronym]);
         if (results.length !== 0) return res.status(400).json({ message: `Plan MVP name "${planName}" already exists` });
@@ -190,15 +190,15 @@ exports.createTask = async (req, res) => {
     } = req.body;
 
     if (!taskName) return res.status(400).json({ message: 'Required fields cannot be empty' });
-    if (taskName.length >255) return res.status(400).json({ message: 'plan name exceeded limit of 255' });
+    if (taskName.length > 255) return res.status(400).json({ message: 'plan name exceeded limit of 255' });
 
     // convert date to epoch
     const userCreateDate = new Date(taskCreateDate);
     const epochCreateDate = Math.floor(userCreateDate.getTime() / 1000);
-    
+
     // Get a connection from the pool
     const connection = await getConnection().getConnection();
-    
+
     try {
         // Handle Race Condition - Transaction with Row Locking
         console.log('step1');
@@ -212,7 +212,7 @@ exports.createTask = async (req, res) => {
         );
 
         let rNumber = rows[0].App_Rnumber;
-        rNumber +=1;
+        rNumber += 1;
 
         // Update existing R-number
         await connection.query(
@@ -258,7 +258,7 @@ exports.saveTaskChanges = async (req, res) => {
     } = req.body;
 
     // consider race condition if you have the time
-    console.log('taskid, planname, tasknotes, taskState', [taskID,planName,taskNotes,taskState]);
+    console.log('taskid, planname, tasknotes, taskState', [taskID, planName, taskNotes, taskState]);
     try {
         if (planName === '') {
             await getConnection().query(
@@ -284,13 +284,15 @@ exports.saveTaskChanges = async (req, res) => {
 exports.sendEmail = async (req, res) => {
     const {
         to,
-        subject,
-        message
+        appAcronym,
+        taskName,
+        taskOwner
+
     } = req.body;
 
     let transporter = nodemailer.createTransport({
         service: 'gmail',
-        port: 587, 
+        port: 587,
         secure: false,
         auth: {
             user: 'jjstengg98@gmail.com',
@@ -298,10 +300,25 @@ exports.sendEmail = async (req, res) => {
         },
     });
 
+    const subject = `Review Request for ${taskName}`;
+    const message = `${taskOwner} moved ${taskName} to <done State> for review`;
+
     try {
+        const [results] = await getConnection().query(`
+            SELECT a.email FROM accounts a  
+            JOIN usergroup u ON u.username = a.username 
+            JOIN application app ON u.user_group = app.App_permit_Done 
+            WHERE app.App_Acronym = ?`, [appAcronym]);
+        
+        console.log('logging to', to);
+        
+        const emails = results.map(user => user.email).filter(email => email).join(', ');
+        
+        console.log('logging emails:', emails);
+
         await transporter.sendMail({
             from: '"Dev Team" <jjstengg98@gmail.com>',
-            to,
+            to: emails,
             subject,
             text: message,
         });
@@ -312,7 +329,6 @@ exports.sendEmail = async (req, res) => {
     }
 }
 
- 
- 
- 
- 
+
+
+
