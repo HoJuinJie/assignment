@@ -63,7 +63,8 @@ exports.createApp = async (req, res) => {
 
     if (!appAcronym || !rNumber || !startDate || !endDate) return res.status(400).json({ message: 'Required fields cannot be empty' });
     if (!validateAppAcronym(appAcronym)) return res.status(400).json({ message: 'Invalid App Acronym format' });
-    if (rNumber <= 0) return res.status(400).json({ message: 'R-number must be > 0' });
+    if (rNumber > 2**32 -1) return res.status(400).json({ message: 'R-number exceeded acceptable range' });
+    if (!/^[1-9]\d*$/.test(rNumber)) return res.status(400).json({ message: 'R-number must be a positive integer' });
 
     // convert date to epoch
     const userStartDate = new Date(startDate);
