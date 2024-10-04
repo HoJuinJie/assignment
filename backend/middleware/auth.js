@@ -4,19 +4,12 @@ const { checkGroup } = require('../functions');
 const { JWT_SECRET } = require('../config/config');
 
 exports.belongInAppPermit = (state) => async (req, res, next) => {
-    console.log('logging state', state);
-    console.log('logging req.body', req.body);
-    
     const appAcronym = req.body.appAcronym;
-    console.log('logging appAcronym:', req.body.appAcronym);
     try {
         const [result] = await getConnection().query(`
             SELECT ${state}
             FROM application
             WHERE App_Acronym = ?`, [appAcronym]);
-    
-        console.log('logging result in belonginapppermit:', result);
-        console.log('logging result[0] in belonginapppermit:', result[0][state]);
     
         const token = req.cookies.token;
         const decoded = jwt.verify(token, JWT_SECRET);

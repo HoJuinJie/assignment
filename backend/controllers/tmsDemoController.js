@@ -1,5 +1,4 @@
 const { getConnection } = require('../database');
-const { validateAppAcronym } = require('../functions');
 const nodemailer = require('nodemailer');
 const bcrpyt = require('bcryptjs');
 
@@ -9,7 +8,7 @@ class MsgCode {
     static ENTRY_EXISTS = "ERR4002";
     static INVALID_STATE_CHANGE = "ERR4003";
     static NOT_FOUND = "ERR4004";
-    static NOT_AUTHENTICATED = "ERR4005"; // do not have credentials
+    static INVALID_CREDENTIALS = "ERR4005"; // do not have credentials
     static NOT_AUTHORIZED = "ERR4006";    // do not have access rights
     static INTERNAL = "ERR5001";
     static UNHANDLED = "ERR6001";
@@ -47,8 +46,8 @@ exports.CreateTask = async (req, res) => {
     const userCreateDate = new Date(formattedDate);
     const epochCreateDate = Math.floor(userCreateDate.getTime() / 1000);
     // format taskNotes
-    let newTaskNotes = taskNotes + `\n[${taskCreator}, Current state: ${taskState}, ${displayDate} at ${formattedTime}] \n\n` +
-                '===================================================================================\n\n';
+    const newTaskNotes = taskNotes + `\n[${taskCreator}, Current state: ${taskState}, ${displayDate} at ${formattedTime}] \n\n` +
+                '=================================================================================================\n\n';
 
     // Get a connection from the pool
     const connection = await getConnection().getConnection();
@@ -73,7 +72,7 @@ exports.CreateTask = async (req, res) => {
         return
     }
 
-    try {
+    try { // check login details
         const [result] = await getConnection().query('SELECT * FROM accounts WHERE username = ?', [username]);
         if (result.length === 0) throw "user does not exist";
         if (result[0].accountStatus !== 'ACTIVE') throw "account disabled";
@@ -84,15 +83,45 @@ exports.CreateTask = async (req, res) => {
 
     } catch (err) {
         console.error(err);
-        return res.status(400).json({ msgCode: MsgCode.NOT_AUTHENTICATED });
+        return res.status(400).json({ msgCode: MsgCode.INVALID_CREDENTIALS });
     }
 
-    try { // check if plan exists
-        const [plans] = await getConnection().query('SELECT Plan_MVP_name FROM tms.plan WHERE Plan_app_Acronym = ? AND Plan_MVP_name = ?', [appAcronym, taskPlan]);
-        if (plans.length === 0) throw "plan does not exist";
+    try { // check permit create
+        const [permitCreate] = await getConnection().query(`
+            SELECT App_permit_Create
+            FROM application
+            WHERE App_Acronym = ?`, [appAcronym]);
+    
+        const [groups] = await getConnection().query(`
+            SELECT a.*, GROUP_CONCAT(ug.user_group) AS user_groups
+            FROM accounts a
+            LEFT JOIN usergroup ug ON a.username = ug.username
+            WHERE a.username = ?
+            GROUP BY a.username`, [username]);
+    
+        const filteredRows = groups.map(element => {
+            return {
+                ...element, // Keep other properties as they are
+                user_groups: element.user_groups ? element.user_groups.split(",") : [] // Split usergroups into an array or set to empty array if null
+            };
+        });
+    
+        const userGroups = filteredRows[0].user_groups;
+    
+        if (!userGroups.includes(permitCreate[0]['App_permit_Create'])) return res.status(401).json({ message: 'Access denied, unauthorised user', msgCode: MsgCode.NOT_AUTHORIZED });    
     } catch (err) {
         console.error(err);
-        return res.status(400).json({ msgCode: MsgCode.INVALID_INPUT });
+        return res.status(400).json({ message: 'Error when checking if Account belongs to permitted groups', error: err, msgCode: MsgCode.INTERNAL });
+    }
+
+    if (taskPlan) { // check if plan exists
+        try { 
+            const [plans] = await getConnection().query('SELECT Plan_MVP_name FROM tms.plan WHERE Plan_app_Acronym = ? AND Plan_MVP_name = ?', [appAcronym, taskPlan]);
+            if (plans.length === 0) throw "plan does not exist";
+        } catch (err) {
+            console.error(err);
+            return res.status(400).json({ msgCode: MsgCode.INVALID_INPUT });
+        }
     }
 
     try {
@@ -150,76 +179,3 @@ exports.CreateTask = async (req, res) => {
         connection.release();
     }
 }
-
-exports.createTask2 = async (req, res) => {
-    const {
-        taskID,
-        planName,
-        appAcronym,
-        taskName,
-        taskDescription,
-        taskNotes,
-        taskState,
-        taskCreator,
-        taskOwner,
-        taskCreateDate
-    } = req.body;
-
-    if (!taskName) return res.status(400).json({ message: 'Required fields cannot be empty' });
-    if (taskName.length > 255) return res.status(400).json({ message: 'plan name exceeded limit of 255' });
-
-    // convert date to epoch
-    const userCreateDate = new Date(taskCreateDate);
-    const epochCreateDate = Math.floor(userCreateDate.getTime() / 1000);
-
-    // Get a connection from the pool
-    const connection = await getConnection().getConnection();
-
-    try {
-        // Handle Race Condition - Transaction with Row Locking
-        console.log('step1');
-        // Start transaction
-        await connection.beginTransaction();
-        console.log('managed to begin transaction')
-
-        // Lock the R_number row
-        const [rows] = await connection.query(
-            'SELECT App_Rnumber FROM application WHERE App_Acronym = ? FOR UPDATE', [appAcronym]
-        );
-
-        let rNumber = rows[0].App_Rnumber;
-        rNumber += 1;
-
-        // Update existing R-number
-        await connection.query(
-            'UPDATE application SET App_Rnumber = ? WHERE App_Acronym = ?', [rNumber, appAcronym]
-        );
-
-        let newTaskID = appAcronym + '_' + rNumber;
-
-        console.log('logging newtaskID', newTaskID);
-
-        if (planName === '') {
-            await connection.query(
-                'INSERT INTO task (Task_id, Task_app_Acronym, Task_name, Task_description, Task_notes, Task_state, Task_creator, Task_owner, Task_createDate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
-                [newTaskID, appAcronym, taskName, taskDescription, taskNotes, taskState, taskCreator, taskOwner, epochCreateDate]);
-        } else {
-            await connection.query(
-                'INSERT INTO task (Task_id, Task_plan, Task_app_Acronym, Task_name, Task_description, Task_notes, Task_state, Task_creator, Task_owner, Task_createDate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-                [newTaskID, planName, appAcronym, taskName, taskDescription, taskNotes, taskState, taskCreator, taskOwner, epochCreateDate]);
-        }
-
-        // commit the transaction
-        await connection.commit();
-
-        res.status(201).json({ message: 'Task created successfully' });
-    } catch (err) {
-        // if any error occurs, rollback the transaction
-        await connection.rollback();
-        console.log(JSON.stringify(err));
-        return res.status(400).json({ message: 'An error occurred while creating application' });
-    } finally {
-        // Release connection back to the pool
-        connection.release();
-    }
-};
