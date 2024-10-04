@@ -21,10 +21,12 @@ const router = require('express').Router();
 //     } = require('../middleware/auth');
     
 const {
-    CreateTask
+    CreateTask,
+    GetTaskbyState
 } = require('../controllers/tmsDemoController')
 
 router.post('/CreateTask', [CreateTask]); 
+router.post('/GetTaskbyState', [GetTaskbyState]); 
 
 
 

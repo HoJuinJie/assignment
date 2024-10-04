@@ -62,11 +62,6 @@ exports.CreateTask = async (req, res) => {
         return
     }
 
-    if (!/^[a-zA-Z0-9_]{1,50}$/.test(appAcronym)) { // appAcronym format validation
-        res.status(400).json({ msgCode: MsgCode.INVALID_INPUT });
-        return
-    }
-
     if (taskName.length < 0 || taskName.length > 255) { // TN format validation
         res.status(400).json({ msgCode: MsgCode.INVALID_INPUT });
         return
@@ -178,4 +173,54 @@ exports.CreateTask = async (req, res) => {
         // Release connection back to the pool
         connection.release();
     }
+}
+
+
+exports.GetTaskbyState = async (req, res) => {
+    const {
+        username,
+        password,
+        taskState,
+        appAcronym
+    } = req.body
+
+    if (!username || !password) { // no US or PW
+        res.status(401).json({ msgCode: MsgCode.INVALID_INPUT });
+        return
+    }
+
+    if (!appAcronym || !taskState) { //no AA or TS
+        res.status(400).json({ msgCode: MsgCode.INVALID_INPUT });
+        return
+    }
+
+
+    if (!['open', 'to do', 'doing', 'done', 'closed'].includes(taskState)) { // if taskState does not exist
+        res.status(201).json({ result: [], msgCode: MsgCode.SUCCESS });
+        return
+    }
+
+    try { // check login details
+        const [result] = await getConnection().query('SELECT * FROM accounts WHERE username = ?', [username]);
+        if (result.length === 0) throw "user does not exist";
+        if (result[0].accountStatus !== 'ACTIVE') throw "account disabled";
+
+        const isPasswordValid = await bcrpyt.compare(password, result[0].password);
+        if (!isPasswordValid) throw "password not matched";
+        // res.status(201).json({ message: 'create task looks good' }); //this is to test if create task works 
+
+    } catch (err) {
+        console.error(err);
+        return res.status(400).json({ msgCode: MsgCode.INVALID_CREDENTIALS });
+    }
+
+    try {
+        const [rows] = await getConnection().query(`SELECT * from task WHERE Task_app_Acronym = ? AND Task_state = ?`, [appAcronym, taskState]);
+        res.status(200).json({result: rows, msgCode: MsgCode.SUCCESS });
+
+    } catch (err) {
+        console.error(err);
+        return res.status(400).json({ message: 'An error occurred while fetching tasks from application', msgCode: MsgCode.INTERNAL });
+    }
+
 }
