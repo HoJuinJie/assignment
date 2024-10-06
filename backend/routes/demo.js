@@ -22,11 +22,13 @@ const router = require('express').Router();
     
 const {
     CreateTask,
-    GetTaskbyState
+    GetTaskbyState,
+    PromoteTask2Done
 } = require('../controllers/tmsDemoController')
 
 router.post('/CreateTask', [CreateTask]); 
 router.post('/GetTaskbyState', [GetTaskbyState]); 
+router.post('/PromoteTask2Done', [PromoteTask2Done]); 
 
 
 

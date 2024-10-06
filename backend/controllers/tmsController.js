@@ -287,7 +287,8 @@ exports.sendEmail = async (req, res) => {
         to,
         appAcronym,
         taskName,
-        taskOwner
+        taskOwner,
+        taskID
 
     } = req.body;
 
@@ -301,8 +302,8 @@ exports.sendEmail = async (req, res) => {
         },
     });
 
-    const subject = `Review Request for ${taskName}`;
-    const message = `${taskOwner} moved ${taskName} to <done State> for review`;
+    const subject = `Requesting review for ${taskID}`;
+    const message = `${taskOwner} moved ${taskID} from <doing> state to <done> state for review`;
 
     try {
         const [results] = await getConnection().query(`

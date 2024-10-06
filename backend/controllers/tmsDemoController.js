@@ -280,7 +280,7 @@ exports.PromoteTask2Done = async (req, res) => {
     }
 
     try { // check permit doing
-        const [permitCreate] = await getConnection().query(`
+        const [permitDoing] = await getConnection().query(`
             SELECT App_permit_Doing
             FROM application
             WHERE App_Acronym = ?`, [appAcronym]);
@@ -301,21 +301,22 @@ exports.PromoteTask2Done = async (req, res) => {
     
         const userGroups = filteredRows[0].user_groups;
     
-        if (!userGroups.includes(permitCreate[0]['App_permit_Doing'])) return res.status(401).json({ message: 'Access denied, unauthorised user', msgCode: MsgCode.NOT_AUTHORIZED });    
+        if (!userGroups.includes(permitDoing[0]['App_permit_Doing'])) return res.status(401).json({ message: 'Access denied, unauthorised user', msgCode: MsgCode.NOT_AUTHORIZED });  
+
     } catch (err) {
         console.error(err);
         return res.status(400).json({ message: 'Error when checking if Account belongs to permitted groups', error: err, msgCode: MsgCode.INTERNAL });
     }
 
     try { // check if taskID exist
-        const [tasks] = await getConnection().query(`SELECT Task_id from tms.task WHERE Task_app_Acronym = ? AND Task_id = ?`, [appAcronym, taskID]);
+        const [tasks] = await getConnection().query(`SELECT * from tms.task WHERE Task_app_Acronym = ? AND Task_id = ?`, [appAcronym, taskID]);
         if (tasks.length === 0) throw "task does not exist";
     } catch (err) {
         console.error(err);
         return res.status(400).json({ msgCode: MsgCode.NOT_FOUND });
     }
 
-    try {
+    try { // update database when all fields meet requirements
         await getConnection().query(
             'UPDATE task SET Task_notes = ?, Task_state = ?, Task_owner = ? WHERE Task_id = ?',
             [newTaskNotes, taskState, taskOwner, taskID]
@@ -323,7 +324,7 @@ exports.PromoteTask2Done = async (req, res) => {
 
     } catch (err) {
         console.error(err);
-        return res.status(400).json({ message: 'Error when promoting task to Done state', msgCode: MsgCode.NOT_FOUND });
+        return res.status(400).json({ message: 'Error when promoting task to Done state', msgCode: MsgCode.INTERNAL });
     }
 
     //send email
@@ -337,10 +338,10 @@ exports.PromoteTask2Done = async (req, res) => {
         },
     });
 
-    const subject = `Review Request for ${taskID}`;
-    const message = `${taskOwner} moved ${taskID} to <done State> for review`;
+    const subject = `Requesting review for ${taskID}`;
+    const message = `${taskOwner} moved ${taskID} from <doing> state to <done> state for review`;
 
-    try { // Stopped here
+    try { // Send email
         const [results] = await getConnection().query(`
             SELECT a.email FROM accounts a  
             JOIN usergroup u ON u.username = a.username 
@@ -349,16 +350,23 @@ exports.PromoteTask2Done = async (req, res) => {
                 
         const emails = results.map(user => user.email).filter(email => email).join(', ');
         
+        if (emails.length === 0) {
+            res.status(400).json({ msgCode: MsgCode.NOT_FOUND });
+            return
+        }
+
         await transporter.sendMail({
             from: '"Dev Team" <jjstengg98@gmail.com>',
             to: emails,
             subject,
             text: message,
-        });
-        res.status(200).send('Email sent successfully!');
-    } catch (error) {
-        console.error('Error sending email:', error);
-        res.status(500).send('Failed to send email');
-    }
+        })
 
-}
+        const [result] = await connection.query(`SELECT * from task WHERE Task_id = ?`,[taskID]);
+        res.status(201).json({ result, msgCode: MsgCode.SUCCESS });
+
+    } catch (err) {
+        console.error(err);
+        return res.status(400).json({ message: 'Error when sending email', msgCode: MsgCode.INTERNAL });
+    }
+};
