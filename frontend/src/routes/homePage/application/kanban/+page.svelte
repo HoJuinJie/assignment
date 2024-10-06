@@ -209,20 +209,20 @@
 			if (newTask.notesToAdd === '' && newTask.planName === '') {
 				// only task name is filled
 				newTask.taskNotes = `${newTask.taskCreator} created the task '${newTask.taskName}' \n[${newTask.taskCreator}, Current State: ${newTask.taskState}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n`
-					+ '===================================================================================\n\n';
+					+ '=================================================================================================\n\n';
 			} else if (newTask.notesToAdd === '' && newTask.planName) {
 				// both task name and plan name filled
 				newTask.taskNotes =
 					`${newTask.taskCreator} created the task '${newTask.taskName}' \n[${newTask.taskCreator}, Current State: ${newTask.taskState}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n` +
 					`${newTask.taskCreator} updated the plan to '${newTask.planName}' \n[${globalUsername}, Current State: ${newTask.taskState}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n`
-					+ '===================================================================================\n\n';
+					+ '=================================================================================================\n\n';
 			} else {
 				// task name/plan/notes all filled
 				newTask.taskNotes =
 					`${newTask.taskCreator} created the task '${newTask.taskName}' \n[${newTask.taskCreator}, Current state: ${newTask.taskState}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n` +
 					`${newTask.taskCreator} updated the plan to '${newTask.planName}' \n[${globalUsername}, Current State: ${newTask.taskState}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n` +
 					`"${newTask.notesToAdd}" \n[${newTask.taskCreator}, Current state: ${newTask.taskState}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n`
-					+ '===================================================================================\n\n';
+					+ '=================================================================================================\n\n';
 			}
 		}
 
@@ -276,7 +276,7 @@
 
 		// changes in state  // may need to change the [user from onwer/creator to globalusername]
 		newTask.taskNotes += `${globalUsername} moved '${newTask.taskName}' from <${newTask.taskState}> state to <${state}> state \n[${globalUsername}, Current State: ${state}, ${newTask.taskDisplayDate} at ${formattedTime}]\n\n`
-			+ '===================================================================================\n\n';
+			+ '=================================================================================================\n\n';
 
 		// To update state in database
 		newTask.taskState = state;
