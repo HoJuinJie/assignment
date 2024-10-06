@@ -12,7 +12,7 @@ class MsgCode {
     static NOT_AUTHORIZED = "ERR4006";    // do not have access rights
     static INTERNAL = "ERR5001";
     static UNHANDLED = "ERR6001";
-}
+};
 
 exports.CreateTask = async (req, res) => {
     const {
@@ -46,7 +46,7 @@ exports.CreateTask = async (req, res) => {
     const userCreateDate = new Date(formattedDate);
     const epochCreateDate = Math.floor(userCreateDate.getTime() / 1000);
     // format taskNotes
-    const newTaskNotes = taskNotes + `\n[${taskCreator}, Current state: ${taskState}, ${displayDate} at ${formattedTime}] \n\n` +
+    const newTaskNotes = `"${taskNotes}"` + `\n[${taskCreator}, Current state: ${taskState}, ${displayDate} at ${formattedTime}] \n\n` +
                 '===============================================================================================\n\n';
 
     // Get a connection from the pool
@@ -175,7 +175,7 @@ exports.CreateTask = async (req, res) => {
         // Release connection back to the pool
         connection.release();
     }
-}
+};
 
 exports.GetTaskbyState = async (req, res) => {
     const {
@@ -224,7 +224,7 @@ exports.GetTaskbyState = async (req, res) => {
         return res.status(400).json({ message: 'An error occurred while fetching tasks from application', msgCode: MsgCode.INTERNAL });
     }
 
-}
+};
 
 exports.PromoteTask2Done = async (req, res) => {
     const {
@@ -252,7 +252,7 @@ exports.PromoteTask2Done = async (req, res) => {
     const taskOwner = username;
     const taskState = 'done';
     // format taskNotes
-    const newTaskNotes = taskNotes + `\n[${taskOwner}, Current state: ${taskState}, ${displayDate} at ${formattedTime}] \n\n` +
+    const newTaskNotes = `"${taskNotes}"` + `\n[${taskOwner}, Current state: ${taskState}, ${displayDate} at ${formattedTime}] \n\n` +
                 `${taskOwner} moved '${taskID}' from <doing> state to <${taskState}> state \n[${taskOwner}, Current State: ${taskState}, ${displayDate} at ${formattedTime}]\n\n` +
                 '===============================================================================================\n\n';
 
@@ -371,7 +371,7 @@ exports.PromoteTask2Done = async (req, res) => {
             text: message,
         })
 
-        const [result] = await connection.query(`SELECT * from task WHERE Task_id = ?`,[taskID]);
+        const [result] = await getConnection().query(`SELECT * from task WHERE Task_id = ?`,[taskID]);
         res.status(201).json({ result, msgCode: MsgCode.SUCCESS });
 
     } catch (err) {
@@ -379,3 +379,29 @@ exports.PromoteTask2Done = async (req, res) => {
         return res.status(400).json({ message: 'Error when sending email', msgCode: MsgCode.INTERNAL });
     }
 };
+
+/*
+!cURL:
+?command prompt:
+curl --location "http://localhost:3000/api/v1/demo/PromoteTask2Done" --header "Content-Type: application/json" --data "{\"username\":\"test\",\"password\":\"abc123!!\",\"taskID\":\"app1_129\",\"appAcronym\":\"app1\",\"taskNotes\":\"testing cURL\"}"
+OR
+curl --location "http://localhost:3000/api/v1/demo/PromoteTask2Done" ^
+--header "Content-Type: application/json" ^
+--data "{\"username\":\"test\", \"password\":\"abc123!!\", \"taskID\":\"app1_130\", \"appAcronym\":\"app1\", \"taskNotes\":\"testing cURL multilines\"}"
+
+
+?powershell:
+curl -Method POST `
+-Uri "http://localhost:3000/api/v1/demo/PromoteTask2Done" `
+-Headers @{
+    "Content-Type" = "application/json"
+} `
+-Body '{
+    "username" : "test",
+    "password" : "abc123!!",
+    "taskID" : "app1_129",
+    "appAcronym" : "app1",
+    "taskNotes" : "testing cURL on powershell"
+}'
+
+*/
