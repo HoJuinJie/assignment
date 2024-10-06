@@ -316,6 +316,14 @@ exports.PromoteTask2Done = async (req, res) => {
         return res.status(400).json({ msgCode: MsgCode.NOT_FOUND });
     }
 
+    try { // check if task is currently in <doing> state i.e not allowed to promote to <done> otherwise
+        const [state] = await getConnection().query(`SELECT Task_state FROM tms.task WHERE Task_id = ?`, [taskID]);
+        if (state[0].Task_state !== 'doing') throw "invalid state change";
+    } catch (err) {
+        console.error(err);
+        return res.status(400).json({ msgCode: MsgCode.INVALID_STATE_CHANGE });
+    }
+
     try { // update database when all fields meet requirements
         await getConnection().query(
             'UPDATE task SET Task_notes = ?, Task_state = ?, Task_owner = ? WHERE Task_id = ?',
