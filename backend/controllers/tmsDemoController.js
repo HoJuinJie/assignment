@@ -47,7 +47,7 @@ exports.CreateTask = async (req, res) => {
     const epochCreateDate = Math.floor(userCreateDate.getTime() / 1000);
     // format taskNotes
     const newTaskNotes = taskNotes + `\n[${taskCreator}, Current state: ${taskState}, ${displayDate} at ${formattedTime}] \n\n` +
-                '=================================================================================================\n\n';
+                '===============================================================================================\n\n';
 
     // Get a connection from the pool
     const connection = await getConnection().getConnection();
@@ -254,7 +254,7 @@ exports.PromoteTask2Done = async (req, res) => {
     // format taskNotes
     const newTaskNotes = taskNotes + `\n[${taskOwner}, Current state: ${taskState}, ${displayDate} at ${formattedTime}] \n\n` +
                 `${taskOwner} moved '${taskID}' from <doing> state to <${taskState}> state \n[${taskOwner}, Current State: ${taskState}, ${displayDate} at ${formattedTime}]\n\n` +
-                '=================================================================================================\n\n';
+                '===============================================================================================\n\n';
 
     if (!username || !password) { // no US or PW
         res.status(401).json({ msgCode: MsgCode.INVALID_INPUT });
