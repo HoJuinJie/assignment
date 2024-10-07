@@ -15,6 +15,11 @@ class MsgCode {
 };
 
 exports.CreateTask = async (req, res) => {
+    if (Object.keys(req.query).length !== 0) { // check if url does not contain any special char
+        res.status(400).json({ msgCode: MsgCode.INVALID_INPUT})
+        return;
+    }
+
     const {
         username,
         password,
@@ -24,6 +29,13 @@ exports.CreateTask = async (req, res) => {
         taskNotes,
         taskPlan
     } = req.body;
+
+    const allowedKeys = ['username', 'password', 'appAcronym', 'taskName', 'description', 'taskNotes', 'taskPlan'];
+    const invalidKeys = Object.keys(req.body).filter(key => !allowedKeys.includes(key));
+    if (invalidKeys.length > 0) {
+        res.status(400).json({ msgCode: MsgCode.INVALID_INPUT });
+        return;
+    }
 
     const today = new Date();
     const day = today.getDate().toString().padStart(2, '0');
@@ -176,7 +188,13 @@ exports.CreateTask = async (req, res) => {
     }
 };
 
-exports.GetTaskbyState = async (req, res) => {
+exports.GetTaskbyState = async (req, res) => { 
+
+    if (Object.keys(req.query).length !== 0) { // check if url does not contain any special char
+        res.status(400).json({ msgCode: MsgCode.INVALID_INPUT})
+        return;
+    }
+
     const {
         username,
         password,
@@ -184,6 +202,15 @@ exports.GetTaskbyState = async (req, res) => {
         appAcronym
     } = req.body;
 
+    const allowedKeys = ['username', 'password', 'taskState', 'appAcronym'];
+    const invalidKeys = Object.keys(req.body).filter(key => !allowedKeys.includes(key));
+    if (invalidKeys.length > 0) {
+        res.status(400).json({ msgCode: MsgCode.INVALID_INPUT });
+        return;
+    }
+
+    
+    console.log('log reqbody', req.body);
     if (!username || !password) { // no US or PW
         res.status(401).json({ msgCode: MsgCode.INVALID_INPUT });
         return
@@ -226,6 +253,11 @@ exports.GetTaskbyState = async (req, res) => {
 };
 
 exports.PromoteTask2Done = async (req, res) => {
+    if (Object.keys(req.query).length !== 0) { // check if url does not contain any special char
+        res.status(400).json({ msgCode: MsgCode.INVALID_INPUT})
+        return;
+    }
+
     const {
         username,
         password,
@@ -233,6 +265,13 @@ exports.PromoteTask2Done = async (req, res) => {
         appAcronym,
         taskNotes
     } = req.body;
+
+    const allowedKeys = ['username', 'password', 'taskID', 'appAcronym', 'taskNotes'];
+    const invalidKeys = Object.keys(req.body).filter(key => !allowedKeys.includes(key));
+    if (invalidKeys.length > 0) {
+        res.status(400).json({ msgCode: MsgCode.INVALID_INPUT });
+        return;
+    }
 
     const today = new Date();
     const day = today.getDate().toString().padStart(2, '0');
@@ -424,7 +463,7 @@ curl -Method POST `
 -Body '{
     "username" : "test",
     "password" : "abc123!!",
-    "taskState" : "open",
+    "taskState" : "doing",
     "appAcronym" : "app1"
 }'
 
