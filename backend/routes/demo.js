@@ -7,6 +7,7 @@ const {
 } = require('../controllers/tmsDemoController')
 
 class MsgCode {
+    // URL Structure
     static INVALID_URL = "ERR3001";
     static INVALID_PARAMETER = "ERR3002";
 };
