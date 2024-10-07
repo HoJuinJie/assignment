@@ -62,7 +62,7 @@ exports.CreateTask = async (req, res) => {
         return
     }
 
-    if (taskName.length < 0 || taskName.length > 255) { // TN format validation
+    if (taskName.length < 0 || taskName.length > 255) { // TN format validation 
         res.status(400).json({ msgCode: MsgCode.INVALID_INPUT });
         return
     }
@@ -74,7 +74,6 @@ exports.CreateTask = async (req, res) => {
 
         const isPasswordValid = await bcrpyt.compare(password, result[0].password);
         if (!isPasswordValid) throw "password not matched";
-        // res.status(201).json({ message: 'create task looks good' }); //this is to test if create task works 
 
     } catch (err) {
         console.error(err);
@@ -106,7 +105,7 @@ exports.CreateTask = async (req, res) => {
         if (!userGroups.includes(permitCreate[0]['App_permit_Create'])) return res.status(401).json({ message: 'Access denied, unauthorised user', msgCode: MsgCode.NOT_AUTHORIZED });    
     } catch (err) {
         console.error(err);
-        return res.status(400).json({ message: 'Error when checking if Account belongs to permitted groups', error: err, msgCode: MsgCode.INTERNAL });
+        return res.status(400).json({ message: 'Error when checking if Account belongs to permitted group', error: err, msgCode: MsgCode.INTERNAL });
     }
 
     if (taskPlan) { // check if plan exists
@@ -164,7 +163,7 @@ exports.CreateTask = async (req, res) => {
     } catch (err) {
         if (err.code === "NOT_FOUND") {
             console.error(err);
-            return res.status(400).json({ msgCode: MsgCode.INVALID_INPUT });
+            return res.status(400).json({ msgCode: MsgCode.NOT_FOUND });
         }
 
         // if any error occurs, rollback the transaction
@@ -382,6 +381,54 @@ exports.PromoteTask2Done = async (req, res) => {
 
 /*
 !cURL:
+!ENDPOINT 1: CreateTask
+?command prompt:
+curl --location "http://localhost:3000/api/v1/demo/CreateTask" --header "Content-Type: application/json" --data "{\"username\":\"pl\",\"password\":\"abc123!!\",\"appAcronym\":\"app1\",\"taskName\":\"task1\",\"description\":\"the is the description\",\"taskNotes\":\"testing cURL\", \"taskPlan\":\"sprint 1\"}"
+OR
+curl --location "http://localhost:3000/api/v1/demo/CreateTask" ^
+--header "Content-Type: application/json" ^
+--data "{\"username\":\"pl\",\"password\":\"abc123!!\",\"appAcronym\":\"app1\",\"taskName\":\"task1\",\"description\":\"the is the description\",\"taskNotes\":\"testing cURL\", \"taskPlan\":\"sprint 1\"}"
+
+
+?powershell:
+curl -Method POST `
+-Uri "http://localhost:3000/api/v1/demo/CreateTask" `
+-Headers @{
+    "Content-Type" = "application/json"
+} `
+-Body '{
+    "username" : "pl",
+    "password" : "abc123!!",
+    "appAcronym" : "app1",
+    "taskName" : "task2",
+    "description" : "this is the description for task2",
+    "taskNotes" : "testing cURL on powershell",
+    "taskPlan" : "sprint 1"
+}'
+
+!ENDPOINT 2: GetTaskbyState
+?command prompt:
+curl --location "http://localhost:3000/api/v1/demo/GetTaskbyState" --header "Content-Type: application/json" --data "{\"username\":\"test\",\"password\":\"abc123!!\",\"taskState\":\"open\",\"appAcronym\":\"app1\"}"
+OR
+curl --location "http://localhost:3000/api/v1/demo/GetTaskbyState" ^
+--header "Content-Type: application/json" ^
+--data "{\"username\":\"test\", \"password\":\"abc123!!\", \"taskState\":\"open\", \"appAcronym\":\"app1\"}"
+
+
+?powershell:
+curl -Method POST `
+-Uri "http://localhost:3000/api/v1/demo/GetTaskbyState" `
+-Headers @{
+    "Content-Type" = "application/json"
+} `
+-Body '{
+    "username" : "test",
+    "password" : "abc123!!",
+    "taskState" : "open",
+    "appAcronym" : "app1"
+}'
+
+!ENDPOINT 3: PromoteTask2Done
 ?command prompt:
 curl --location "http://localhost:3000/api/v1/demo/PromoteTask2Done" --header "Content-Type: application/json" --data "{\"username\":\"test\",\"password\":\"abc123!!\",\"taskID\":\"app1_129\",\"appAcronym\":\"app1\",\"taskNotes\":\"testing cURL\"}"
 OR
