@@ -18,14 +18,14 @@ router.use((req, res, next) => {
         return;
     }
 
-    console.log(`req.originalUrl: ${req.originalUrl}`);
+    // console.log(`req.originalUrl: ${req.originalUrl}`);
     const validUrls = [
       "/api/demo/CreateTask",
       "/api/demo/GetTaskbyState",
       "/api/demo/PromoteTask2Done",
     ];
     const url = req.originalUrl;
-    console.log("incoming url:", url);
+    // console.log("incoming url:", url);
   
     let isValidUrl = false;
   

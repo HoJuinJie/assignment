@@ -366,22 +366,6 @@ exports.PromoteTask2Done = async (req, res) => {
         return res.status(400).json({ msgCode: MsgCode.INVALID_STATE_CHANGE });
     }
 
-    // format taskNotes
-    // try { // fetch existing notes from database
-    //     const [notes] = await getConnection().query(`SELECT Task_notes from tms.task WHERE Task_id = ?`, [taskId]);
-    //     const existingNotes = notes[0].Task_notes;
-    //     const newTaskNotes = existingNotes + `"${taskNotes}"` + `\n[${taskOwner}, Current state: ${taskState}, ${displayDate} at ${formattedTime}] \n\n` +
-    //                 `${taskOwner} moved '${taskId}' from <doing> state to <${taskState}> state \n[${taskOwner}, Current State: ${taskState}, ${displayDate} at ${formattedTime}]\n\n` +
-    //                 '===============================================================================================\n\n';
-    
-    //     if (newTaskNotes.length > 2**24-1) { //check taskNotes within allowable limit
-    //         throw "taskNotes exceeded allowable character limit"
-    //     }
-    // } catch (err) {
-    //     console.error(err);
-    //     return res.status(400).json({ msgCode: MsgCode.INVALID_INPUT });
-    // }
-
     try { // update database when all fields meet requirements
         // format taskNotes
         const [notes] = await getConnection().query(`SELECT Task_notes from tms.task WHERE Task_id = ?`, [taskId]);
