@@ -5,21 +5,15 @@ const bcrpyt = require('bcryptjs');
 class MsgCode {
     static SUCCESS = "SUCC2001";
     static INVALID_INPUT = "ERR4001";
-    static ENTRY_EXISTS = "ERR4002";
+    static INVALID_KEY = "ERR4002";
     static INVALID_STATE_CHANGE = "ERR4003";
     static NOT_FOUND = "ERR4004";
     static INVALID_CREDENTIALS = "ERR4005"; // do not have credentials
     static NOT_AUTHORIZED = "ERR4006";    // do not have access rights
     static INTERNAL = "ERR5001";
-    static UNHANDLED = "ERR6001";
 };
 
 exports.CreateTask = async (req, res) => {
-    if (Object.keys(req.query).length !== 0) { // check if url does not contain any special char
-        res.status(400).json({ msgCode: MsgCode.INVALID_INPUT})
-        return;
-    }
-
     const {
         username,
         password,
@@ -33,7 +27,7 @@ exports.CreateTask = async (req, res) => {
     const allowedKeys = ['username', 'password', 'appAcronym', 'taskName', 'description', 'taskNotes', 'taskPlan'];
     const invalidKeys = Object.keys(req.body).filter(key => !allowedKeys.includes(key));
     if (invalidKeys.length > 0) {
-        res.status(400).json({ msgCode: MsgCode.INVALID_INPUT });
+        res.status(400).json({ msgCode: MsgCode.INVALID_KEY });
         return;
     }
 
@@ -188,12 +182,6 @@ exports.CreateTask = async (req, res) => {
 };
 
 exports.GetTaskbyState = async (req, res) => { 
-
-    if (Object.keys(req.query).length !== 0) { // check if url does not contain any special char
-        res.status(400).json({ msgCode: MsgCode.INVALID_INPUT})
-        return;
-    }
-
     const {
         username,
         password,
@@ -204,7 +192,7 @@ exports.GetTaskbyState = async (req, res) => {
     const allowedKeys = ['username', 'password', 'taskState', 'appAcronym'];
     const invalidKeys = Object.keys(req.body).filter(key => !allowedKeys.includes(key));
     if (invalidKeys.length > 0) {
-        res.status(400).json({ msgCode: MsgCode.INVALID_INPUT });
+        res.status(400).json({ msgCode: MsgCode.INVALID_KEY });
         return;
     }
 
@@ -251,17 +239,12 @@ exports.GetTaskbyState = async (req, res) => {
 
     } catch (err) {
         console.error(err);
-        return res.status(400).json({ msgCode: MsgCode.INTERNAL });
+        return res.status(500).json({ msgCode: MsgCode.INTERNAL });
     }
 
 };
 
 exports.PromoteTask2Done = async (req, res) => {
-    if (Object.keys(req.query).length !== 0) { // check if url does not contain any special char
-        res.status(400).json({ msgCode: MsgCode.INVALID_INPUT})
-        return;
-    }
-
     const {
         username,
         password,
@@ -273,7 +256,7 @@ exports.PromoteTask2Done = async (req, res) => {
     const allowedKeys = ['username', 'password', 'taskId', 'appAcronym', 'taskNotes'];
     const invalidKeys = Object.keys(req.body).filter(key => !allowedKeys.includes(key));
     if (invalidKeys.length > 0) {
-        res.status(400).json({ msgCode: MsgCode.INVALID_INPUT });
+        res.status(400).json({ msgCode: MsgCode.INVALID_KEY });
         return;
     }
 
@@ -347,7 +330,7 @@ exports.PromoteTask2Done = async (req, res) => {
 
     } catch (err) {
         console.error(err);
-        return res.status(400).json({ msgCode: MsgCode.INTERNAL });
+        return res.status(500).json({ msgCode: MsgCode.INTERNAL });
     }
 
     try { // check if appAcronym exist
@@ -382,7 +365,7 @@ exports.PromoteTask2Done = async (req, res) => {
 
     } catch (err) {
         console.error(err);
-        return res.status(400).json({ msgCode: MsgCode.INTERNAL });
+        return res.status(500).json({ msgCode: MsgCode.INTERNAL });
     }
 
     //send email
@@ -421,11 +404,11 @@ exports.PromoteTask2Done = async (req, res) => {
         })
 
         // const [result] = await getConnection().query(`SELECT * from task WHERE Task_id = ?`,[taskId]);
-        res.status(200).json({ result: { Task_id: taskId, taskState : 'done'  }, msgCode: MsgCode.SUCCESS });
+        res.status(200).json({ result: { Task_id: taskId, Task_state : 'done'  }, msgCode: MsgCode.SUCCESS });
 
     } catch (err) {
         console.error(err);
-        return res.status(400).json({ msgCode: MsgCode.INTERNAL });
+        return res.status(500).json({ msgCode: MsgCode.INTERNAL });
     }
 };
 
