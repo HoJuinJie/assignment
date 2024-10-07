@@ -25,7 +25,7 @@ app.use(cookieParser());
 // Routing
 app.use('/api/v1/auth', auth);
 app.use('/api/v1/tms', tms);
-app.use('/api/v1/demo', demo);
+app.use('/api/demo', demo);
 // Connecting to database
 createConnection()
 console.log('db connected')

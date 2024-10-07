@@ -65,7 +65,7 @@ exports.CreateTask = async (req, res) => {
     const connection = await getConnection().getConnection();
 
     if (!username || !password) { // no US or PW
-        res.status(401).json({ msgCode: MsgCode.INVALID_INPUT });
+        res.status(400).json({ msgCode: MsgCode.INVALID_INPUT });
         return
     }
 
@@ -89,7 +89,15 @@ exports.CreateTask = async (req, res) => {
 
     } catch (err) {
         console.error(err);
-        return res.status(400).json({ msgCode: MsgCode.INVALID_CREDENTIALS });
+        return res.status(401).json({ msgCode: MsgCode.INVALID_CREDENTIALS });
+    }
+
+    try { // check if appAcronym exist
+        const [app] = await getConnection().query('SELECT * FROM tms.application WHERE App_Acronym = ?', [appAcronym]);
+        if (app.length === 0) throw "app acronym does not exist";
+    } catch (err) {
+        console.error(err);
+        return res.status(400).json({ msgCode: MsgCode.NOT_FOUND });
     }
 
     try { // check permit create
@@ -114,10 +122,10 @@ exports.CreateTask = async (req, res) => {
     
         const userGroups = filteredRows[0].user_groups;
     
-        if (!userGroups.includes(permitCreate[0]['App_permit_Create'])) return res.status(401).json({ message: 'Access denied, unauthorised user', msgCode: MsgCode.NOT_AUTHORIZED });    
+        if (!userGroups.includes(permitCreate[0]['App_permit_Create'])) return res.status(403).json({ msgCode: MsgCode.NOT_AUTHORIZED });    
     } catch (err) {
         console.error(err);
-        return res.status(400).json({ message: 'Error when checking if Account belongs to permitted group', error: err, msgCode: MsgCode.INTERNAL });
+        return res.status(500).json({ msgCode: MsgCode.INTERNAL });
     }
 
     if (taskPlan) { // check if plan exists
@@ -140,10 +148,6 @@ exports.CreateTask = async (req, res) => {
         const [rows] = await connection.query(
             'SELECT App_Rnumber FROM application WHERE App_Acronym = ? FOR UPDATE', [appAcronym]
         );
-
-        if (rows.length === 0) { // check if appAcronym input is exists
-            throw { code: "NOT_FOUND" };
-        }
 
         let rNumber = rows[0].App_Rnumber;
         rNumber += 1;
@@ -168,20 +172,15 @@ exports.CreateTask = async (req, res) => {
         // commit the transaction
         await connection.commit();
 
-        const [result] = await connection.query(`SELECT * from task WHERE Task_id = ?`,[newTaskID]);
+        // const [result] = await connection.query(`SELECT * from task WHERE Task_id = ?`,[newTaskID]);
 
-        res.status(201).json({ result, msgCode: MsgCode.SUCCESS });
+        res.status(200).json({ result: { Task_id : newTaskID }, msgCode: MsgCode.SUCCESS });
 
     } catch (err) {
-        if (err.code === "NOT_FOUND") {
-            console.error(err);
-            return res.status(400).json({ msgCode: MsgCode.NOT_FOUND });
-        }
-
         // if any error occurs, rollback the transaction
         await connection.rollback();
         console.log(JSON.stringify(err));
-        return res.status(400).json({ message: 'An error occurred while creating application', msgCode: MsgCode.INTERNAL });
+        return res.status(500).json({ msgCode: MsgCode.INTERNAL });
     } finally {
         // Release connection back to the pool
         connection.release();
@@ -210,9 +209,8 @@ exports.GetTaskbyState = async (req, res) => {
     }
 
     
-    console.log('log reqbody', req.body);
     if (!username || !password) { // no US or PW
-        res.status(401).json({ msgCode: MsgCode.INVALID_INPUT });
+        res.status(400).json({ msgCode: MsgCode.INVALID_INPUT });
         return
     }
 
@@ -221,9 +219,8 @@ exports.GetTaskbyState = async (req, res) => {
         return
     }
 
-
     if (!['open', 'to do', 'doing', 'done', 'closed'].includes(taskState)) { // if taskState does not exist
-        res.status(201).json({ result: [], msgCode: MsgCode.SUCCESS });
+        res.status(400).json({ msgCode: MsgCode.INVALID_INPUT });
         return
     }
 
@@ -234,11 +231,18 @@ exports.GetTaskbyState = async (req, res) => {
 
         const isPasswordValid = await bcrpyt.compare(password, result[0].password);
         if (!isPasswordValid) throw "password not matched";
-        // res.status(201).json({ message: 'create task looks good' }); //this is to test if create task works 
 
     } catch (err) {
         console.error(err);
-        return res.status(400).json({ msgCode: MsgCode.INVALID_CREDENTIALS });
+        return res.status(401).json({ msgCode: MsgCode.INVALID_CREDENTIALS });
+    }
+
+    try { // check if appAcronym exist
+        const [app] = await getConnection().query('SELECT * FROM tms.application WHERE App_Acronym = ?', [appAcronym]);
+        if (app.length === 0) throw "app acronym does not exist";
+    } catch (err) {
+        console.error(err);
+        return res.status(400).json({ msgCode: MsgCode.NOT_FOUND });
     }
 
     try {
@@ -247,7 +251,7 @@ exports.GetTaskbyState = async (req, res) => {
 
     } catch (err) {
         console.error(err);
-        return res.status(400).json({ message: 'An error occurred while fetching tasks from application', msgCode: MsgCode.INTERNAL });
+        return res.status(400).json({ msgCode: MsgCode.INTERNAL });
     }
 
 };
@@ -261,12 +265,12 @@ exports.PromoteTask2Done = async (req, res) => {
     const {
         username,
         password,
-        taskID,
+        taskId,
         appAcronym,
         taskNotes
     } = req.body;
 
-    const allowedKeys = ['username', 'password', 'taskID', 'appAcronym', 'taskNotes'];
+    const allowedKeys = ['username', 'password', 'taskId', 'appAcronym', 'taskNotes'];
     const invalidKeys = Object.keys(req.body).filter(key => !allowedKeys.includes(key));
     if (invalidKeys.length > 0) {
         res.status(400).json({ msgCode: MsgCode.INVALID_INPUT });
@@ -291,15 +295,15 @@ exports.PromoteTask2Done = async (req, res) => {
     const taskState = 'done';
     // format taskNotes
     const newTaskNotes = `"${taskNotes}"` + `\n[${taskOwner}, Current state: ${taskState}, ${displayDate} at ${formattedTime}] \n\n` +
-                `${taskOwner} moved '${taskID}' from <doing> state to <${taskState}> state \n[${taskOwner}, Current State: ${taskState}, ${displayDate} at ${formattedTime}]\n\n` +
+                `${taskOwner} moved '${taskId}' from <doing> state to <${taskState}> state \n[${taskOwner}, Current State: ${taskState}, ${displayDate} at ${formattedTime}]\n\n` +
                 '===============================================================================================\n\n';
 
     if (!username || !password) { // no US or PW
-        res.status(401).json({ msgCode: MsgCode.INVALID_INPUT });
+        res.status(400).json({ msgCode: MsgCode.INVALID_INPUT });
         return
     }
 
-    if (!appAcronym || !taskID) { //no AA or Tid
+    if (!appAcronym || !taskId) { //no AA or Tid
         res.status(400).json({ msgCode: MsgCode.INVALID_INPUT });
         return
     }
@@ -311,11 +315,10 @@ exports.PromoteTask2Done = async (req, res) => {
 
         const isPasswordValid = await bcrpyt.compare(password, result[0].password);
         if (!isPasswordValid) throw "password not matched";
-        // res.status(201).json({ message: 'create task looks good' }); //this is to test if create task works 
 
     } catch (err) {
         console.error(err);
-        return res.status(400).json({ msgCode: MsgCode.INVALID_CREDENTIALS });
+        return res.status(401).json({ msgCode: MsgCode.INVALID_CREDENTIALS });
     }
 
     try { // check permit doing
@@ -340,15 +343,23 @@ exports.PromoteTask2Done = async (req, res) => {
     
         const userGroups = filteredRows[0].user_groups;
     
-        if (!userGroups.includes(permitDoing[0]['App_permit_Doing'])) return res.status(401).json({ message: 'Access denied, unauthorised user', msgCode: MsgCode.NOT_AUTHORIZED });  
+        if (!userGroups.includes(permitDoing[0]['App_permit_Doing'])) return res.status(403).json({ msgCode: MsgCode.NOT_AUTHORIZED });  
 
     } catch (err) {
         console.error(err);
-        return res.status(400).json({ message: 'Error when checking if Account belongs to permitted groups', error: err, msgCode: MsgCode.INTERNAL });
+        return res.status(400).json({ msgCode: MsgCode.INTERNAL });
     }
 
-    try { // check if taskID exist
-        const [tasks] = await getConnection().query(`SELECT * from tms.task WHERE Task_app_Acronym = ? AND Task_id = ?`, [appAcronym, taskID]);
+    try { // check if appAcronym exist
+        const [app] = await getConnection().query('SELECT * FROM tms.application WHERE App_Acronym = ?', [appAcronym]);
+        if (app.length === 0) throw "app acronym does not exist";
+    } catch (err) {
+        console.error(err);
+        return res.status(400).json({ msgCode: MsgCode.NOT_FOUND });
+    }
+
+    try { // check if taskId exist
+        const [tasks] = await getConnection().query(`SELECT * from tms.task WHERE Task_app_Acronym = ? AND Task_id = ?`, [appAcronym, taskId]);
         if (tasks.length === 0) throw "task does not exist";
     } catch (err) {
         console.error(err);
@@ -356,7 +367,7 @@ exports.PromoteTask2Done = async (req, res) => {
     }
 
     try { // check if task is currently in <doing> state i.e not allowed to promote to <done> otherwise
-        const [state] = await getConnection().query(`SELECT Task_state FROM tms.task WHERE Task_id = ?`, [taskID]);
+        const [state] = await getConnection().query(`SELECT Task_state FROM tms.task WHERE Task_id = ?`, [taskId]);
         if (state[0].Task_state !== 'doing') throw "invalid state change";
     } catch (err) {
         console.error(err);
@@ -366,12 +377,12 @@ exports.PromoteTask2Done = async (req, res) => {
     try { // update database when all fields meet requirements
         await getConnection().query(
             'UPDATE task SET Task_notes = ?, Task_state = ?, Task_owner = ? WHERE Task_id = ?',
-            [newTaskNotes, taskState, taskOwner, taskID]
+            [newTaskNotes, taskState, taskOwner, taskId]
         );
 
     } catch (err) {
         console.error(err);
-        return res.status(400).json({ message: 'Error when promoting task to Done state', msgCode: MsgCode.INTERNAL });
+        return res.status(400).json({ msgCode: MsgCode.INTERNAL });
     }
 
     //send email
@@ -385,8 +396,8 @@ exports.PromoteTask2Done = async (req, res) => {
         },
     });
 
-    const subject = `Requesting review for ${taskID}`;
-    const message = `${taskOwner} moved ${taskID} from <doing> state to <done> state for review`;
+    const subject = `Requesting review for ${taskId}`;
+    const message = `${taskOwner} moved ${taskId} from <doing> state to <done> state for review`;
 
     try { // Send email
         const [results] = await getConnection().query(`
@@ -409,12 +420,12 @@ exports.PromoteTask2Done = async (req, res) => {
             text: message,
         })
 
-        const [result] = await getConnection().query(`SELECT * from task WHERE Task_id = ?`,[taskID]);
-        res.status(201).json({ result, msgCode: MsgCode.SUCCESS });
+        // const [result] = await getConnection().query(`SELECT * from task WHERE Task_id = ?`,[taskId]);
+        res.status(200).json({ result: { Task_id: taskId, taskState : 'done'  }, msgCode: MsgCode.SUCCESS });
 
     } catch (err) {
         console.error(err);
-        return res.status(400).json({ message: 'Error when sending email', msgCode: MsgCode.INTERNAL });
+        return res.status(400).json({ msgCode: MsgCode.INTERNAL });
     }
 };
 
@@ -422,16 +433,16 @@ exports.PromoteTask2Done = async (req, res) => {
 !cURL:
 !ENDPOINT 1: CreateTask
 ?command prompt:
-curl --location "http://localhost:3000/api/v1/demo/CreateTask" --header "Content-Type: application/json" --data "{\"username\":\"pl\",\"password\":\"abc123!!\",\"appAcronym\":\"app1\",\"taskName\":\"task1\",\"description\":\"the is the description\",\"taskNotes\":\"testing cURL\", \"taskPlan\":\"sprint 1\"}"
+curl --location "http://localhost:3000/api/demo/CreateTask" --header "Content-Type: application/json" --data "{\"username\":\"pl\",\"password\":\"abc123!!\",\"appAcronym\":\"app1\",\"taskName\":\"task1\",\"description\":\"the is the description\",\"taskNotes\":\"testing cURL\", \"taskPlan\":\"sprint 1\"}"
 OR
-curl --location "http://localhost:3000/api/v1/demo/CreateTask" ^
+curl --location "http://localhost:3000/api/demo/CreateTask" ^
 --header "Content-Type: application/json" ^
 --data "{\"username\":\"pl\",\"password\":\"abc123!!\",\"appAcronym\":\"app1\",\"taskName\":\"task1\",\"description\":\"the is the description\",\"taskNotes\":\"testing cURL\", \"taskPlan\":\"sprint 1\"}"
 
 
 ?powershell:
 curl -Method POST `
--Uri "http://localhost:3000/api/v1/demo/CreateTask" `
+-Uri "http://localhost:3000/api/demo/CreateTask" `
 -Headers @{
     "Content-Type" = "application/json"
 } `
@@ -439,24 +450,24 @@ curl -Method POST `
     "username" : "pl",
     "password" : "abc123!!",
     "appAcronym" : "app1",
-    "taskName" : "task2",
-    "description" : "this is the description for task2",
+    "taskName" : "task100",
+    "description" : "this is the description for task100",
     "taskNotes" : "testing cURL on powershell",
     "taskPlan" : "sprint 1"
 }'
 
 !ENDPOINT 2: GetTaskbyState
 ?command prompt:
-curl --location "http://localhost:3000/api/v1/demo/GetTaskbyState" --header "Content-Type: application/json" --data "{\"username\":\"test\",\"password\":\"abc123!!\",\"taskState\":\"open\",\"appAcronym\":\"app1\"}"
+curl --location "http://localhost:3000/api/demo/GetTaskbyState" --header "Content-Type: application/json" --data "{\"username\":\"test\",\"password\":\"abc123!!\",\"taskState\":\"open\",\"appAcronym\":\"app1\"}"
 OR
-curl --location "http://localhost:3000/api/v1/demo/GetTaskbyState" ^
+curl --location "http://localhost:3000/api/demo/GetTaskbyState" ^
 --header "Content-Type: application/json" ^
 --data "{\"username\":\"test\", \"password\":\"abc123!!\", \"taskState\":\"open\", \"appAcronym\":\"app1\"}"
 
 
 ?powershell:
 curl -Method POST `
--Uri "http://localhost:3000/api/v1/demo/GetTaskbyState" `
+-Uri "http://localhost:3000/api/demo/GetTaskbyState" `
 -Headers @{
     "Content-Type" = "application/json"
 } `
@@ -469,23 +480,23 @@ curl -Method POST `
 
 !ENDPOINT 3: PromoteTask2Done
 ?command prompt:
-curl --location "http://localhost:3000/api/v1/demo/PromoteTask2Done" --header "Content-Type: application/json" --data "{\"username\":\"test\",\"password\":\"abc123!!\",\"taskID\":\"app1_129\",\"appAcronym\":\"app1\",\"taskNotes\":\"testing cURL\"}"
+curl --location "http://localhost:3000/api/demo/PromoteTask2Done" --header "Content-Type: application/json" --data "{\"username\":\"test\",\"password\":\"abc123!!\",\"taskId\":\"app1_129\",\"appAcronym\":\"app1\",\"taskNotes\":\"testing cURL\"}"
 OR
-curl --location "http://localhost:3000/api/v1/demo/PromoteTask2Done" ^
+curl --location "http://localhost:3000/api/demo/PromoteTask2Done" ^
 --header "Content-Type: application/json" ^
---data "{\"username\":\"test\", \"password\":\"abc123!!\", \"taskID\":\"app1_130\", \"appAcronym\":\"app1\", \"taskNotes\":\"testing cURL multilines\"}"
+--data "{\"username\":\"test\", \"password\":\"abc123!!\", \"taskId\":\"app1_130\", \"appAcronym\":\"app1\", \"taskNotes\":\"testing cURL multilines\"}"
 
 
 ?powershell:
 curl -Method POST `
--Uri "http://localhost:3000/api/v1/demo/PromoteTask2Done" `
+-Uri "http://localhost:3000/api/demo/PromoteTask2Done" `
 -Headers @{
     "Content-Type" = "application/json"
 } `
 -Body '{
     "username" : "test",
     "password" : "abc123!!",
-    "taskID" : "app1_129",
+    "taskId" : "app1_129",
     "appAcronym" : "app1",
     "taskNotes" : "testing cURL on powershell"
 }'
