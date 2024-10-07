@@ -425,7 +425,7 @@
 									newTask.taskOwner = appTasks[editTaskIndex].Task_owner;
 									newTask.taskCreateDate = appTasks[editTaskIndex].Task_createDate;
 									newTask.taskExistingPlan = appTasks[editTaskIndex].Task_plan || '';
-									// newTask.taskNextState = 'to do';
+									// newTask.taskNextState = 'todo';
 								}}
 							/>
 						{/if}
@@ -437,7 +437,7 @@
 				<h2 class="title-header">To Do</h2>
 				<div class="kanbanTask">
 					{#each appTasks as task, index}
-						{#if task.Task_state === 'to do'}
+						{#if task.Task_state === 'todo'}
 							<ShowTask
 								taskDetails={task}
 								color={getPlanColor(task.Task_plan)}
@@ -770,7 +770,7 @@
 					<div class="input-container2 comments">
 						<textarea bind:value={newTask.notesToAdd} placeholder="comments" />
 					</div>
-				{:else if newTask.taskState === 'to do' && globalUserBelongsTo.includes($appWritable.App_permit_toDoList)}
+				{:else if newTask.taskState === 'todo' && globalUserBelongsTo.includes($appWritable.App_permit_toDoList)}
 					<div class="input-container2 comments">
 						<textarea bind:value={newTask.notesToAdd} placeholder="comments" />
 					</div>
@@ -799,7 +799,7 @@
 			>
 		{:else if newTask.taskState === 'open' && globalUserBelongsTo.includes($appWritable.App_permit_Open)}
 			<button class="modelCreateBtn2" on:click={() => saveChanges()}>SAVE CHANGES</button>
-		{:else if newTask.taskState === 'to do' && globalUserBelongsTo.includes($appWritable.App_permit_toDoList)}
+		{:else if newTask.taskState === 'todo' && globalUserBelongsTo.includes($appWritable.App_permit_toDoList)}
 			<button class="modelCreateBtn2" on:click={() => saveChanges()}>SAVE CHANGES</button>
 		{:else if newTask.taskState === 'doing' && globalUserBelongsTo.includes($appWritable.App_permit_Doing)}
 			<button class="modelCreateBtn2" on:click={() => saveChanges()}>SAVE CHANGES</button>
@@ -811,12 +811,12 @@
 	<div slot="button2">
 		{#if globalUserBelongsTo.includes($appWritable.App_permit_Open)}
 			{#if newTask.taskState === 'open'}
-				<button class="modelCreateBtn3" on:click={() => changeTaskStateTo('to do', true)}
+				<button class="modelCreateBtn3" on:click={() => changeTaskStateTo('todo', true)}
 					>RELEASE TASK</button
 				>
 			{/if}
 		{/if}
-		{#if newTask.taskState === 'to do' && globalUserBelongsTo.includes($appWritable.App_permit_toDoList)}
+		{#if newTask.taskState === 'todo' && globalUserBelongsTo.includes($appWritable.App_permit_toDoList)}
 			<button class="modelCreateBtn3" on:click={() => changeTaskStateTo('doing', true)}
 				>TAKE ON</button
 			>
@@ -841,7 +841,7 @@
 
 	<div slot="button3">
 		{#if newTask.taskState === 'doing' && globalUserBelongsTo.includes($appWritable.App_permit_Doing)}
-			<button class="modelCreateBtn4" on:click={() => changeTaskStateTo('to do', false)}
+			<button class="modelCreateBtn4" on:click={() => changeTaskStateTo('todo', false)}
 				>FORFEIT TASK</button
 			>
 		{/if}

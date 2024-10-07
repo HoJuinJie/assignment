@@ -59,6 +59,10 @@ exports.CreateTask = async (req, res) => {
     const newTaskNotes = `"${taskNotes}"` + `\n[${taskCreator}, Current state: ${taskState}, ${displayDate} at ${formattedTime}] \n\n` +
                 '===============================================================================================\n\n';
 
+    if (newTaskNotes.length > 2**24-1) { //check taskNotes within allowable limit
+        res.status(400).json({ msgCode: MsgCode.INVALID_INPUT });
+        return
+    }
     // Get a connection from the pool
     const connection = await getConnection().getConnection();
 
@@ -73,6 +77,11 @@ exports.CreateTask = async (req, res) => {
     }
 
     if (taskName.length < 0 || taskName.length > 255) { // TN format validation 
+        res.status(400).json({ msgCode: MsgCode.INVALID_INPUT });
+        return
+    }
+
+    if (description.length > 2**16-1) { // check description within allowable limit
         res.status(400).json({ msgCode: MsgCode.INVALID_INPUT });
         return
     }
@@ -211,7 +220,7 @@ exports.GetTaskbyState = async (req, res) => {
         return
     }
 
-    if (!['open', 'to do', 'doing', 'done', 'closed'].includes(taskState)) { // if taskState does not exist
+    if (!['open', 'todo', 'doing', 'done', 'closed'].includes(taskState)) { // if taskState does not exist
         res.status(400).json({ msgCode: MsgCode.INVALID_INPUT });
         return
     }
@@ -280,11 +289,7 @@ exports.PromoteTask2Done = async (req, res) => {
     // set other display fields that can be handled in backend 
     const taskOwner = username;
     const taskState = 'done';
-    // format taskNotes
-    const newTaskNotes = `"${taskNotes}"` + `\n[${taskOwner}, Current state: ${taskState}, ${displayDate} at ${formattedTime}] \n\n` +
-                `${taskOwner} moved '${taskId}' from <doing> state to <${taskState}> state \n[${taskOwner}, Current State: ${taskState}, ${displayDate} at ${formattedTime}]\n\n` +
-                '===============================================================================================\n\n';
-
+    
     if (!username || !password) { // no US or PW
         res.status(400).json({ msgCode: MsgCode.INVALID_INPUT });
         return
@@ -361,7 +366,35 @@ exports.PromoteTask2Done = async (req, res) => {
         return res.status(400).json({ msgCode: MsgCode.INVALID_STATE_CHANGE });
     }
 
+    // format taskNotes
+    // try { // fetch existing notes from database
+    //     const [notes] = await getConnection().query(`SELECT Task_notes from tms.task WHERE Task_id = ?`, [taskId]);
+    //     const existingNotes = notes[0].Task_notes;
+    //     const newTaskNotes = existingNotes + `"${taskNotes}"` + `\n[${taskOwner}, Current state: ${taskState}, ${displayDate} at ${formattedTime}] \n\n` +
+    //                 `${taskOwner} moved '${taskId}' from <doing> state to <${taskState}> state \n[${taskOwner}, Current State: ${taskState}, ${displayDate} at ${formattedTime}]\n\n` +
+    //                 '===============================================================================================\n\n';
+    
+    //     if (newTaskNotes.length > 2**24-1) { //check taskNotes within allowable limit
+    //         throw "taskNotes exceeded allowable character limit"
+    //     }
+    // } catch (err) {
+    //     console.error(err);
+    //     return res.status(400).json({ msgCode: MsgCode.INVALID_INPUT });
+    // }
+
     try { // update database when all fields meet requirements
+        // format taskNotes
+        const [notes] = await getConnection().query(`SELECT Task_notes from tms.task WHERE Task_id = ?`, [taskId]);
+        const existingNotes = notes[0].Task_notes;
+        const newTaskNotes = existingNotes + `"${taskNotes}"` + `\n[${taskOwner}, Current state: ${taskState}, ${displayDate} at ${formattedTime}] \n\n` +
+                    `${taskOwner} moved '${taskId}' from <doing> state to <${taskState}> state \n[${taskOwner}, Current State: ${taskState}, ${displayDate} at ${formattedTime}]\n\n` +
+                    '===============================================================================================\n\n';
+    
+        if (newTaskNotes.length > 2**24-1) { //check taskNotes within allowable limit
+            res.status(400).json({ msgCode: MsgCode.INVALID_INPUT });
+            return
+        }
+
         await getConnection().query(
             'UPDATE task SET Task_notes = ?, Task_state = ?, Task_owner = ? WHERE Task_id = ?',
             [newTaskNotes, taskState, taskOwner, taskId]
@@ -436,11 +469,11 @@ curl -Method POST `
 -Body '{
     "username" : "pl",
     "password" : "abc123!!",
-    "appAcronym" : "app1",
-    "taskName" : "task100",
-    "description" : "this is the description for task100",
+    "appAcronym" : "app2",
+    "taskName" : "task2",
+    "description" : "this is the description for task2",
     "taskNotes" : "testing cURL on powershell",
-    "taskPlan" : "sprint 1"
+    "taskPlan" : "plan1"
 }'
 
 !ENDPOINT 2: GetTaskbyState
@@ -461,8 +494,8 @@ curl -Method POST `
 -Body '{
     "username" : "test",
     "password" : "abc123!!",
-    "taskState" : "doing",
-    "appAcronym" : "app1"
+    "taskState" : "todo",
+    "appAcronym" : "app2"
 }'
 
 !ENDPOINT 3: PromoteTask2Done
@@ -483,8 +516,8 @@ curl -Method POST `
 -Body '{
     "username" : "test",
     "password" : "abc123!!",
-    "taskId" : "app1_129",
-    "appAcronym" : "app1",
+    "taskId" : "app2_502",
+    "appAcronym" : "app2",
     "taskNotes" : "testing cURL on powershell"
 }'
 
