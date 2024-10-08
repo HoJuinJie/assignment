@@ -313,6 +313,14 @@ exports.PromoteTask2Done = async (req, res) => {
         return res.status(401).json({ msgCode: MsgCode.INVALID_CREDENTIALS });
     }
 
+    try { // check if appAcronym exist
+        const [app] = await getConnection().query('SELECT * FROM tms.application WHERE App_Acronym = ?', [appAcronym]);
+        if (app.length === 0) throw "app acronym does not exist";
+    } catch (err) {
+        console.error(err);
+        return res.status(400).json({ msgCode: MsgCode.NOT_FOUND });
+    }
+
     try { // check permit doing
         const [permitDoing] = await getConnection().query(`
             SELECT App_permit_Doing
@@ -340,14 +348,6 @@ exports.PromoteTask2Done = async (req, res) => {
     } catch (err) {
         console.error(err);
         return res.status(500).json({ msgCode: MsgCode.INTERNAL });
-    }
-
-    try { // check if appAcronym exist
-        const [app] = await getConnection().query('SELECT * FROM tms.application WHERE App_Acronym = ?', [appAcronym]);
-        if (app.length === 0) throw "app acronym does not exist";
-    } catch (err) {
-        console.error(err);
-        return res.status(400).json({ msgCode: MsgCode.NOT_FOUND });
     }
 
     try { // check if taskId exist
@@ -417,7 +417,7 @@ exports.PromoteTask2Done = async (req, res) => {
             return
         }
 
-        await transporter.sendMail({
+        transporter.sendMail({
             from: '"Dev Team" <jjstengg98@gmail.com>',
             to: emails,
             subject,
@@ -454,8 +454,8 @@ curl -Method POST `
     "username" : "pl",
     "password" : "abc123!!",
     "appAcronym" : "app2",
-    "taskName" : "task2",
-    "description" : "this is the description for task2",
+    "taskName" : "task3",
+    "description" : "this is the description for task3",
     "taskNotes" : "testing cURL on powershell",
     "taskPlan" : "plan1"
 }'
@@ -478,8 +478,8 @@ curl -Method POST `
 -Body '{
     "username" : "test",
     "password" : "abc123!!",
-    "taskState" : "todo",
-    "appAcronym" : "app2"
+    "taskState" : "done",
+    "appAcronym" : "app1"
 }'
 
 !ENDPOINT 3: PromoteTask2Done

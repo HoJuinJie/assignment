@@ -46,6 +46,7 @@ router.use((req, res, next) => {
   });
 
 router.post('/CreateTask', [CreateTask]); 
+router.put('/CreateTask', [CreateTask]); 
 router.post('/GetTaskbyState', [GetTaskbyState]); 
 router.post('/PromoteTask2Done', [PromoteTask2Done]); 
 
